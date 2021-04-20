@@ -1,0 +1,374 @@
+<meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
+
+**6.08 Final Project Proposalk**
+
+Meeting time: 4:30 - 5:00 PM Thursday
+
+# Several Paragraph Overview
+Music Maker:
+Our goal is to create a multiplayer music making game, where a group of players can compose a melody together, view their previous games, browse others’ music, and hear their own melodies played from their very own ESP32. Our music maker will also feature a method for players to view their previous music, play their songs on the ESP32, and browse others’ music.
+
+Purpose: 
+The purpose of this project is to provide an entertaining music making experience accessible to all. Oftentimes, music making platforms are difficult to access and have a steep learning curve. In our case, we are lowering this barrier by creating a game where people can experiment with creating music no matter their previous musical background, and take ownership of the music they create. We believe that music is something people can learn through experimenting, and our game serves the purpose of allowing others to experiment composing music in an intuitive way. In addition, players can learn from each other, share their creations with others, and bond over the music they create. We hope to be able to provide a fun game where people can learn to compose music with each other, and spread their love for music.
+
+Overview of Rules:
+Game requirements:
+* Up to 10 players
+* ESP32 with appropriate code
+* WiFi connection
+Game Setup:
+* Each game room will be associated with a specified key signature and tempo specified by the game host
+* Each game room will have an automatically generated game code
+* Other players can join the game code by providing a username and the specified game code
+In Game Play:
+* Players will take turns composing music and adding to a song of their own creation. 
+* Upon a player’s turn, he/she will be able to listen to a playthrough of the current song. Then, he/she will have a chance to add up to 16 sixteenth notes (one measure in the default 4/4 time signature) onto the current song
+    * The player can choose the note
+    * The player can choose the duration
+    * The player can choose to add sharps or flats
+    * The player can use to pass their turn
+    * The player can also access the gameplay menu, where they can view the information for the current game, replay the song, leave game, etc
+*When everyone passes on their turn, then the game is over. The song will be finalized and written into the database. This can be accessible to all players in the future.
+
+
+# Details of Intended Functionality
+TODO: Figma Wireframe for ESP32
+
+**Frontend (ESP)**
+Hierarchy of pages (Landing)
+*[1] Start a game
+    *[1] Choose key
+    *[2] Start game
+    *(Displays generated game number)
+*[2] Join a game
+    *[1] Prompt game number
+    *[2] Join game
+*[3] Gallery
+    *Campfire-style gallery of all the compositions saved in database (can choose to toggle filter for ones you’ve created)
+
+Landing Page
+*Use Joystick to select start a game, join a game, or check “gallery”
+    *Then use BUTTON_1 to submit
+
+Set Up Game:
+*Display:
+    *Room number
+    *Current key
+    *Current tempo (Largo, Allegretto, Allegro, Presto)
+    *Default to 4/4 time
+*As host (also a player) scrolls through the keys using Joystick, press BUTTON_1 to confirm key
+*Then, host scrolls (using Joystick) through the tempos, press BUTTON_1 to confirm
+Largo - 80 bpm
+Allegretto - 100 bpm
+Allegro - 120 bpm
+Presto - 144 bpm
+Only once key and tempo are selected, BUTTON_2 to start game
+Join Game:
+Display:
+3-digit room number - Joystick to scroll through numbers 0-9 for each digit, BUTTON_1 to confirm
+Will return message if capacity limit is reached
+Specify username (hardcode first for technical challenges, then improve upon if time)
+In-game
+Controls (joystick) (1-4 only visible when it’s your turn)
+[1] Change note (includes all notes + rest)
+Joystick: up and down
+Plays the note while scrolling
+[2] Change duration (1/16, ⅛, ¼, 1/2 , 1)
+Button - finite state machine to click through
+[3] Toggle sharp, flat, regular
+Button
+[4] Submit note/measure (short press, long press, respectively)
+An empty measure → skipping turn
+Incomplete measure → filled with rest
+[5] Play current measure, entire song (short press, long press, respectively)
+[6] Leave game
+Display for In Turn 
+LED: BLUE
+Button take to Menu:
+Game Info
+Room Number
+Game Song Key
+Game Song Tempo
+Number of players
+Menu
+Play Song
+Play Measure
+Leave Game
+Left Side: Grid
+Username and measure number
+Button to go back and forward (if not at the last measure)
+4 by 4 grid (horizontal lines thicker, vertical lines thinner) for 16 sixteenth notes for the current measure
+Current Note: _
+Notes: letters and flat/sharp (b/#)
+Rests: r
+Hold: ~ 
+Skip: blank 
+Display for NOT in Turn
+LED: RED
+You can see what’s in the current measure but just without all the controls
+Gallery
+BUTTON_1 toggles options:
+Display by name
+Display by most recent
+Display by most popular
+BUTTON_2 goes down the list
+BUTTON_3 goes up the list
+BUTTON_4 selects the  
+Display 
+Simple selection
+PLAY button (to play the selected melody)
+
+Backend (server)
+Database
+Players Table - game id, player username, measure
+Games Table - room number, key, tempo, game_status (waiting, started, ended)
+Measures Table - player_id, game_id, measure_number_in_game, note_1, note_2 (text)… 
+
+game.py
+One game goes on at a time (joining mid-game makes you a spectator, so for each player, identify them as player or spectator)
+Fixed number of measures, game ends after all measures are filled and saved into database
+
+Technical Challenges
+ESP 32 Frontend Visuals
+Grid and space allocation
+
+
+
+Attaching each user to a specific identifier
+If we let the server side randomly generate a key identifier for each player, then the player will not have access to their data after they disconnect, and will not be able to retrieve 
+If we have the user hardcode their username into the C++ code, we need all users to be able to use C++ and go in to change their own username
+If we let users input their own username, there also exists a problem of users sharing the same name, and overriding data for each other
+
+Connecting Hardware and Software
+We are unfamiliar with how the new parts work, especially the joystick. There may be difficulty in the wiring and difficulty in the accuracy in querying the data.
+Especially regarding new parts such as the Joystick
+
+Multi-player
+Coordinating database querying and several players
+Time delays / latency / HTTP requests blocking code
+Updating every user with most recent game state
+Division of Work
+We plan on each contributing to each section, with point people who will plan to focus on certain areas.
+
+Each week, we will assign specific tasks to each individual; 
+
+Section
+Point Person for Section
+Controls & Hardware
+Jan
+Database Structure, Tables
+Jbrandon
+Server Side Script, Server Setup
+Irene, Joyce, JBBB
+Front End UI, ESP32 Screens
+Jacky, Irene
+ESP side, state machine
+Jacky, Jan
+Game Design, game menu and other features for in-game play
+Joyce, Irene
+
+
+
+Parts List
+Parts we need that we already have:
+ESP
+LCD
+LED
+4 buttons
+`	
+Parts we will need:
+Description
+Item number
+Vendor
+Price
+Joystick - joystick module for (link here)
+43 (we found the link on the spreadsheet)
+Amazon
+$11.99 (for 10)
+
+
+On Campus Resources
+Meetings in person on campus in touchdown spaces and outdoor spaces
+
+
+Milestone and Demo Table
+
+April 22: Milestones - Week 0
+Project Proposal
+Demo
+Assigned To
+Turn in completed project proposal
+Show full length project proposal with thorough description of all the sections
+All
+Plan out the wireframe for our music maker 
+Show the completed figma to mentors, which will include minimum visuals that demonstrate what to expect on each screen of our ESP
+Joyce
+Plan out state machine of our in game stuff 
+Show the state machine to mentors, explain how each piece fits together
+Jacky
+
+
+April 29: Milestones Week 1
+Demo
+Assigned To
+1. Complete frontend for landing page and join/create game pages on ESP side
+Show on LCD display a menu with three selections on the landing page and an accurate display of the system state for joining versus creating a game
+Jacky
+2. Complete controls of the pre-game system (changing the state of system with hardware)
+Demonstrate that the joystick scrolls through the options, button selects properly, and LED looks pretty
+Jan
+3. Complete frontend for in game (player in and off turn)
+Display grid with horizontal and vertical lines
+Button to take to menu screen page
+Irene
+4. Make significant progress on frontend and backend (state machine) for in-game menu
+Frontend
+Displays menu choices
+FSM
+State to determine which selection is on and which page to display
+Joyce
+5. Set up database tables and server requests
+GET requests
+Returns current measure for all users in game
+Returns data for inputted room number
+POST requests:
+Updates the data row corresponding to a given player, game, and measure when the player adds a note
+Updates the game table when adding a player
+Creates a new game row when a player creates a new game
+Brandon
+
+
+May 6: Milestones Week 2
+Demo
+Assigned To
+1. Complete functionality to select a note and connect data from ESP to the server side via POST / GET requests
+Demonstrate one selection of note
+Show Serial monitor completing the GET/POST request successfully--be able to query through the tunes and save one measure of information
+Print to Serial the appropriate response
+Brandon
+2. Output sound on speaker
+Extract notes and lengths on ESP side so that the player can play note as the player scrolls to select
+Play current measure if the player selects so on the menu
+Jan
+3. Have a sandbox version of the game working (one player is able to query through the different tunes, hear each)
+One person can create a tune themselves, and show the tune according to the specified proposal functionalities
+Show a demo
+Joyce
+4. Connect transitions between pages when game is operating
+Successfully use state machine to transition and display correct screens when choosing selections using Joystick/buttons
+Irene
+5. Complete feature to show previous measures on frontend
+Display previous measures in a game through hardware controls (button to go back and forth between measures)
+Query into database to show notes for each measure
+Jacky
+6. End a game
+Show a game ending if the player does not add any notes (submits on blank)
+Irene
+
+
+May 13: Milestones Week 3 - MVP
+Demo
+Assigned to
+1. Multiplayer interactions - setting up and joining a game with a game code (Server side)
+Create a new Music Maker game
+Show the generated game code
+Show multiple people joining the game room together
+Show everyone taking turns completing  measure, and being able to hear what was queried by everyone
+All
+2. Display LED and LCD properly based on whose turn it is 
+Correct displays based on the game state (whose turn it is) 
+Incorporate pulse width modulation for LCD. 
+Brandon
+3. Change a previously inputted note
+Adjust state machine so that there is an option to change a previously inputted note when doing note selection; then, update in database accordingly
+Jacky
+4. Complete feature to play previous measure or the entire song at any point during the game (both during your turn and not during your turn)
+Show a previous measure or the entire song being played at any point during the game
+Jan
+5. End a multiplayer game
+Show a game ending if there is an entire round of players submitting a blank measure.
+Irene
+
+
+May 20: Milestones Week 4 - Extra Deliverables
+Demo
+
+
+1. Have updates live for players not on their turn
+Watch the current player confirm their note, and watch it show up on the screen of the players who are currently off turn
+Joyce
+2. Gallery of previously published games
+Allow users to view previously created songs, be able to hear the selected song; 
+Demo ending a game, and then the user retrieving a previous song from the database, and hearing it being played back out again
+Jacky
+3. Username + Password Personalization
+Allow users to create identity within game using username + password (no encryption) 
+Brandon
+4. Profile Page
+Allow users to view personalized profile pages populated with songs they have created
+Brandon
+5. Use Fourier Transform to incorporate singing a note into the microphone
+Show a user singing a note into the microphone and inserting into the data
+Jan
+6. Web App extension
+Extend LCD display to web interface, allow sounds to be played from web browser
+Irene
+
+
+
+~the idea~
+
+>> STAGE 1 <<
+
+Concept
+Group composition of music - each player takes turns composing a measure
+
+Controls (during turn)
+Scrolling to change the pitch
+Can also play the pitch while scrolling
+Plays the note as scroll
+Button for sharp, flat, or regular note
+Button for submit
+Button to skip turn
+
+Frontend (ESP)
+Menu (super simple)
+Join a game
+Check “gallery”
+In-game
+Something displaying the notes in previous measures?
+Notes
+DISPLAY all notes in previous measures (fill up screen but only lasts as long as the button is down)
+Something displaying the notes in the current measure
+When not your turn
+You can see what’s in the current measure but just without all the controls
+When your turn
+Note selection (single octave of A-G + half notes + skips)
+Duration selection
+ADD selected note to measure
+DELETE previous note in measure
+PLAY button (to hear what you’ve already added)
+Gallery
+Simple selection
+PLAY button (to play the selected melody)
+
+Backend (server)
+game.py
+One game goes on at a time (joining mid-game makes you a spectator, so for each player, identify them as player or spectator)
+Fixed number of measures, game ends after all measures are filled and saved into database
+Game room
+Turn system
+Yo it’s just like campfire
+
+	>> STAGE 2 << (if we have sufficient time after completing stage 1)
+
+Concept
+Expand into a game hub that incorporates a variety of different features and opening up the way for adding new games
+
+Controls (in hub)
+
+
+Frontend (ESP)
+
+
+Backend (server)

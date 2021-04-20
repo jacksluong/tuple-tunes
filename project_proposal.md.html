@@ -1,156 +1,167 @@
-<meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
+    <meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
 
-**6.08 Final Project Proposalk**
+    **6.08 Final Project Proposal**
+
+**Team 59:** Irene Huang, Siliang (Brandon) Li, Jacky Luong, Janette (Jan) Park, Joyce Yuan
 
 Meeting time: 4:30 - 5:00 PM Thursday
 
 # Several Paragraph Overview
-Music Maker:
+**Music Maker:**
+
 Our goal is to create a multiplayer music making game, where a group of players can compose a melody together, view their previous games, browse others’ music, and hear their own melodies played from their very own ESP32. Our music maker will also feature a method for players to view their previous music, play their songs on the ESP32, and browse others’ music.
 
-Purpose: 
+**Purpose:** 
+
 The purpose of this project is to provide an entertaining music making experience accessible to all. Oftentimes, music making platforms are difficult to access and have a steep learning curve. In our case, we are lowering this barrier by creating a game where people can experiment with creating music no matter their previous musical background, and take ownership of the music they create. We believe that music is something people can learn through experimenting, and our game serves the purpose of allowing others to experiment composing music in an intuitive way. In addition, players can learn from each other, share their creations with others, and bond over the music they create. We hope to be able to provide a fun game where people can learn to compose music with each other, and spread their love for music.
 
-Overview of Rules:
-Game requirements:
-* Up to 10 players
-* ESP32 with appropriate code
-* WiFi connection
-Game Setup:
-* Each game room will be associated with a specified key signature and tempo specified by the game host
-* Each game room will have an automatically generated game code
-* Other players can join the game code by providing a username and the specified game code
-In Game Play:
-* Players will take turns composing music and adding to a song of their own creation. 
-* Upon a player’s turn, he/she will be able to listen to a playthrough of the current song. Then, he/she will have a chance to add up to 16 sixteenth notes (one measure in the default 4/4 time signature) onto the current song
-    * The player can choose the note
-    * The player can choose the duration
-    * The player can choose to add sharps or flats
-    * The player can use to pass their turn
-    * The player can also access the gameplay menu, where they can view the information for the current game, replay the song, leave game, etc
-*When everyone passes on their turn, then the game is over. The song will be finalized and written into the database. This can be accessible to all players in the future.
+**Overview of Rules:**
+
+* Game requirements:
+    * Up to 10 players
+    * ESP32 with appropriate code
+    * WiFi connection
+* Game Setup:
+    * Each game room will be associated with a specified key signature and tempo specified by the game host
+    * Each game room will have an automatically generated game code
+    * Other players can join the game code by providing a username and the specified game code
+* In Game Play:
+    * Players will take turns composing music and adding to a song of their own creation. 
+    * Upon a player’s turn, he/she will be able to listen to a playthrough of the current song. Then, he/she will have a chance to add up to 16 sixteenth notes (one measure in the default 4/4 time signature) onto the current song
+        * The player can choose the note
+        * The player can choose the duration
+        * The player can choose to add sharps or flats
+        * The player can use to pass their turn
+        * The player can also access the gameplay menu, where they can view the information for the current game, replay the song, leave game, etc
+    * When everyone passes on their turn, then the game is over. The song will be finalized and written into the database. This can be accessible to all players in the future.
 
 
 # Details of Intended Functionality
 TODO: Figma Wireframe for ESP32
 
-**Frontend (ESP)**
-Hierarchy of pages (Landing)
-*[1] Start a game
-    *[1] Choose key
-    *[2] Start game
-    *(Displays generated game number)
-*[2] Join a game
-    *[1] Prompt game number
-    *[2] Join game
-*[3] Gallery
-    *Campfire-style gallery of all the compositions saved in database (can choose to toggle filter for ones you’ve created)
+**Frontend and Controls on ESP**
 
-Landing Page
-*Use Joystick to select start a game, join a game, or check “gallery”
-    *Then use BUTTON_1 to submit
+* Hierarchy of pages (Landing)
+    * [1] Start a game
+        * [1] Choose key
+        * [2] Start game
+        * (Displays generated game number)
+    * [2] Join a game
+        * [1] Prompt game number
+        * [2] Join game
+    * [3] Gallery
+        * Campfire-style gallery of all the compositions saved in database (can choose to toggle filter for ones you’ve created)
 
-Set Up Game:
-*Display:
-    *Room number
-    *Current key
-    *Current tempo (Largo, Allegretto, Allegro, Presto)
-    *Default to 4/4 time
-*As host (also a player) scrolls through the keys using Joystick, press BUTTON_1 to confirm key
-*Then, host scrolls (using Joystick) through the tempos, press BUTTON_1 to confirm
-Largo - 80 bpm
-Allegretto - 100 bpm
-Allegro - 120 bpm
-Presto - 144 bpm
-Only once key and tempo are selected, BUTTON_2 to start game
-Join Game:
-Display:
-3-digit room number - Joystick to scroll through numbers 0-9 for each digit, BUTTON_1 to confirm
-Will return message if capacity limit is reached
-Specify username (hardcode first for technical challenges, then improve upon if time)
-In-game
-Controls (joystick) (1-4 only visible when it’s your turn)
-[1] Change note (includes all notes + rest)
-Joystick: up and down
-Plays the note while scrolling
-[2] Change duration (1/16, ⅛, ¼, 1/2 , 1)
-Button - finite state machine to click through
-[3] Toggle sharp, flat, regular
-Button
-[4] Submit note/measure (short press, long press, respectively)
-An empty measure → skipping turn
-Incomplete measure → filled with rest
-[5] Play current measure, entire song (short press, long press, respectively)
-[6] Leave game
-Display for In Turn 
-LED: BLUE
-Button take to Menu:
-Game Info
-Room Number
-Game Song Key
-Game Song Tempo
-Number of players
-Menu
-Play Song
-Play Measure
-Leave Game
-Left Side: Grid
-Username and measure number
-Button to go back and forward (if not at the last measure)
-4 by 4 grid (horizontal lines thicker, vertical lines thinner) for 16 sixteenth notes for the current measure
-Current Note: _
-Notes: letters and flat/sharp (b/#)
-Rests: r
-Hold: ~ 
-Skip: blank 
-Display for NOT in Turn
-LED: RED
-You can see what’s in the current measure but just without all the controls
-Gallery
-BUTTON_1 toggles options:
-Display by name
-Display by most recent
-Display by most popular
-BUTTON_2 goes down the list
-BUTTON_3 goes up the list
-BUTTON_4 selects the  
-Display 
-Simple selection
-PLAY button (to play the selected melody)
+* Landing Page
+    * Use Joystick to select start a game, join a game, or check “gallery”
+        * Then use BUTTON_1 to submit
 
-Backend (server)
-Database
-Players Table - game id, player username, measure
-Games Table - room number, key, tempo, game_status (waiting, started, ended)
-Measures Table - player_id, game_id, measure_number_in_game, note_1, note_2 (text)… 
+* Set Up Game:
+    * Display:
+        * Room number
+        * Current key
+        * Current tempo (Largo, Allegretto, Allegro, Presto)
+        * Default to 4/4 time
+    * As host (also a player) scrolls through the keys using Joystick, press BUTTON_1 to confirm key
+    * Then, host scrolls (using Joystick) through the tempos, press BUTTON_1 to confirm
+        * Largo - 80 bpm
+        * Allegretto - 100 bpm
+        * Allegro - 120 bpm
+        * Presto - 144 bpm
+    * Only once key and tempo are selected, BUTTON_2 to start game
 
-game.py
-One game goes on at a time (joining mid-game makes you a spectator, so for each player, identify them as player or spectator)
-Fixed number of measures, game ends after all measures are filled and saved into database
+* Join Game:
+    * Display:
+        * 3-digit room number - Joystick to scroll through numbers 0-9 for each digit, BUTTON_1 to confirm
+        * Will return message if capacity limit is reached
+    * Specify username (hardcode first for technical challenges, then improve upon if time)
 
-Technical Challenges
-ESP 32 Frontend Visuals
-Grid and space allocation
+* In-game:
+    * Controls (joystick) (1-4 only visible when it’s your turn)
+        * [1] Change note (includes all notes + rest)
+            * Joystick: up and down
+            * Plays the note while scrolling
+        * [2] Change duration (1/16, ⅛, ¼, 1/2 , 1)
+            * Button - finite state machine to click through
+        * [3] Toggle sharp, flat, regular
+            * Button
+        * [4] Submit note/measure (short press, long press, respectively)
+            * An empty measure → skipping turn
+            * Incomplete measure → filled with rest
+        * [5] Play current measure, entire song (short press, long press, respectively)
+        * [6] Leave game
+    * Display for In Turn 
+        * LED: BLUE
+        * Button take to Menu:
+            * Game Info
+                * Room Number
+                * Game Song Key
+                * Game Song Tempo
+                * Number of players
+            * Menu
+                * Play Song
+                * Play Measure
+                * Leave Game
+        * Left Side: Grid
+            * Username and measure number
+                * Button to go back and forward (if not at the last measure)
+            * 4 by 4 grid (horizontal lines thicker, vertical lines thinner) for 16 sixteenth notes for the current measure
+                * Current Note: _
+                * Notes: letters and flat/sharp (b/#)
+                * Rests: r
+                * Hold: ~ 
+                * Skip: blank 
+    * Display for NOT in Turn
+        * LED: RED
+        * You can see what’s in the current measure but just without all the controls
+
+* Gallery:
+    * BUTTON_1 toggles options:
+        * Display by name
+        * Display by most recent
+        * Display by most popular
+    * Joystick goes up and down the list
+    * BUTTON_2 is the PLAY button (to play the selected melody)
+
+**Backend on Server Side**
+
+* Database
+    * Players Table - game id, player username, measure
+    * Games Table - room number, key, tempo, game_status (waiting, started, ended)
+    * Measures Table - player_id, game_id, measure_number_in_game, note_1, note_2 (text)… 
+
+* game.py
+    * One game goes on at a time (joining mid-game makes you a spectator, so for each player, identify them as player or spectator)
+    * Fixed number of measures, game ends after all measures are filled and saved into database
+
+# Technical Challenges
+
+**ESP 32 Frontend Visuals**
+
+* Grid and space allocation
+
+**Attaching each user to a specific identifier**
+
+* If we let the server side randomly generate a key identifier for each player, then the player will not have access to their data after they disconnect, and will not be able to retrieve 
+* If we have the user hardcode their username into the C++ code, we need all users to be able to use C++ and go in to change their own username
+* If we let users input their own username, there also exists a problem of users sharing the same name, and overriding data for each other
+
+**Connecting Hardware and Software**
+
+* We are unfamiliar with how the new parts work, especially the joystick. There may be difficulty in the wiring and difficulty in the accuracy in querying the data.
+
+**Multi-player**
+
+* Coordinating database querying and several players
+* Time delays / latency / HTTP requests blocking code
+* Updating every user with most recent game state
 
 
+# Division of Work
 
-Attaching each user to a specific identifier
-If we let the server side randomly generate a key identifier for each player, then the player will not have access to their data after they disconnect, and will not be able to retrieve 
-If we have the user hardcode their username into the C++ code, we need all users to be able to use C++ and go in to change their own username
-If we let users input their own username, there also exists a problem of users sharing the same name, and overriding data for each other
-
-Connecting Hardware and Software
-We are unfamiliar with how the new parts work, especially the joystick. There may be difficulty in the wiring and difficulty in the accuracy in querying the data.
-Especially regarding new parts such as the Joystick
-
-Multi-player
-Coordinating database querying and several players
-Time delays / latency / HTTP requests blocking code
-Updating every user with most recent game state
-Division of Work
 We plan on each contributing to each section, with point people who will plan to focus on certain areas.
 
-Each week, we will assign specific tasks to each individual; 
+Each week, we will assign specific tasks to each individual. In general:
 
 Section
 Point Person for Section
@@ -169,13 +180,13 @@ Joyce, Irene
 
 
 
-Parts List
+#Parts List
 Parts we need that we already have:
-ESP
-LCD
-LED
-4 buttons
-`	
+*ESP
+*LCD
+*LED
+*2 buttons
+	
 Parts we will need:
 Description
 Item number
@@ -187,11 +198,10 @@ Amazon
 $11.99 (for 10)
 
 
-On Campus Resources
+#On Campus Resources
 Meetings in person on campus in touchdown spaces and outdoor spaces
 
-
-Milestone and Demo Table
+#Milestone and Demo Table
 
 April 22: Milestones - Week 0
 Project Proposal
@@ -372,3 +382,6 @@ Frontend (ESP)
 
 
 Backend (server)
+
+<style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
+<!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>

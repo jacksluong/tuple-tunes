@@ -37,7 +37,7 @@ The purpose of this project is to provide an entertaining music making experienc
 
 
 # Details of Intended Functionality
-TODO: Figma Wireframe for ESP32
+[Figma Wireframe for ESP32](https://www.figma.com/file/3p7oTRakfWV7Lz8oDmOkGT/6.08-Final-Project?node-id=0%3A1)
 
 **Frontend and Controls on ESP**
 
@@ -98,10 +98,12 @@ TODO: Figma Wireframe for ESP32
                 * Game Song Key
                 * Game Song Tempo
                 * Number of players
+                * ![Figure: in game game screen wireframe](game_screen.png)
             * Menu
                 * Play Song
                 * Play Measure
                 * Leave Game
+                * ![Figure: in game menu screen wireframe](menu_screen.png) 
         * Left Side: Grid
             * Username and measure number
                 * Button to go back and forward (if not at the last measure)
@@ -114,6 +116,24 @@ TODO: Figma Wireframe for ESP32
     * Display for NOT in Turn
         * LED: RED
         * You can see what’s in the current measure but just without all the controls
+
+        ![Figure: in game game screen wireframe](game_screen.png)
+        ![Figure: in game menu screen wireframe](menu_screen.png)
+
+
+    <!-- <br>
+    <div style = "display: inline">
+        <figure style = "display: inline">
+            <img src="game_screen.png" alt="game screen" style="width:50%">
+            <figcaption>in game game screen wireframe</figcaption>
+        </figure>
+
+        <figure style = "display: inline">
+            <img src="menu_screen.png" alt="menu screen" style="width:50%">
+            <figcaption>in game menu screen wireframe</figcaption>
+        </figure>
+    </div>
+    <br> -->
 
 * Gallery:
     * BUTTON_1 toggles options:
@@ -133,6 +153,8 @@ TODO: Figma Wireframe for ESP32
 * game.py
     * One game goes on at a time (joining mid-game makes you a spectator, so for each player, identify them as player or spectator)
     * Fixed number of measures, game ends after all measures are filled and saved into database
+
+![state machine](state_machine.png width="800px")
 
 # Technical Challenges
 
@@ -159,28 +181,21 @@ TODO: Figma Wireframe for ESP32
 
 # Division of Work
 
-We plan on each contributing to each section, with point people who will plan to focus on certain areas.
+* We plan on each contributing to each section, with point people who will plan to focus on certain areas.
+* Each week, we will assign specific tasks to each individual. In general:
 
-Each week, we will assign specific tasks to each individual. In general:
-
-Section
-Point Person for Section
-Controls & Hardware
-Jan
-Database Structure, Tables
-Jbrandon
-Server Side Script, Server Setup
-Irene, Joyce, JBBB
-Front End UI, ESP32 Screens
-Jacky, Irene
-ESP side, state machine
-Jacky, Jan
-Game Design, game menu and other features for in-game play
-Joyce, Irene
+| Section | Point Person for Section |
+| ---- | ---- |
+| Controls & Hardware | Jan |
+| Database Structure, Tables | Jbrandon |
+| Server Side Script, Server Setup | Irene, Joyce, JBBB |
+| Front End UI, ESP32 Screens | Jacky, Irene |
+| ESP side, state machine | Jacky, Jan |
+| Game Design, game menu and other features for in-game play | Joyce, Irene |
 
 
 
-#Parts List
+# Parts List
 
 **Parts we need that we already have:**
 
@@ -202,57 +217,35 @@ Meetings in person on campus in touchdown spaces and outdoor spaces
 
 # Milestone and Demo Table
 
-**April 22: Milestones - Week 0**
-
-Project Proposal
-Demo
-Assigned To
-Turn in completed project proposal
-Show full length project proposal with thorough description of all the sections
-All
-Plan out the wireframe for our music maker 
-Show the completed figma to mentors, which will include minimum visuals that demonstrate what to expect on each screen of our ESP
-Joyce
-Plan out state machine of our in game stuff 
-Show the state machine to mentors, explain how each piece fits together
-Jacky
+| April 22: Milestones - Week 0 Project Proposal | Demo | Assigned To |
+| ---- | ---- | ---- |
+| Turn in completed project proposal | Show full length project proposal with thorough description of all the sections | All |
+| Plan out the wireframe for our music maker | Show the completed figma to mentors, which will include minimum visuals that demonstrate what to expect on each screen of our ESP | Joyce |
+| Plan out state machine of our in game stuff | Show the state machine to mentors, explain how each piece fits together | Jacky |
 
 
 | April 29: Milestones Week 1 | Demo | Assigned To |
 | ---- | ---- | ---- |
 | 1. Complete frontend for landing page and join/create game pages on ESP side |Show on LCD display a menu with three selections on the landing page and an accurate display of the system state for joining versus creating a game | Jacky |
 | 2. Complete controls of the pre-game system (changing the state of system with hardware) | Demonstrate that the joystick scrolls through the options, button selects properly, and LED looks pretty | Jan |
-| 3. Complete frontend for in game (player in and off turn) | * Display grid with horizontal and vertical lines * Button to take to menu screen page | Irene |
-| 4. Make significant progress on frontend and backend (state machine) for in-game menu| 
-Frontend
-* Displays menu choices
-FSM
-* State to determine which selection is on and which page to display |
-Joyce | 
-5. Set up database tables and server requests
-GET requests
-Returns current measure for all users in game
-Returns data for inputted room number
-POST requests:
-Updates the data row corresponding to a given player, game, and measure when the player adds a note
-Updates the game table when adding a player
-Creates a new game row when a player creates a new game
-Brandon
+| 3. Complete frontend for in game (player in and off turn) | <ul><li>Display grid with horizontal and vertical lines</li><li>Button to take to menu screen page</li></ul> | Irene |
+| 4. Make significant progress on frontend and backend (state machine) for in-game menu | Frontend<br>  - Displays menu choices<br> FSM <br>  - State to determine which selection is on and which page to display | Joyce | 
+| 5. Set up database tables and server requests | <ul><li>GET requests<ul><li>Returns current measure for all users in game</li><li>Returns data for inputted room number</li></ul></li><li>POST requests:<ul><li>Updates the data row corresponding to a given player, game, and measure when the player adds a note</li><li>Updates the game table when adding a player</li><li>Creates a new game row when a player creates a new game </li></ul></li></ul> | Brandon |
 
 | May 6: Milestones Week 2 | Demo | Assigned To |
 | ---- | ---- | ---- |
-| 1. Complete functionality to select a note and connect data from ESP to the server side via POST / GET requests | * Demonstrate one selection of note * Show Serial monitor completing the GET/POST request successfully--be able to query through the tunes and save one measure of information * Print to Serial the appropriate response | Brandon |
-| 2. Output sound on speaker | * Extract notes and lengths on ESP side so that the player can play note as the player scrolls to select * Play current measure if the player selects so on the menu | Jan |
+| 1. Complete functionality to select a note and connect data from ESP to the server side via POST / GET requests | - Demonstrate one selection of note <br> - Show Serial monitor completing the GET/POST request successfully--be able to query through the tunes and save one measure of information <br> - Print to Serial the appropriate response | Brandon |
+| 2. Output sound on speaker | - Extract notes and lengths on ESP side so that the player can play note as the player scrolls to select <br> - Play current measure if the player selects so on the menu | Jan |
 | 3. Have a sandbox version of the game working (one player is able to query through the different tunes, hear each) | One person can create a tune themselves, and show the tune according to the specified proposal functionalities - Show a demo | Joyce |
 | 4. Connect transitions between pages when game is operating | Successfully use state machine to transition and display correct screens when choosing selections using Joystick/buttons | Irene |
-| 5. Complete feature to show previous measures on frontend | * Display previous measures in a game through hardware controls (button to go back and forth between measures) * Query into database to show notes for each measure | Jacky |
+| 5. Complete feature to show previous measures on frontend | - Display previous measures in a game through hardware controls (button to go back and forth between measures) <br> - Query into database to show notes for each measure | Jacky |
 | 6. End a game | Show a game ending if the player does not add any notes (submits on blank) | Irene|
 
 
 | May 13: Milestones Week 3 - MVP | Demo | Assigned To |
 | ---- | ---- | ---- |
-| 1. Multiplayer interactions - setting up and joining a game with a game code (Server side) | * Create a new Music Maker game * Show the generated game code * Show multiple people joining the game room together * Show everyone taking turns completing  measure, and being able to hear what was queried by everyone | All |
-| 2. Display LED and LCD properly based on whose turn it is | * Correct displays based on the game state (whose turn it is) * Incorporate pulse width modulation for LCD. | Brandon |
+| 1. Multiplayer interactions - setting up and joining a game with a game code (Server side) | - Create a new Music Maker game <br> - Show the generated game code <br> - Show multiple people joining the game room together <br> - Show everyone taking turns completing measure, and being able to hear what was queried by everyone | All |
+| 2. Display LED and LCD properly based on whose turn it is | - Correct displays based on the game state (whose turn it is) <br> - Incorporate pulse width modulation for LCD. | Brandon |
 | 3. Change a previously inputted note | Adjust state machine so that there is an option to change a previously inputted note when doing note selection; then, update in database accordingly | Jacky |
 | 4. Complete feature to play previous measure or the entire song at any point during the game (both during your turn and not during your turn) | Show a previous measure or the entire song being played at any point during the game | Jan |
 | 5. End a multiplayer game | Show a game ending if there is an entire round of players submitting a blank measure. | Irene |
@@ -261,7 +254,7 @@ Brandon
 | May 20: Milestones Week 4 - Extra Deliverables | Demo | Assigned To |
 | ---- | ---- | ---- |
 | 1. Have updates live for players not on their turn | Watch the current player confirm their note, and watch it show up on the screen of the players who are currently off turn | Joyce |
-| 2. Gallery of previously published games | * Allow users to view previously created songs, be able to hear the selected song; * Demo ending a game, and then the user retrieving a previous song from the database, and hearing it being played back out again | Jacky |
+| 2. Gallery of previously published games | <br> Allow users to view previously created songs, be able to hear the selected song; <br> - Demo ending a game, and then the user retrieving a previous song from the database, and hearing it being played back out again | Jacky |
 | 3. Username + Password Personalization | Allow users to create identity within game using username + password (no encryption) | Brandon |
 | 4. Profile Page | Allow users to view personalized profile pages populated with songs they have created | Brandon |
 | 5. Use Fourier Transform to incorporate singing a note into the microphone | Show a user singing a note into the microphone and inserting into the data | Jan |

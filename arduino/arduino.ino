@@ -14,7 +14,7 @@
 /////////////
 
 // Pins for buttons, LCD, AUDIO CONTROL
-int BUTTON_PINS[] = {19, 3, 5, 13};
+int BUTTON_PINS[] = {5, 19, 3, 13};
 const int AUDIO_IN = A0;
 uint8_t LCD_CONTROL = 25;
 uint8_t AUDIO_TRANSDUCER = 26;
@@ -40,7 +40,7 @@ const int SCREEN_HEIGHT = 160;
 const int SCREEN_WIDTH = 128;
 
 // Buttons
-Button button1(BUTTON_PINS[0]);
+Button button1(BUTTON_PINS[0]); // connected to pin 5
 Button button2(BUTTON_PINS[1]);
 Button button3(BUTTON_PINS[2]);
 Button button4(BUTTON_PINS[3]);
@@ -54,18 +54,103 @@ const uint8_t NOTE_COUNT = 97; // number of half-steps included in our range of 
 char input[50] = {0};
 TextInput text_input(input);
 NumberInput number_input;
-int state = 0;
+int state = 0; // determines overall game page 
+int menu_state = 0; // determines cursor selection on menu page
 
 // Below are project-specific variables
-
+int room_num; // three-digit integer
+char song_key[10]; // song key e.g. C Major
+char tempo[10]; // song tempo e.g. Allegro
+int player_count; // # of players for the current game
+int curr_measure; // int number of measure currently on
 
 
 ////////////////////////////////
 // Project-specific functions //
 ////////////////////////////////
 
-void example() {
+void display_in_turn() {
+  // dividing line between left and right
+  tft.drawLine(106, 0, 106, 128, TFT_WHITE);
+  tft.drawLine(107, 0, 107, 128, TFT_WHITE);
   
+  // left side grid
+  tft.setCursor(5, 6, 1);
+  tft.println("<measure 4/4>");
+  // horizontal grid lines
+  tft.drawLine(0, 19, 106, 19, TFT_WHITE);
+  tft.drawLine(0, 20, 106, 20, TFT_WHITE);
+  tft.drawLine(0, 44, 106, 44, TFT_WHITE);
+  tft.drawLine(0, 45, 106, 45, TFT_WHITE);
+  tft.drawLine(0, 69, 106, 69, TFT_WHITE);
+  tft.drawLine(0, 70, 106, 70, TFT_WHITE);
+  tft.drawLine(0, 94, 106, 94, TFT_WHITE);
+  tft.drawLine(0, 95, 106, 95, TFT_WHITE);
+  tft.drawLine(0, 119, 106, 119, TFT_WHITE);
+  tft.drawLine(0, 120, 106, 120, TFT_WHITE);
+  // vertical grid lines
+  tft.drawLine(26.5, 19, 26.5, 120, TFT_WHITE);
+  tft.drawLine(53, 19, 53, 120, TFT_WHITE);
+  tft.drawLine(79.5, 19, 79.5, 120, TFT_WHITE);
+
+  // play notes
+  tft.setCursor(8, 30, 1);
+  tft.printf("C#");
+  
+  // right side info
+  tft.setCursor(128, 20, 2);
+  tft.println("C#"); // selected note
+  tft.setCursor(126, 45, 1);
+  tft.println("1/4"); // note duration
+  tft.drawTriangle(117,45,112,47.5,117,50, TFT_WHITE);
+  tft.drawTriangle(153,45,158,47,153,50, TFT_WHITE);
+  tft.setCursor(146, 119, 1); // ellipses for menu
+  tft.printf(".");
+  tft.setCursor(150, 119, 1);
+  tft.printf(".");
+  tft.setCursor(154, 119, 1);
+  tft.printf(".");
+}
+
+void display_menu() {
+  // dividing line between left and right
+  tft.drawLine(84, 0, 84, 128, TFT_WHITE);
+  tft.drawLine(85, 0, 85, 128, TFT_WHITE);
+
+  // left side actionables
+  tft.setCursor(2, 6, 1);
+  tft.println("Menu\r\n");
+  tft.setCursor(4, 25, 1);
+  tft.println(" Resume\r\n");
+  tft.setCursor(4, 50, 1);
+  tft.println(" Play Song\r\n");
+  tft.setCursor(4, 75, 1);
+  tft.println(" Play Measure\r\n");
+  tft.setCursor(4, 100, 1);
+  tft.println(" Leave Game\r\n");
+
+  // right side static
+  tft.setCursor(88, 6, 1);
+  tft.println("Game Info\r\n");
+  tft.setCursor(88, 25, 1);
+  tft.printf(" Room#:%d\r\n", room_num);
+  tft.setCursor(88, 50, 1);
+  tft.printf(" Key:%s\r\n", song_key);
+  tft.setCursor(88, 75, 1);
+  tft.printf(" Tempo:%s\r\n", tempo);
+  tft.setCursor(88, 100, 1);
+  tft.printf(" #Players:%d", player_count);
+
+  // draw triangle cursor for selection
+  if (menu_state == 0) {
+    tft.drawTriangle(2,25,3.5,27.5,2,30,TFT_WHITE);
+  } else if (menu_state == 1) {
+    tft.drawTriangle(2,50,3.5,52.5,2,55,TFT_WHITE);
+  } else if (menu_state == 2) {
+    tft.drawTriangle(2,75,3.5,77.5,2,80,TFT_WHITE);
+  } else if (menu_state == 3) {
+    tft.drawTriangle(2,100,3.5,102.5,2,105,TFT_WHITE);
+  }
 }
 
 /////////////////////////////////
@@ -91,7 +176,7 @@ void setup() {
 
   // Set up screen
   tft.init();
-  tft.setRotation(2);
+  tft.setRotation(1); // set display in landscape
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
@@ -164,11 +249,20 @@ void loop() {
   float y = -imu.accelCount[1] * imu.aRes;
   float z = -imu.accelCount[2] * imu.aRes;
   
-  if (state == 0) {
+  if (state == 0) { // landing page
     
-  } else if (state == 1) {
+  } else if (state == 1) { // start game
     
-  } else if (state == 2) {
+  } else if (state == 2) { // join game
     
+  } else if (state == 3) { // gallery
+    
+  } else if (state == 4) { // in game and in turn
+    display_in_turn();
+  } else if (state == 5) { // in game and out of turn
+    
+  } else if (state == 6) { // menu info page
+    display_menu();
   }
+
 }

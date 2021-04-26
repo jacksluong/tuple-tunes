@@ -204,6 +204,10 @@ void setup() {
   delay(100);
   for (int pin : BUTTON_PINS) pinMode(pin, INPUT_PULLUP);
 
+  // set up buttons
+  pinMode(JOYSTICK_LR, INPUT);
+  pinMode(JOYSTICK_UD, INPUT);
+  analogReadResolution(8);
 
   // Set up LED
   ledcSetup(red, 50, 8);

@@ -45,6 +45,15 @@ Button button2(BUTTON_PINS[1]);
 Button button3(BUTTON_PINS[2]);
 Button button4(BUTTON_PINS[3]);
 
+//state machine
+const uint8_t LANDING = 0;
+const uint8_t START = 1;
+const uint8_t JOIN = 2;
+const uint8_t GALLERY = 3;
+const uint8_t INTURN = 4;
+const uint8_t OUTTURN = 5;
+const uint8_t MENU = 6;
+
 // Audio output (see lab05b)
 double MULT = 1.059463094359; // 12th root of 2 (precalculated) for note generation
 double A1 = 55; // A1 55 Hz for note generation
@@ -249,19 +258,19 @@ void loop() {
   float y = -imu.accelCount[1] * imu.aRes;
   float z = -imu.accelCount[2] * imu.aRes;
   
-  if (state == 0) { // landing page
+  if (state == LANDING) { // landing page
     
-  } else if (state == 1) { // start game
+  } else if (state == START) { // start game
     
-  } else if (state == 2) { // join game
+  } else if (state == JOIN) { // join game
     
-  } else if (state == 3) { // gallery
+  } else if (state == GALLERY) { // gallery
     
-  } else if (state == 4) { // in game and in turn
+  } else if (state == INTURN) { // in game and in turn
     display_in_turn();
-  } else if (state == 5) { // in game and out of turn
+  } else if (state == OUTTURN) { // in game and out of turn
     
-  } else if (state == 6) { // menu info page
+  } else if (state == MENU) { // menu info page
     display_menu();
   }
 

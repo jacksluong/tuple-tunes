@@ -13,11 +13,13 @@
 // Globals //
 /////////////
 
-// Pins for buttons, LCD, AUDIO CONTROL
-int BUTTON_PINS[] = {5, 19, 3, 13};
+// Pins for buttons, LCD, AUDIO CONTROL, joystick
+int BUTTON_PINS[] = {32};
 const int AUDIO_IN = A0;
 uint8_t LCD_CONTROL = 25;
 uint8_t AUDIO_TRANSDUCER = 26;
+const int JOYSTICK_LR = 35;
+const int JOYSTICK_UD = 34;
 
 // HTTP
 char NETWORK[] = "MIT";
@@ -40,10 +42,8 @@ const int SCREEN_HEIGHT = 160;
 const int SCREEN_WIDTH = 128;
 
 // Buttons
-Button button1(BUTTON_PINS[0]); // connected to pin 5
-Button button2(BUTTON_PINS[1]);
-Button button3(BUTTON_PINS[2]);
-Button button4(BUTTON_PINS[3]);
+Button button1(BUTTON_PINS[0]); // connected to pin 32
+
 
 // Audio output (see lab05b)
 double MULT = 1.059463094359; // 12th root of 2 (precalculated) for note generation
@@ -63,6 +63,13 @@ char song_key[10]; // song key e.g. C Major
 char tempo[10]; // song tempo e.g. Allegro
 int player_count; // # of players for the current game
 int curr_measure; // int number of measure currently on
+
+// Below are joystick values
+uint8_t left_right;
+uint8_t up_down;
+const uint8_t LOWER_BOUND = 31;
+const uint8_t UPPER_BOUND = 224;
+
 
 
 ////////////////////////////////
@@ -196,6 +203,7 @@ void setup() {
   // Set up buttons
   delay(100);
   for (int pin : BUTTON_PINS) pinMode(pin, INPUT_PULLUP);
+
 
   // Set up LED
   ledcSetup(red, 50, 8);

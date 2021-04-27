@@ -49,6 +49,8 @@ const uint8_t NOTE_COUNT = 97; // number of half-steps included in our range of 
 char input[50] = {0};
 int state = 0;
 int menu_state = 0;
+int start_game_state = 0;
+bool is_locked = false;
 
 // Game variable options
 char* key_labels[] = {"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"};
@@ -201,6 +203,20 @@ void loop() {
 
     }
   } else if (state == 1) {      ////////////////////// start game //////////////////////
+    if (!is_locked && js == 1) { // up
+      start_game_state = (start_game_state + 3) % 4;
+      update_start_game(start_game_state, is_locked);
+    } else if (!is_locked && js == 3) { // down
+      start_game_state = (start_game_state + 1) % 4;
+      update_start_game(start_game_state, is_locked);
+    } else if (is_locked && js == 2) {
+      
+    }
+
+    if (bv) {
+      is_locked = !is_locked;
+      update_start_game(start_game_state, is_locked);
+    }
     
   } else if (state == 2) {      ////////////////////// join game //////////////////////
     

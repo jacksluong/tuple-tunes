@@ -72,14 +72,17 @@ void display_start_game() {
 }
 
 void update_start_game() {
-  
+  tft.fillRect(75, 10, 80, 25, TFT_BLACK);
+  tft.drawTriangle(80, 77 + 17 * selection, 
+                   80, 81 + 17 * selection, 
+                   83, 79 + 17 * selection, TFT_WHITE);
 }
 
 ///////////////
 // Join Game //
 ///////////////
 
-void display_join_game() {
+void display_join_game(int selection, int is_locked) {
   tft.fillScreen(TFT_BLACK);
   fade_in_text(" Join\n Game", 0, 13, CYAN, 1200, 2);
 

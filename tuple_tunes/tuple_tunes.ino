@@ -49,7 +49,6 @@ const uint8_t NOTE_COUNT = 97; // number of half-steps included in our range of 
 char input[50] = {0};
 int state = 0;
 int menu_state = 0;
-int start_game_state = 0;
 bool is_locked = false;
 
 // Game variable options
@@ -206,34 +205,34 @@ void loop() {
     }
   } else if (state == 1) {      ////////////////////// start game //////////////////////
     if (!is_locked && js == 1) { // up
-      start_game_state = (start_game_state + 3) % 4;
-      update_start_game(start_game_state);
+      menu_state = (menu_state + 3) % 4;
+      update_start_game(menu_state);
     } else if (!is_locked && js == 3) { // down
-      start_game_state = (start_game_state + 1) % 4;
-      update_start_game(start_game_state);
+      menu_state = (menu_state + 1) % 4;
+      update_start_game(menu_state);
     } else if (is_locked && js == 2) {
-      if (start_game_state == 1) {
+      if (menu_state == 1) {
         key_state = (key_state + 1) % 12;
-      } else if (start_game_state == 2) {
+      } else if (menu_state == 2) {
         tempo_state = (tempo_state + 1) % 3;
       }
-      update_start_game(start_game_state);
+      update_start_game(menu_state);
     } else if (is_locked && js == 4) {
-      if (start_game_state == 1) {
+      if (menu_state == 1) {
         key_state = (key_state + 11) % 12;
-      } else if (start_game_state == 2) {
+      } else if (menu_state == 2) {
         tempo_state = (tempo_state + 2) % 3;
       }
-      update_start_game(start_game_state);
+      update_start_game(menu_state);
     }
     
     if (bv) {
-      if (start_game_state == 1 || start_game_state == 2) {
+      if (menu_state == 1 || menu_state == 2) {
         is_locked = !is_locked;
-        update_start_game(start_game_state);
-      } else if (start_game_state == 3) {
+        update_start_game(menu_state);
+      } else if (menu_state == 3) {
         display_game_menu();
-      } else if (start_game_state == 4) {
+      } else if (menu_state == 4) {
         display_landing();
       }
     }

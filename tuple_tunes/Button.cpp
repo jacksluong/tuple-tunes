@@ -6,21 +6,20 @@ Button::Button(int p) {
   flag = 0;
   state = 0;
   pin = p;
-  state_2_start_time = millis(); //init
-  button_change_time = millis(); //init
-  debounce_duration = 10;
-  long_press_duration = 1000;
+  state_2_start_time = millis();
+  button_change_time = millis();
   button_pressed = 0;
 }
 
-void Button::read() {
+int Button::read() {
   uint8_t button_state = digitalRead(pin);
   button_pressed = !button_state;
+
+  return update();
 }
 
 int Button::update() {
   // returns 0, 1, 2 for off, short press, long press, respectively
-  read();
   flag = 0;
   switch (state) {
     case 0:
@@ -33,7 +32,7 @@ int Button::update() {
       if (!button_pressed) {
         state = 0;
         button_change_time = millis();
-      } else if (millis() - button_change_time >= debounce_duration) {
+      } else if (millis() - button_change_time >= DEBOUNCE_DURATION) {
         state = 2;
         state_2_start_time = millis();
       }
@@ -42,7 +41,7 @@ int Button::update() {
       if (!button_pressed) {
         state = 4;
         button_change_time = millis();
-      } else if (millis() - state_2_start_time >= long_press_duration) {
+      } else if (millis() - state_2_start_time >= LONG_PRESS_DURATION) {
         state = 3;
       }
       break;
@@ -53,12 +52,12 @@ int Button::update() {
       }
       break;
     case 4:
-      if (!button_pressed && millis() - button_change_time >= debounce_duration) {
+      if (!button_pressed && millis() - button_change_time >= DEBOUNCE_DURATION) {
         state = 0;
-        flag = millis() - state_2_start_time < long_press_duration ? 1 : 2;
+        flag = millis() - state_2_start_time < LONG_PRESS_DURATION ? 1 : 2;
       } else if (button_pressed) {
         button_change_time = millis();
-        if (millis() - state_2_start_time < long_press_duration) {
+        if (millis() - state_2_start_time < LONG_PRESS_DURATION) {
           state = 2;
         } else {
           state = 3;

@@ -4,10 +4,10 @@
 #include <WiFiClient.h>
 #include <TFT_eSPI.h>
 
-const uint8_t PIN1 = 34;
-const uint8_t PIN2 = 35;
-int reading1;
-int reading2;
+const uint8_t PIN1 = 35;
+const uint8_t PIN2 = 34;
+uint8_t reading1;
+uint8_t reading2;
 
 void setup() {
   // put your setup code here, to run once:
@@ -16,7 +16,7 @@ void setup() {
   pinMode(PIN2, INPUT);
   reading1 = 0;
   reading2 = 0;
-  analogReadResolution(10);
+  analogReadResolution(4);
 }
 
 void loop() {

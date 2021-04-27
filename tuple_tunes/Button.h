@@ -7,18 +7,20 @@
  * Button class that can recognize short presses and long presses.
  */
 class Button {
+  static const uint32_t DEBOUNCE_DURATION = 10;
+  static const uint32_t LONG_PRESS_DURATION = 1000;
+  
+  uint8_t pin;
   uint32_t state_2_start_time;
   uint32_t button_change_time;
-  uint32_t debounce_duration;
-  uint32_t long_press_duration;
-  uint8_t pin;
   uint8_t flag;
   bool button_pressed;
-  uint8_t state; // this is public for the sake of convenience
+  uint8_t state;
     
+  int update();
+  
   public:
     Button(int p);
-    void read();
-    int update();
+    int read();
 };
 #endif

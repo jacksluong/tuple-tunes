@@ -32,7 +32,7 @@ const char API_KEY[] = "AIzaSyCwyynsePu7xijUYTOgR7NdVqxH2FAG9DQ"; // for googlea
 /////////////
 
 const int RESPONSE_TIMEOUT = 6000;
-const uint16_t IN_BUFFER_SIZE = 3000;
+const uint16_t IN_BUFFER_SIZE = 2000;
 const uint16_t JSON_BODY_SIZE = 3000;
 char request[IN_BUFFER_SIZE];
 
@@ -88,80 +88,6 @@ void make_post_request(char* server, char* address, char* body, char* output, bo
   Serial.println("-----------");
   Serial.println(output);
   Serial.println("-----------");
-}
-
-/*
- * Get location using geofencing (from lab03a_starter).
-*/
-void get_current_location(double* lat, double* lon, char* response) {
-  // lat, lon: variables to write values to
-  const char PREFIX[] = "{\"wifiAccessPoints\": [";
-  const char SUFFIX[] = "]}";
-  const int MAX_APS = 15;
-
-  char json_body[JSON_BODY_SIZE];
-  int offset = sprintf(json_body, "%s", PREFIX);
-  int n = WiFi.scanNetworks(); // run a new scan. could also modify to use original scan from setup so quicker (though older info)
-  Serial.println("Scan done");
-  if (n == 0) {
-    Serial.println("No networks found");
-  } else {
-    int max_aps = max(min(MAX_APS, n), 1);
-    for (int i = 0; i < max_aps; ++i) { // for each valid access point
-      uint8_t* mac = WiFi.BSSID(i); // get the MAC Address
-      offset += wifi_object_builder(json_body + offset, JSON_BODY_SIZE - offset, WiFi.channel(i), WiFi.RSSI(i), WiFi.BSSID(i)); //generate the query
-      if (i != max_aps - 1) {
-        offset += sprintf(json_body + offset, ","); // add comma between entries except trailing.
-      }
-    }
-    sprintf(json_body + offset, "%s", SUFFIX);
-    Serial.printf("json_body: \n%s\n", json_body);
-    int len = strlen(json_body);
-
-    Serial.println("SENDING REQUEST");
-    request[0] = '\0';
-    offset = 0;
-    offset += sprintf(request + offset, "POST https://www.googleapis.com/geolocation/v1/geolocate?key=%s  HTTP/1.1\r\n", API_KEY);
-    offset += sprintf(request + offset, "Host: googleapis.com\r\n");
-    offset += sprintf(request + offset, "Content-Type:  \r\n");
-    offset += sprintf(request + offset, "cache-control: no-cache\r\n");
-    offset += sprintf(request + offset, "Content-Length: %d\r\n\r\n", len);
-    offset += sprintf(request + offset, "%s\r\n", json_body);
-    do_https_request("googleapis.com", request, response, OUT_BUFFER_SIZE, RESPONSE_TIMEOUT, false);
-    Serial.println("-----------");
-    Serial.println(response);
-    Serial.println("-----------");
-
-    int start_point = strchr(response, '{') - response;
-    int end_point = strrchr(response, '}') - response + 1;
-
-    StaticJsonDocument<200> doc;
-    char json[100];
-    strncpy(json, response + start_point, end_point - start_point);
-
-    deserializeJson(doc, json);
-    double latitude = doc["location"]["lat"];
-    double longitude = doc["location"]["lng"];
-
-    *lat = latitude;
-    *lon = longitude;
-  }
-}
-
-/*
- * A function to assist get_location by building a JSON object out of each WiFi network.
- */
-int wifi_object_builder(char* object_string, uint32_t os_len, uint8_t channel, int signal_strength, uint8_t* mac_address) {
-  if (os_len < 81) return 0;
-
-  int offset = 0;
-  offset += sprintf(object_string + offset, "{\"macAddress\": \"%x", mac_address[0]);
-  for (int i = 1; i < 6; i++) {
-    offset += sprintf(object_string + offset, ":%x", mac_address[i]);
-  }
-  offset += sprintf(object_string + offset, "\",\"signalStrength\": %d", signal_strength);
-  offset += sprintf(object_string + offset, ",\"age\": 0,\"channel\": %d}", channel);
-  return offset;
 }
 
 /////////////////////////////////////////////////////////////////////////////

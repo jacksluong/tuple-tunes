@@ -51,13 +51,18 @@ int state = 0;
 int menu_state = 0;
 
 // Game variable options
-char key_labels[] = {'C', 'D', 'E', 'F', 'G', 'A', 'B'};
+char* key_labels[] = {"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"};
 char* keys[] = {"C", "D", "E", "F", "G", "A", "B",      // C major
+                "Db", "Eb", "F", "Gb", "Ab", "Bb", "C", // Db major
                 "D", "E", "F#", "G", "A", "B", "C#",    // D major
+                "Eb", "F", "G", "Ab", "Bb", "C", "D",   // Eb major
                 "E", "F#", "G#", "A", "B", "C#", "D#",  // etc.
                 "F", "G", "A", "Bb", "C", "D", "E",
+                "Gb", "Ab", "Bb", "Cb", "Db", "Eb", "F",
                 "G", "A", "B", "C", "D", "E", "F#",
+                "Ab", "Bb", "C", "Db", "Eb", "F", "G",
                 "A", "B", "C#", "D", "E", "F#", "G#",
+                "Bb", "C", "D", "Eb", "F", "G", "A",
                 "B", "C#", "D#", "E", "F#", "G#", "A#"};
 char* tempo_labels[] = {"Slow", "Mid", "Fast"};
 int tempo_speeds[] = {70, 95, 120};
@@ -132,7 +137,7 @@ void setup() {
   ledcAttachPin(27, green);
   ledcAttachPin(12, blue);
 
-  set_led_color(0, 0, 0);
+  set_led_color(0, 0, 255);
 
   // Connect to WiFi
   WiFi.begin(NETWORK, PASSWORD);

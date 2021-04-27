@@ -205,17 +205,17 @@ void loop() {
   } else if (state == 1) {      ////////////////////// start game //////////////////////
     if (!is_locked && js == 1) { // up
       start_game_state = (start_game_state + 3) % 4;
-      update_start_game(start_game_state, is_locked);
+      update_start_game(start_game_state);
     } else if (!is_locked && js == 3) { // down
       start_game_state = (start_game_state + 1) % 4;
-      update_start_game(start_game_state, is_locked);
+      update_start_game(start_game_state);
     } else if (is_locked && js == 2) {
       
     }
 
     if (bv) {
       is_locked = !is_locked;
-      update_start_game(start_game_state, is_locked);
+      update_start_game(start_game_state);
     }
     
   } else if (state == 2) {      ////////////////////// join game //////////////////////

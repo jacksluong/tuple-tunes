@@ -16,7 +16,7 @@ void setup() {
   pinMode(PIN2, INPUT);
   reading1 = 0;
   reading2 = 0;
-  analogReadResolution(4);
+  analogReadResolution(10);
 }
 
 void loop() {

@@ -47,8 +47,8 @@ const uint8_t NOTE_COUNT = 97; // number of half-steps included in our range of 
 
 // State and inputs
 char input[50] = {0};
-int state = 0; // determines overall game page 
-int menu_state = 0; // determines cursor selection on menu page
+int state = 0;
+int menu_state = 0;
 
 // Game variable options
 char key_labels[] = {'C', 'D', 'E', 'F', 'G', 'A', 'B'};
@@ -59,7 +59,7 @@ char* keys[] = {"C", "D", "E", "F", "G", "A", "B",      // C major
                 "G", "A", "B", "C", "D", "E", "F#",
                 "A", "B", "C#", "D", "E", "F#", "G#",
                 "B", "C#", "D#", "E", "F#", "G#", "A#"};
-char* tempo_labels[] = {"Slow", "Medium", "Fast"};
+char* tempo_labels[] = {"Slow", "Mid", "Fast"};
 int tempo_speeds[] = {70, 95, 120};
 
 // Game variables
@@ -109,7 +109,10 @@ void setup() {
   tft.init();
   tft.setRotation(1); // set display in landscape
   tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setTextColor(TFT_RED);
+  tft.setTextSize(2);
+  tft.setCursor(15, 50);
+  tft.println("Loading...");
 
   // Set up button(s)
   delay(100);
@@ -156,31 +159,52 @@ void setup() {
   }
   
   // Draw first screen
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setCursor(0, 0);
+  display_landing();
+  update_landing(0);
 }
 
 void loop() {
   int bv = button.read();
   int js = joystick.read();
-  if (js) Serial.println(js);
-  
-  if (state == 0) { // landing page
+
+  if (bv == 2) { // debugging only
+    display_landing();
+    update_landing(0);
+    state = 0;
+  }
+
+  if (state == 0) {             ////////////////////// landing //////////////////////
+    if (js == 1) { // up
+      menu_state = (menu_state + 2) % 3;
+      update_landing(menu_state);
+    } else if (js == 3) { // down
+      menu_state = (menu_state + 1) % 3;
+      update_landing(menu_state);
+    }
+      
+    if (bv) {
+      if (menu_state == 0) { // start
+        display_start_game();
+        state = 1;
+      } else if (menu_state == 1) { // join
+        display_join_game();
+        state = 2;
+      } else { // gallery
+        display_gallery();
+        state = 3;
+      }
+
+    }
+  } else if (state == 1) {      ////////////////////// start game //////////////////////
     
-  } else if (state == 1) { // start game
+  } else if (state == 2) {      ////////////////////// join game //////////////////////
     
-  } else if (state == 2) { // join game
+  } else if (state == 3) {      ////////////////////// gallery //////////////////////
     
-  } else if (state == 3) { // gallery
-    
-  } else if (state == 4) { // in game and in turn
-    // TODO: want to print only on state change (not on every loop)
-    display_in_turn();
-  } else if (state == 5) { // in game and out of turn
-    
-  } else if (state == 6) { // menu info page
-    display_menu();
+  } else if (state == 4) {      ////////////////////// in-game //////////////////////
+    display_in_game();
+  } else if (state == 5) {      ////////////////////// game menu //////////////////////
+    display_game_menu();
   }
 
 }

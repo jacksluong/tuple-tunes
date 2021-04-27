@@ -1,4 +1,119 @@
-void display_in_turn() {
+/////////////////
+// Convenience //
+/////////////////
+
+uint8_t CYAN[] = {18, 243, 255};
+uint8_t DARK_CYAN[] = {50, 162, 168};
+
+/*
+ * A blocking function that will animate text with a fade-in
+ * with the given specs (color, location, duration, size).
+ */
+void fade_in_text(char* text, uint8_t x, uint8_t y, uint8_t* rgb, int duration, uint8_t font_size = 1) {
+  // draw: function that takes in an alpha value; duration: millis
+  uint32_t last = millis();
+  uint16_t interval = (int) (duration / 20);
+  for (float alpha = 0.0; alpha < 1; alpha += 0.05) {
+    tft.setCursor(x, y);
+    tft.setTextSize(font_size);
+    tft.setTextColor(tft.color565((int) (rgb[0] * alpha),
+                                  (int) (rgb[1] * alpha),
+                                  (int) (rgb[2] * alpha)));
+    tft.println(text);
+    while (millis() - last < interval);
+    last = millis();
+  }
+}
+
+/*
+ * Draws text with the given specs.
+ */
+void draw_text(char* text, uint8_t x, uint8_t y, uint8_t* rgb, uint8_t font_size = 1) {
+  tft.setCursor(x, y);
+  tft.setTextSize(font_size);
+  tft.setTextColor(tft.color565(rgb[0], rgb[1], rgb[2]));
+  tft.println(text);
+}
+
+/////////////
+// Landing //
+/////////////
+
+void display_landing() {
+  tft.fillScreen(TFT_BLACK);
+  fade_in_text(" Tuple\n Tunes", 0, 13, CYAN, 1200, 3);
+  
+  // Menu options
+  fade_in_text("Start Game", 90, 75, DARK_CYAN, 700, 1);
+  fade_in_text(" Join Game", 90, 92, DARK_CYAN, 700, 1);
+  fade_in_text("   Gallery", 90, 109, DARK_CYAN, 700, 1);
+}
+
+void update_landing(int selection) {
+  tft.fillRect(78, 75, 11, 45, TFT_BLACK);
+  tft.drawTriangle(80, 77 + 17 * selection, 
+                   80, 81 + 17 * selection, 
+                   83, 79 + 17 * selection, TFT_WHITE);
+}
+
+////////////////
+// Start Game //
+////////////////
+
+void display_start_game() {
+  tft.fillScreen(TFT_BLACK);
+  fade_in_text(" Start\n Game", 0, 13, CYAN, 1200, 2);
+
+  // Menu options
+  fade_in_text("  Key: C", 86, 25, DARK_CYAN, 200, 1);
+  fade_in_text("Tempo: Fast", 86, 42, DARK_CYAN, 200, 1);
+  fade_in_text("    Start", 86, 59, DARK_CYAN, 200, 1);
+  fade_in_text("     Back", 86, 105, DARK_CYAN, 200, 1);
+}
+
+void update_start_game() {
+  
+}
+
+///////////////
+// Join Game //
+///////////////
+
+void display_join_game() {
+  tft.fillScreen(TFT_BLACK);
+  fade_in_text(" Join\n Game", 0, 13, CYAN, 1200, 2);
+
+  draw_text("Room:", 100, 25, DARK_CYAN, 1);
+  fade_in_text("___", 103, 42, DARK_CYAN, 200, 1);
+  fade_in_text("   Change", 86, 59, DARK_CYAN, 200, 1);
+  fade_in_text("     Join", 86, 76, DARK_CYAN, 200, 1);
+  fade_in_text("     Back", 86, 105, DARK_CYAN, 200, 1);
+}
+
+void update_join_game() {
+  
+}
+
+/////////////
+// Gallery //
+/////////////
+void display_gallery() {
+  tft.fillScreen(TFT_BLACK);
+  fade_in_text(" Gallery", 0, 13, CYAN, 1200, 2);
+   
+}
+
+void update_gallery() {
+  
+}
+
+/////////////
+// In-game //
+/////////////
+
+void display_in_game() {
+  tft.fillScreen(TFT_BLACK);
+  
   // Dividing line between left and right
   tft.drawRect(106, 0, 107, 128, TFT_WHITE);
   
@@ -31,7 +146,17 @@ void display_in_turn() {
   }
 }
 
-void display_menu() {
+void update_in_game() {
+  
+}
+
+///////////////
+// Game Menu //
+///////////////
+
+void display_game_menu() {
+  tft.fillScreen(TFT_BLACK);
+  
   // dividing line between left and right
   tft.drawLine(84, 0, 84, 128, TFT_WHITE);
   tft.drawLine(85, 0, 85, 128, TFT_WHITE);
@@ -70,4 +195,8 @@ void display_menu() {
   } else if (menu_state == 3) {
     tft.drawTriangle(2,100,3.5,102.5,2,105,TFT_WHITE);
   }
+}
+
+void update_game_menu() {
+  
 }

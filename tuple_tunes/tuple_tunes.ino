@@ -201,6 +201,7 @@ void loop() {
         display_gallery();
         state = 3;
       }
+      menu_state = 0;
 
     }
   } else if (state == 1) {      ////////////////////// start game //////////////////////
@@ -227,13 +228,18 @@ void loop() {
     }
     
     if (bv) {
-      if (menu_state == 1 || menu_state == 2) {
+      if (menu_state == 0 || menu_state == 1) {
         is_locked = !is_locked;
         update_start_game(menu_state);
-      } else if (menu_state == 3) {
+      } else if (menu_state == 2) {
+        menu_state = 0;
         display_game_menu();
-      } else if (menu_state == 4) {
+        state = 5;
+      } else if (menu_state == 3) {
+        menu_state = 0;
+        state = 0;
         display_landing();
+        update_landing(menu_state);
       }
     }
     

@@ -68,6 +68,8 @@ char* keys[] = {"C", "D", "E", "F", "G", "A", "B",      // C major
                 "B", "C#", "D#", "E", "F#", "G#", "A#"};
 char* tempo_labels[] = {"Slow", "Mid", "Fast"};
 int tempo_speeds[] = {70, 95, 120};
+int key_state = 0;
+int tempo_state = 0;
 
 // Game variables
 int room_num;
@@ -210,12 +212,30 @@ void loop() {
       start_game_state = (start_game_state + 1) % 4;
       update_start_game(start_game_state);
     } else if (is_locked && js == 2) {
-      
-    }
-
-    if (bv) {
-      is_locked = !is_locked;
+      if (start_game_state == 1) {
+        key_state = (key_state + 1) % 12;
+      } else if (start_game_state == 2) {
+        tempo_state = (tempo_state + 1) % 3;
+      }
       update_start_game(start_game_state);
+    } else if (is_locked && js == 4) {
+      if (start_game_state == 1) {
+        key_state = (key_state + 11) % 12;
+      } else if (start_game_state == 2) {
+        tempo_state = (tempo_state + 2) % 3;
+      }
+      update_start_game(start_game_state);
+    }
+    
+    if (bv) {
+      if (start_game_state == 1 || start_game_state == 2) {
+        is_locked = !is_locked;
+        update_start_game(start_game_state);
+      } else if (start_game_state == 3) {
+        display_game_menu();
+      } else if (start_game_state == 4) {
+        display_landing();
+      }
     }
     
   } else if (state == 2) {      ////////////////////// join game //////////////////////

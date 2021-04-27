@@ -213,16 +213,18 @@ void loop() {
       menu_state = (menu_state + 1) % 4;
       update_start_game(menu_state);
     } else if (is_locked && js == 2) {
-      if (menu_state == 1) {
+      if (menu_state == 0) {
         key_state = (key_state + 1) % 12;
-      } else if (menu_state == 2) {
+        update_start_game(menu_state);
+      } else if (menu_state == 1) {
         tempo_state = (tempo_state + 1) % 3;
+        update_start_game(menu_state);
       }
       update_start_game(menu_state);
     } else if (is_locked && js == 4) {
-      if (menu_state == 1) {
+      if (menu_state == 0) {
         key_state = (key_state + 11) % 12;
-      } else if (menu_state == 2) {
+      } else if (menu_state == 1) {
         tempo_state = (tempo_state + 2) % 3;
       }
       update_start_game(menu_state);

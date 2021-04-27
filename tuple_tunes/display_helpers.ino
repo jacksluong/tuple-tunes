@@ -64,15 +64,33 @@ void display_start_game() {
   tft.fillScreen(TFT_BLACK);
   fade_in_text(" Start\n Game", 0, 13, CYAN, 1200, 2);
 
+  key_text = "  Key: ";
+  strcat(key_text, key_labels[key_state]);
+  tempo_text = "Tempo: Fast";
+  strcat(tempo_text, tempo_labels[tempo_state]);
+
   // Menu options
-  fade_in_text("  Key: C", 86, 25, DARK_CYAN, 200, 1);
-  fade_in_text("Tempo: Fast", 86, 42, DARK_CYAN, 200, 1);
-  fade_in_text("    Start", 86, 59, DARK_CYAN, 200, 1);
-  fade_in_text("     Back", 86, 105, DARK_CYAN, 200, 1);
+  fade_in_text(key_text, 86, 25, DARK_CYAN, 200, 1);
+  fade_in_text(tempo_text, 86, 42, DARK_CYAN, 200, 1);
+  fade_in_text("   Start", 86, 59, DARK_CYAN, 200, 1);
+  fade_in_text("   Back", 86, 105, DARK_CYAN, 200, 1);
 }
 
 void update_start_game(int selection) {
   tft.fillRect(75, 0, 5, 120, TFT_BLACK);
+  tft.fillRect(80, 0, 20, 120, TFT_BLACK);
+  
+  key_text = "  Key: ";
+  strcat(key_text, key_labels[key_state]);
+  tempo_text = "Tempo: Fast";
+  strcat(tempo_text, tempo_labels[tempo_state]);
+
+  // Menu options
+  draw_text(key_text, 86, 25, DARK_CYAN, 200, 1);
+  draw_in_text(tempo_text, 86, 42, DARK_CYAN, 200, 1);
+  draw_in_text("   Start", 86, 59, DARK_CYAN, 200, 1);
+  draw_in_text("   Back", 86, 105, DARK_CYAN, 200, 1);
+  
   if (selection < 3) {
     tft.drawTriangle(76, 27 + 17 * selection, 
                      76, 31 + 17 * selection, 

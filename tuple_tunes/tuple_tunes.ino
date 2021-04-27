@@ -193,6 +193,7 @@ void loop() {
     if (bv) {
       if (menu_state == 0) { // start
         display_start_game();
+        update_start_game(menu_state);
         state = 1;
       } else if (menu_state == 1) { // join
         display_join_game();

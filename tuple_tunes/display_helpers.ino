@@ -72,10 +72,17 @@ void display_start_game() {
 }
 
 void update_start_game(int selection) {
-  tft.fillRect(75, 10, 80, 25, TFT_BLACK);
-  tft.drawTriangle(80, 77 + 17 * selection, 
-                   80, 81 + 17 * selection, 
-                   83, 79 + 17 * selection, TFT_WHITE);
+  tft.fillRect(75, 0, 5, 120, TFT_BLACK);
+  if (selection < 3) {
+    tft.drawTriangle(76, 27 + 17 * selection, 
+                     76, 31 + 17 * selection, 
+                     79, 29 + 17 * selection, TFT_WHITE);
+  } else {
+    tft.drawTriangle(76, 27 + 17 * (1.7 + selection), 
+                     76, 31 + 17 * (1.7 + selection), 
+                     79, 29 + 17 * (1.7 + selection), TFT_WHITE);
+  }
+  
 }
 
 ///////////////

@@ -83,8 +83,8 @@ void display_join_game() {
   tft.fillScreen(TFT_BLACK);
   fade_in_text(" Join\n Game", 0, 13, CYAN, 1200, 2);
 
-  draw_text("Room:", 100, 25, DARK_CYAN, 1);
-  fade_in_text("___", 103, 42, DARK_CYAN, 200, 1);
+  draw_text("Room:", 110, 25, DARK_CYAN, 1);
+  fade_in_text("___", 113, 42, DARK_CYAN, 200, 1);
   fade_in_text("   Change", 86, 59, DARK_CYAN, 200, 1);
   fade_in_text("     Join", 86, 76, DARK_CYAN, 200, 1);
   fade_in_text("     Back", 86, 105, DARK_CYAN, 200, 1);

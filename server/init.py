@@ -20,6 +20,8 @@ key_scale_notes = {
     "F Major": ["F", "G", "A", "Bb", "C", "D", "E", "F"],
 }
 
+GAME_ROOM_CAPACITY_LIMIT = 10
+
 def initiate_tables():
     with sqlite3.connect(moosic_db) as c:
         c.execute('''CREATE TABLE IF NOT EXISTS games(game_code int, host text, key text, tempo text, game_status text, time timestamp, turn int, measure int);''')
@@ -57,7 +59,27 @@ def create_game(host, key, tempo):
     game_code_string = '0' * (3 - len(str(game_code))) + str(game_code)
     return (game_code_string, str(game_id))
 
+def join_game(username, game_code):
+    with sqlite3.connect(moosic_db) as c:
+        game = c.execute('''SELECT rowid, status FROM games WHERE game_code = ?;''',(game_code))
+        game_id, game_status = game
 
+        #check if game is in start state
+        if game_status == "start":
+            #check num of players
+            players = c.execute('''SELECT rowid FROM players WHERE game_id = ?;''',(game_id))
+            num_players = len(players)
+            
+            if num_players < GAME_ROOM_CAPACITY_LIMIT:
+                #insert player into database
+                c.execute('''INSERT INTO players VALUES (?,?,?,?);'''(game_id, username, datetime.datetime.now(), datetime.datetime.now()))
+
+                return f"{username} has successfully joined game {game_code} with {num_players + 1} players. The game_id is {game_id}"
+            else:
+                return "Failed to Join Game: Reached Capacity Limit"
+
+        else:
+            return "Game Has Already Started. Please provide different game code"
 
 def request_handler(request):
     if request["method"] == "POST":
@@ -85,7 +107,7 @@ def request_handler(request):
                 key = request['form']['key']
                 tempo = request['form']['tempo']
             except Exception as e:
-                return "Please return host, key, tempo when creaitng a game"
+                return "Please return host, key, tempo when creating a game"
 
             print("Game was created with host, key, tempo ", host, key, tempo)
 
@@ -93,8 +115,20 @@ def request_handler(request):
 
             return "Your game code is: " + game_code + ", game id: " + game_id
 
+        ###############################
+        # JOIN A GAME ###############
+        ###############################
+        elif type_ == "join":
+            try:
+                username = request['form']['username']
+                game_code = request['form']['game_code']
+            except Exception as e:
+                return "Please provide username and game code when joining a game"
+            
+            return join_game(username, game_code)
 
-
+        #TODO: Have to live update players currently waiting with number of players in the current room (currently is static update, only when join)
+        #TODO: Maybe insert num_players into game_state?
 
         return "this is a post request"
 

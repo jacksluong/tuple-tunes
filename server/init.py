@@ -64,7 +64,12 @@ def request_handler(request):
 
     #GET REQUEST HANDLERS
     elif request["method"] == "GET":
-        return "This is a GET Request"
+        try:
+            game_id = int(request['values']['game_id'])
+        except:
+            return "Please provide valid game id!"
+
+        return fetch_game_status(game_id)
 
     #INVALID REQUEST
     else:

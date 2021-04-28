@@ -14,3 +14,6 @@ def request_handler(request):
             return "Please provide username, game id, and last updated measure"
 
         return fetch(game_id, username, last_measure)
+
+    elif request["method"] == "POST":
+        pass

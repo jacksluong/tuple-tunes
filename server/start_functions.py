@@ -79,7 +79,6 @@ def join_game(username, game_code):
             #get player names
             player_names = [val[0] for val in players]
 
-            
             #check if room is still open to players
             if num_players < GAME_ROOM_CAPACITY_LIMIT:
 
@@ -115,3 +114,33 @@ def start_game(game_id):
         
         else:
             return "INVALID! Game is in progress/ended!"
+
+def fetch_game_status(game_id):
+    """
+    Given a game_id, return the information about the status of the game
+    """
+
+    with sqlite3.connect(moosic_db) as c:
+
+        #get the status of the game
+        try:
+            status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
+        except Exception as e:
+            return f"INVALID GAME ID! ERROR: {e}"
+        
+        #still in start state (waiting) state
+        if status == "start":
+            players = c.execute('''SELECT username FROM players WHERE game_id = ?;''', (game_id,)).fetchall()
+            num_players = len(players)
+            player_names = [val[0] for val in players]
+
+            return f"GAME w/ id {game_id} \n STATE: START (WAITING FOR HOST TO START) \n NUM PLAYERS: {num_players} \n CURRENT PLAYERS IN WAITING ROOM: {', '.join(player_names)}"
+
+        elif status == "in_game":
+            return f"GAME w/ id: {game_id} IS IN PROGRESS!"
+        
+        elif status == "ended":
+            return f"GAME w/ id: {game_id} HAS ENDED!"
+        
+        else:
+            return f"Invalid game status code: {status}"

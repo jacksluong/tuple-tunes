@@ -12,7 +12,10 @@ def fetch(game_id, username, last_updated_measure):
 
     with sqlite3.connect(moosic_db) as c:
         #update the player last ping for timeout purposes
-        c.execute('''UPDATE players SET last_ping = ? WHERE game_id = ? AND username = ?;''', (datetime.datetime.now(), game_id, username))
+        try:
+            c.execute('''UPDATE players SET last_ping = ? WHERE game_id = ? AND username = ?;''', (datetime.datetime.now(), game_id, username))
+        except Exception as e:
+            return "INVALID GAME ID!"
 
         #check for status of the game
         game_status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id, )).fetchone()

@@ -1,5 +1,5 @@
 import sys
-sys.path.append('__HOME__')
+sys.path.append('__HOME__/start_game')
 from start_functions import *
 
 def request_handler(request):

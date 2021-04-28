@@ -2,7 +2,7 @@ import numpy
 import sqlite3
 import datetime
 
-moosic_db = '/var/jail/home/team59/moosic/moosic.db'
+moosic_db = '/var/jail/home/team59/moosic.db'
 
 #hard coded stuff: all the major minor scales
 #TODO: set up frequencies with each note

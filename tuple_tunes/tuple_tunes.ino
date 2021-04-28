@@ -67,8 +67,8 @@ char* keys[] = {"C", "D", "E", "F", "G", "A", "B",      // C major
                 "B", "C#", "D#", "E", "F#", "G#", "A#"};
 char* tempo_labels[] = {"Slow", "Mid", "Fast"};
 int tempo_speeds[] = {70, 95, 120};
-int key_state = 0;
-int tempo_state = 0;
+int selected_key = 0;
+int selected_tempo = 0;
 
 // Game variables
 int room_num;
@@ -90,7 +90,12 @@ int current_measure;
 // Project-specific functions //
 ////////////////////////////////
 
-
+void back_to_landing() {
+  menu_state = 0;
+  state = 0;
+  display_landing();
+  update_landing();
+}
 
 /////////////////////////////////
 // Convenient helper functions //
@@ -167,33 +172,26 @@ void setup() {
   }
   
   // Draw first screen
-  display_landing();
-  update_landing(0);
+  back_to_landing();
 }
 
 void loop() {
   int bv = button.read();
   int js = joystick.read();
 
-  if (bv == 2) { // debugging only
-    display_landing();
-    update_landing(0);
-    state = 0;
-  }
-
   if (state == 0) {             ////////////////////// landing //////////////////////
     if (js == 1) { // up
       menu_state = (menu_state + 2) % 3;
-      update_landing(menu_state);
+      update_landing();
     } else if (js == 3) { // down
       menu_state = (menu_state + 1) % 3;
-      update_landing(menu_state);
+      update_landing();
     }
       
     if (bv) {
       if (menu_state == 0) { // start
         display_start_game();
-        update_start_game(menu_state);
+        update_start_game();
         state = 1;
       } else if (menu_state == 1) { // join
         display_join_game();
@@ -203,51 +201,62 @@ void loop() {
         state = 3;
       }
       menu_state = 0;
-
     }
   } else if (state == 1) {      ////////////////////// start game //////////////////////
     if (!is_locked && js == 1) { // up
       menu_state = (menu_state + 3) % 4;
-      update_start_game(menu_state);
+      update_start_game();
     } else if (!is_locked && js == 3) { // down
       menu_state = (menu_state + 1) % 4;
-      update_start_game(menu_state);
-    } else if (is_locked && js == 2) {
-      if (menu_state == 0) {
-        key_state = (key_state + 1) % 12;
-        update_start_game(menu_state);
-      } else if (menu_state == 1) {
-        tempo_state = (tempo_state + 1) % 3;
-        update_start_game(menu_state);
-      }
-      update_start_game(menu_state);
-    } else if (is_locked && js == 4) {
-      if (menu_state == 0) {
-        key_state = (key_state + 11) % 12;
-      } else if (menu_state == 1) {
-        tempo_state = (tempo_state + 2) % 3;
-      }
-      update_start_game(menu_state);
+      update_start_game();
+    } else if (is_locked && js == 2) { // right
+      if (menu_state == 0) selected_key = (selected_key + 1) % 12;
+      else selected_tempo = (selected_tempo + 1) % 3;
+      
+      update_start_game();
+    } else if (is_locked && js == 4) { // left
+      if (menu_state == 0) selected_key = (selected_key + 11) % 12;
+      else selected_tempo = (selected_tempo + 2) % 3;
+
+      update_start_game();
     }
     
     if (bv) {
-      if (menu_state == 0 || menu_state == 1) {
+      if (menu_state == 0 || menu_state == 1) { // inputs
         is_locked = !is_locked;
-        update_start_game(menu_state);
-      } else if (menu_state == 2) {
+        update_start_game();
+      } else if (menu_state == 2) { // start
         menu_state = 0;
-        display_game_menu();
-        state = 5;
-      } else if (menu_state == 3) {
-        menu_state = 0;
-        state = 0;
-        display_landing();
-        update_landing(menu_state);
+        state = 4;
+        display_in_game();
+      } else  { // back
+        back_to_landing();
       }
     }
     
   } else if (state == 2) {      ////////////////////// join game //////////////////////
-    
+    if (js == 1 || js == 3) {
+      if (is_locked) {
+        // TODO: update input
+      } else {
+        menu_state = menu_state + (js == 1 ? 2 : 1) % 3;
+      }
+      update_join_game();
+    } else if (is_locked && js) {
+      // update cursor in input
+      update_join_game();
+    }
+
+    if (bv) {
+      if (menu_state == 0) { // input
+        if (!is_locked) is_locked = true;
+        else is_locked = true; // TODO: set to whether input contains three digits
+      } else if (menu_state == 1) { // join
+        
+      } else { // back
+        back_to_landing();
+      }
+    }
   } else if (state == 3) {      ////////////////////// gallery //////////////////////
     
   } else if (state == 4) {      ////////////////////// in-game //////////////////////

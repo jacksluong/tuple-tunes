@@ -149,7 +149,8 @@ void setup() {
   //set up AUDIO_PWM which we will control in this lab for music:
   pinMode(AUDIO_TRANSDUCER, OUTPUT);
   ledcSetup(AUDIO_PWM, 0, 12);//12 bits of PWM precision
-  ledcWrite(AUDIO_PWM, 0); //0 is a 0% duty cycle for the NFET
+  ledcWrite(AUDIO_PWM, 80); //0 is a 0% duty cycle for the NFET
+  stop_sound();
   ledcAttachPin(AUDIO_TRANSDUCER, AUDIO_PWM);
 
   // Connect to WiFi

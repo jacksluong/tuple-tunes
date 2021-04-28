@@ -1,5 +1,5 @@
 import sys
-sys.path.append('__HOME__/moosic')
+sys.path.append('__HOME__')
 from start_functions import *
 from in_game_functions import *
 

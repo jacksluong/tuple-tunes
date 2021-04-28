@@ -6,8 +6,8 @@
 
 const uint8_t PIN1 = 35;
 const uint8_t PIN2 = 34;
-uint8_t reading1;
-uint8_t reading2;
+int reading1;
+int reading2;
 
 void setup() {
   // put your setup code here, to run once:

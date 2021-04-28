@@ -36,6 +36,7 @@ void update_state(int bv, int js) {
     }
     
   } else if (state == 1) {      ////////////////////// start game //////////////////////
+    if (millis() - last_played > 300) stop_sound();
     if (!is_locked && js == 1) { // up
       menu_state = (menu_state + 3) % 4;
     } else if (!is_locked && js == 3) { // down

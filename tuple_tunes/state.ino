@@ -41,10 +41,16 @@ void update_state(int bv, int js) {
     } else if (!is_locked && js == 3) { // down
       menu_state = (menu_state + 1) % 4;
     } else if (is_locked && js == 2) { // right
-      if (menu_state == 0) selected_key = (selected_key + 1) % 12;
+      if (menu_state == 0) {
+        selected_key = (selected_key + 1) % 12;
+        play_note(selected_key);
+      }
       else selected_tempo = (selected_tempo + 1) % 3;
     } else if (is_locked && js == 4) { // left
-      if (menu_state == 0) selected_key = (selected_key + 11) % 12;
+      if (menu_state == 0) {
+        selected_key = (selected_key + 11) % 12;
+        play_note(selected_key);
+      }
       else selected_tempo = (selected_tempo + 2) % 3;
     }
     update_start_game(js);
@@ -52,6 +58,8 @@ void update_state(int bv, int js) {
     if (bv) {
       if (menu_state == 0 || menu_state == 1) { // inputs
         is_locked = !is_locked;
+        if (!is_locked) stop_sound();
+        else if (menu_state == 0) play_note(selected_key);
         update_start_game(1);
       } else if (menu_state == 2) { // start
         for (int i = 0; i < 3; i++) room_num[i] = '0';

@@ -6,7 +6,6 @@ moosic_db = '/var/jail/home/team59/moosic/moosic.db'
 
 #hard coded stuff: all the major minor scales
 #TODO: set up frequencies with each note
-
 key_scale_notes = {
     "C Major": ["C", "D", "E", "F", "G", "A", "B", "C"],
     "G Major": ["G", "A", "B", "C", "D", "E", "F#", "G"],
@@ -70,7 +69,7 @@ def create_game(host, key, tempo):
     game_code_string = '0' * (3 - len(str(game_code))) + str(game_code)
 
     #TODO: Reformat return later on: (currently for demo purposes)
-    return f"Game Created Successfully! Game Code: {game_code_string}. Game ID: {game_id}. Key: {key}. Tempo: {tempo}. Host: {host}"
+    return f"Game Created Successfully! \n Game Code: {game_code_string} \n Game ID: {game_id} \n Key: {key} \n Tempo: {tempo} \n Host: {host}"
 
 def join_game(username, game_code):
     """
@@ -82,6 +81,7 @@ def join_game(username, game_code):
         #get game_id and game_status of game 
         game = c.execute('''SELECT rowid, game_status FROM games WHERE game_code = ?;''',(int(game_code),)).fetchone()
 
+        #if game room not found
         if not game:
             return "No Game Room Found"
 
@@ -90,8 +90,12 @@ def join_game(username, game_code):
         #check if game is in start state
         if game_status == "start":
             #check num of players
-            players = c.execute('''SELECT * FROM players WHERE game_id = ?;''',(game_id,)).fetchall()
+            players = c.execute('''SELECT username FROM players WHERE game_id = ?;''',(game_id,)).fetchall()
             num_players = len(players)
+
+            #get player names
+            player_names = [val[0] for val in players]
+
             
             #check if room is still open to players
             if num_players < GAME_ROOM_CAPACITY_LIMIT:
@@ -100,7 +104,7 @@ def join_game(username, game_code):
                 c.execute('''INSERT INTO players VALUES (?,?,?,?);''',(game_id, username, datetime.datetime.now(), datetime.datetime.now()))
 
                 #TODO: Reformat return later on: (currently for demo purposes)
-                return f"{username} has successfully joined game {game_code} with {num_players + 1} players. The game_id is {game_id}"
+                return f"{username} has successfully joined! \n GAME ID: {game_id} \n GAME CODE: {game_code} \n Num Players: {num_players + 1} \n Current Players: {', '.join(player_names + [username])}"
 
             else:
                 return "Failed to Join Game: Reached Capacity Limit"
@@ -113,5 +117,18 @@ def start_game(game_id):
     Start the game with the give game id
     """
     with sqlite3.connect(moosic_db) as c:
-        c.execute('''UPDATE games SET game_status = ? WHERE game_id = ?;''', ('in_game', game_id))
-        return f"Game w/ Game ID: {game_id} has started"
+
+        #get status of game
+        try:
+            game_status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
+        except Exception as e:
+            return "INVALID GAME CODE!"
+
+        #if game hasn't started yet
+        if game_status == "start":
+            c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ('in_game', game_id))
+
+            return f"Game w/ Game ID: {game_id} has started"
+        
+        else:
+            return "INVALID! Game is in progress/ended!"

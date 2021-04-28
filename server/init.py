@@ -1,3 +1,5 @@
+import sys
+sys.path.append('__HOME__/moosic')
 from start_functions import *
 
 def request_handler(request):
@@ -52,7 +54,7 @@ def request_handler(request):
                 return "Please provide a valid game id"
 
             return start_game(game_id)
-            
+
         #TODO: Have to live update players currently waiting with number of players in the current room (currently is static update, only when join)
         #TODO: Maybe insert num_players into game_state?
 

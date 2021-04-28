@@ -48,7 +48,7 @@ const uint8_t NOTE_COUNT = 97; // number of half-steps included in our range of 
 // State
 int state = 0;
 int menu_state = 0;
-int8_t game_code_input[] = {-1, -1, -1};
+int8_t game_code_input[] = {-10, -10, -10};
 char input_cursor = 0;
 bool is_locked = false;
 uint16_t last_button_click = millis();

@@ -20,9 +20,10 @@ void update_state(int bv, int js) {
         state = 1;
         display_start_game();
       } else if (menu_state == 1) { // join
-        game_code_input[0] = -1;
-        game_code_input[1] = -1;
-        game_code_input[2] = -1;
+        game_code_input[0] = -10; // equivalent to 0 mod 10
+        game_code_input[1] = -10;
+        game_code_input[2] = -10;
+        input_cursor = 0;
         is_locked = true;
         menu_state = 0;
         state = 2;
@@ -51,7 +52,7 @@ void update_state(int bv, int js) {
     if (bv) {
       if (menu_state == 0 || menu_state == 1) { // inputs
         is_locked = !is_locked;
-        update_start_game(js);
+        update_start_game(1);
       } else if (menu_state == 2) { // start
         for (int i = 0; i < 3; i++) room_num[i] = '0';
         menu_state = 0;
@@ -65,7 +66,7 @@ void update_state(int bv, int js) {
   } else if (state == 2) {      ////////////////////// join game //////////////////////
     if (js == 1 || js == 3) {
       if (is_locked) {
-        game_code_input[input_cursor] = (game_code_input[input_cursor] + (js == 1 ? 1 : 9)) % 10;
+        game_code_input[input_cursor] = (game_code_input[input_cursor] + (js == 1 ? 11 : 19)) % 10;
       } else {
         menu_state = (menu_state + (js == 1 ? 2 : 1)) % 3;
       }
@@ -80,6 +81,7 @@ void update_state(int bv, int js) {
         else if (game_code_input[0] >= 0 && // three numbers specified
                  game_code_input[1] >= 0 &&
                  game_code_input[2] >= 0) is_locked = false;
+        update_join_game(1);
       } else if (menu_state == 1) { // join
         room_num[0] = '\0';
         sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
@@ -93,7 +95,7 @@ void update_state(int bv, int js) {
   } else if (state == 3) {      ////////////////////// gallery //////////////////////
     
   } else if (state == 4) {      ////////////////////// in-game //////////////////////
-    
+    if (bv == 2) back_to_landing(); // for debugging/demo only
   } else if (state == 5) {      ////////////////////// game menu //////////////////////
     display_game_menu();
   }

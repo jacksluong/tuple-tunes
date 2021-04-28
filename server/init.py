@@ -1,6 +1,7 @@
 import sys
 sys.path.append('__HOME__/moosic')
 from start_functions import *
+from in_game_functions import *
 
 def request_handler(request):
 
@@ -21,11 +22,11 @@ def request_handler(request):
         # host creates game
         if type_ == "create":
             try:
-                host = request['form']['host']
+                host = request['form']['username']
                 key = request['form']['key']
                 tempo = request['form']['tempo']
             except Exception as e:
-                return "Please return host, key, tempo when creating a game"
+                return "Please return host username, key, tempo when creating a game"
 
             return create_game(host, key, tempo)
 
@@ -62,7 +63,17 @@ def request_handler(request):
 
     #GET REQUEST HANDLERS
     elif request["method"] == "GET":
-        return "This is a GET Request"
+
+        #get the game id, username, and last updated measure
+        try:
+            username = request['values']['username']
+            game_id = int(request['values']['game_id'])
+            last_measure = int(request['values']['measure'])
+        except:
+            return "Please provide username, game id, and last updated measure"
+
+        return fetch(game_id, username, last_measure)
+        #return "This is a GET Request"
 
     #INVALID REQUEST
     else:

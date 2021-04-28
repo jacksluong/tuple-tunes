@@ -17,6 +17,7 @@ int BUTTON_PINS[] = {32};
 uint8_t AUDIO_TRANSDUCER = 26;
 const int JOYSTICK_LR = 35;
 const int JOYSTICK_UD = 34;
+uint8_t AUDIO_PWM = 1;
 
 // HTTP
 char NETWORK[] = "MIT";
@@ -144,6 +145,12 @@ void setup() {
   ledcAttachPin(12, blue);
 
   set_led_color(0, 0, 255);
+
+  //set up AUDIO_PWM which we will control in this lab for music:
+  pinMode(AUDIO_TRANSDUCER, OUTPUT);
+  ledcSetup(AUDIO_PWM, 0, 12);//12 bits of PWM precision
+  ledcWrite(AUDIO_PWM, 0); //0 is a 0% duty cycle for the NFET
+  ledcAttachPin(AUDIO_TRANSDUCER, AUDIO_PWM);
 
   // Connect to WiFi
   WiFi.begin(NETWORK, PASSWORD);

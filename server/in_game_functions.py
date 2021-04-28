@@ -56,8 +56,6 @@ def fetch(game_id, username, last_updated_measure):
         
         return f"No matching game status found for {game_status[0]}"
 
-
-
 #hard coded stuff: all the major minor scales
 #TODO: set up frequencies with each note
 key_scale_notes = {

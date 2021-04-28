@@ -1,7 +1,6 @@
 import sys
-sys.path.append('__HOME__/start_game')
+sys.path.append('__HOME__/server')
 from start_functions import *
-from in_game_functions import *
 
 def request_handler(request):
 
@@ -21,6 +20,7 @@ def request_handler(request):
 
         # host creates game
         if type_ == "create":
+            # return request
             try:
                 host = request['form']['username']
                 key = request['form']['key']
@@ -59,21 +59,12 @@ def request_handler(request):
         #TODO: Have to live update players currently waiting with number of players in the current room (currently is static update, only when join)
         #TODO: Maybe insert num_players into game_state?
 
-        return "this is a post request"
+        else:
+            return "Invalid POST request! Please specify valid type"
 
     #GET REQUEST HANDLERS
     elif request["method"] == "GET":
-
-        #get the game id, username, and last updated measure
-        try:
-            username = request['values']['username']
-            game_id = int(request['values']['game_id'])
-            last_measure = int(request['values']['measure'])
-        except:
-            return "Please provide username, game id, and last updated measure"
-
-        return fetch(game_id, username, last_measure)
-        #return "This is a GET Request"
+        return "This is a GET Request"
 
     #INVALID REQUEST
     else:

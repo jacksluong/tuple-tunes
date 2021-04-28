@@ -3,9 +3,6 @@ import datetime
 
 moosic_db = '/var/jail/home/team59/moosic.db'
 
-#hard coded stuff: all the major minor scales
-#TODO: set up frequencies with each note
-
 GAME_ROOM_CAPACITY_LIMIT = 10
 
 def initiate_tables():

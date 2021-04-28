@@ -6,8 +6,30 @@
 uint8_t CYAN[] = {18, 243, 255};
 uint8_t DARK_CYAN[] = {50, 162, 168};
 
-// For functions
-uint16_t fade_threshold = millis();
+
+uint8_t cursor_pos[2] = {0};
+
+/*
+ * Convenience function to set the cursor pos.
+ */
+void set_cursor_pos(uint8_t x, uint8_t y) {
+  cursor_pos[0] = x;
+  cursor_pos[1] = y;
+}
+
+/*
+ * A non-blocking function that draws a static or flashing cursor.
+ */
+void draw_cursor() {
+  uint16_t color; 
+  if (is_locked) {
+    uint8_t val = (int) (255 * abs(cos((millis() - last_button_click) * PI / 600.0)));
+    color = tft.color565(val, val, val);
+  }
+  else color = TFT_WHITE;
+  uint8_t x = cursor_pos[0], y = cursor_pos[1];
+  tft.drawTriangle(x, y, x, y + 4, x + 3, y + 2, color);
+}
 
 /*
  * A blocking function that will animate text with a fade-in
@@ -39,13 +61,6 @@ void draw_text(char* text, uint8_t x, uint8_t y, uint8_t* rgb, uint8_t font_size
   tft.println(text);
 }
 
-/*
- * A non-blocking function that animates a flashing cursor.
- */
-void animate_cursor() {
-  
-}
-
 /////////////
 // Landing //
 /////////////
@@ -64,9 +79,8 @@ void display_landing() {
 
 void update_landing() {
   tft.fillRect(78, 75, 11, 45, TFT_BLACK);
-  tft.drawTriangle(80, 76 + 17 * menu_state, 
-                   80, 80 + 17 * menu_state, 
-                   83, 78 + 17 * menu_state, TFT_WHITE);
+  set_cursor_pos(80, 76 + 17 * menu_state);
+  draw_cursor();
 }
 
 ////////////////
@@ -91,12 +105,13 @@ void display_start_game() {
   fade_in_text("   Start", 86, 81, DARK_CYAN, 200, 1);
   fade_in_text("    Back", 86, 109, DARK_CYAN, 200, 1);
 
-  update_start_game();
+  update_start_game(1);
 }
 
-void update_start_game() {
-  tft.fillRect(75, 45, 5, 120, TFT_BLACK); // clear arrow
-  tft.fillRect(80, 45, 80, 30, TFT_BLACK); // clear inputs
+void update_start_game(int js) {
+  if (js == 0) return;
+  else if (!is_locked && (js == 1 || js == 3)) tft.fillRect(75, 45, 5, 120, TFT_BLACK); // clear arrow
+  else if (is_locked && (js == 2 || js == 4)) tft.fillRect(80, 45, 80, 30, TFT_BLACK); // clear inputs
   
   char key_text[20] = "\0";
   sprintf(key_text, "  Key: %s", key_labels[selected_key]);
@@ -114,16 +129,14 @@ void update_start_game() {
   draw_text(tempo_text, 86, 64, DARK_CYAN, 1);
   draw_text("   Start", 86, 81, DARK_CYAN, 1);
   draw_text("    Back", 86, 109, DARK_CYAN, 1);
-  
+
+  // Cursor
   if (menu_state < 3) {
-    tft.drawTriangle(76, 48 + 17 * menu_state, 
-                     76, 52 + 17 * menu_state, 
-                     79, 50 + 17 * menu_state, TFT_WHITE);
+    set_cursor_pos(76, 48 + 17 * menu_state);
   } else {
-    tft.drawTriangle(76, 110, 
-                     76, 114, 
-                     79, 112, TFT_WHITE); 
+    set_cursor_pos(76, 110);
   }
+  draw_cursor();
 }
 
 ///////////////
@@ -134,17 +147,19 @@ void display_join_game() {
   tft.fillScreen(TFT_BLACK);
   fade_in_text(" Join\n Game", 0, 13, CYAN, 1200, 2);
 
-  fade_in_text("Room:", 110, 47, DARK_CYAN, 200, 1);
-  fade_in_text("___", 113, 64, DARK_CYAN, 200, 1);
+  fade_in_text("Room:", 115, 47, DARK_CYAN, 200, 1);
+  fade_in_text("___", 118, 64, DARK_CYAN, 200, 1);
   fade_in_text("     Join", 86, 81, DARK_CYAN, 200, 1);
   fade_in_text("     Back", 86, 107, DARK_CYAN, 200, 1);
 
-  update_join_game();
+  update_join_game(1);
 }
 
-void update_join_game() {
-  tft.fillRect(85, 45, 5, 120, TFT_BLACK); // clear arrow
-  tft.fillRect(80, 64, 80, 17, TFT_BLACK); // clear inputs
+void update_join_game(int js) {
+  if (js == 0) return;
+  else if (!is_locked && (js == 1 || js == 3)) tft.fillRect(85, 45, 5, 120, TFT_BLACK); // clear arrow
+  else if (is_locked && (js == 1 || js == 3)) tft.fillRect(110, 64, 40, 17, TFT_BLACK); // clear inputs
+  tft.fillRect(117, 73, 17, 4, TFT_BLACK); // clear dot
   
   char input[4] = "\0";
   for (int i = 0; i < 3; i++) {
@@ -153,17 +168,18 @@ void update_join_game() {
   }
 
   // Input
-  draw_text(input, 113, 64, DARK_CYAN, 1);
+  draw_text(input, 118, 64, DARK_CYAN, 1);
 
+  // Input cursor
+  if (is_locked) tft.fillCircle(120 + 6 * input_cursor, 75, 1, TFT_WHITE);
+
+  // Cursor
   if (menu_state < 2) {
-    tft.drawTriangle(86, 48 + 34 * menu_state, 
-                     86, 52 + 34 * menu_state, 
-                     89, 50 + 34 * menu_state, TFT_WHITE);
+    set_cursor_pos(86, 48 + 34 * menu_state);
   } else {
-    tft.drawTriangle(86, 110, 
-                     86, 114, 
-                     89, 112, TFT_WHITE); 
-  } 
+    set_cursor_pos(86, 110);
+  }
+  draw_cursor();
 }
 
 /////////////

@@ -5,10 +5,7 @@ void back_to_landing() {
   update_landing();
 }
 
-void update_state() {
-  int bv = button.read();
-  int js = joystick.read();
-
+void update_state(int bv, int js) {
   if (state == 0) {             ////////////////////// landing //////////////////////
     if (js == 1) { // up
       menu_state = (menu_state + 2) % 3;
@@ -40,26 +37,21 @@ void update_state() {
   } else if (state == 1) {      ////////////////////// start game //////////////////////
     if (!is_locked && js == 1) { // up
       menu_state = (menu_state + 3) % 4;
-      update_start_game();
     } else if (!is_locked && js == 3) { // down
       menu_state = (menu_state + 1) % 4;
-      update_start_game();
     } else if (is_locked && js == 2) { // right
       if (menu_state == 0) selected_key = (selected_key + 1) % 12;
       else selected_tempo = (selected_tempo + 1) % 3;
-      
-      update_start_game();
     } else if (is_locked && js == 4) { // left
       if (menu_state == 0) selected_key = (selected_key + 11) % 12;
       else selected_tempo = (selected_tempo + 2) % 3;
-
-      update_start_game();
     }
+    update_start_game(js);
     
     if (bv) {
       if (menu_state == 0 || menu_state == 1) { // inputs
         is_locked = !is_locked;
-        update_start_game();
+        update_start_game(js);
       } else if (menu_state == 2) { // start
         for (int i = 0; i < 3; i++) room_num[i] = '0';
         menu_state = 0;
@@ -74,15 +66,13 @@ void update_state() {
     if (js == 1 || js == 3) {
       if (is_locked) {
         game_code_input[input_cursor] = (game_code_input[input_cursor] + (js == 1 ? 1 : 9)) % 10;
-        Serial.printf("game input: %d%d%d\n", game_code_input[0],game_code_input[1],game_code_input[2]);
       } else {
         menu_state = (menu_state + (js == 1 ? 2 : 1)) % 3;
       }
-      update_join_game();
     } else if (is_locked && js) {
       input_cursor = (input_cursor + (js == 2 ? 1 : 2)) % 3;
-      update_join_game();
     }
+    update_join_game(js);
 
     if (bv) {
       if (menu_state == 0) { // input

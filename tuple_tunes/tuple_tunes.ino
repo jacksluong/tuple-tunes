@@ -51,6 +51,7 @@ int menu_state = 0;
 int8_t game_code_input[] = {-1, -1, -1};
 char input_cursor = 0;
 bool is_locked = false;
+uint16_t last_button_click = millis();
 
 // Game variable options
 char* key_labels[] = {"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"};
@@ -113,7 +114,7 @@ void set_led_color(int r, int g, int b) {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("*********\nGreetings and salutations!\n*********\n");
+  Serial.println("\n*********\nGreetings and salutations!\n*********\n");
 
   // Set up screen
   tft.init();
@@ -173,7 +174,13 @@ void setup() {
 }
 
 void loop() {
-  update_state();
+  int bv = button.read();
+  int js = joystick.read();
+  
+  if (bv) last_button_click = millis();
+  if (is_locked) draw_cursor();
+  
+  update_state(bv, js);
 
   // separating that huge chunk of nested ifs to a separate file so
   // when we handle continuous fetching, it doesn't get mixed in with it all here

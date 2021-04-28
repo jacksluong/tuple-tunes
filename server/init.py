@@ -31,6 +31,7 @@ def initiate_tables():
         #tempo - 
 
         c.execute('''CREATE TABLE IF NOT EXISTS players(game_id real, username text, last_ping timestamp, entry_time timestamp);''')
+
         c.execute('''CREATE TABLE IF NOT EXISTS measures(game_id real, username text, measure_number int, n1 text, n2 text, n3 text, n4 text, n5 text, n6 text, n7 text, n8 text, n9 text, n10 text, n11 text, n12 text, n13 text, n14 text, n15 text, n16 text,);''')
 
 def create_game(host, key, tempo):
@@ -39,42 +40,58 @@ def create_game(host, key, tempo):
     game_code = 0 #default
 
     with sqlite3.connect(moosic_db) as c:
-        c.execute('''CREATE TABLE IF NOT EXISTS games(game_code int, host text, key text, tempo text, game_status text, turn int, measure int, time timestamp);''')
-        c.execute('''CREATE TABLE IF NOT EXISTS players(game_id real, username text, last_ping timestamp, entry_time timestamp);''')
 
+        #create GAMES TABLE
+        c.execute('''CREATE TABLE IF NOT EXISTS games(game_code int, host text, key text, tempo text, game_status text, turn int, measure int, time timestamp);''')
+        
+        #CREATE PLAYERS TABLE
+        c.execute('''CREATE TABLE IF NOT EXISTS players(game_id real, username text, last_ping timestamp, entry_time timestamp);''')
         
         #create a row in game table
         #the new game code is going to be the most recent one + 1
-        most_recent = c.execute('''SELECT game_code FROM games ORDER BY time ASC;''').fetchone()
+        most_recent = c.execute('''SELECT game_code FROM games ORDER BY time DESC;''').fetchone()
         if most_recent:
             game_code = (most_recent[0] + 1) % 100
 
         c.execute('''INSERT INTO games VALUES (?,?,?,?,?,?,?,?);''', (game_code, host, key, tempo, 'start', 0, 0, datetime.datetime.now()))
-        #game_id = c.lastrowid
-        game_id = c.execute('''SELECT rowid FROM games ORDER BY time ASC;''').fetchone()
+
+        #get game_id of last inserted game
+        game_id = c.execute('''SELECT rowid FROM games ORDER BY time DESC;''').fetchone()
         game_id = game_id[0]
+
         #create a row in players
         c.execute('''INSERT INTO players VALUES (?,?,?,?);''', (game_id, host, datetime.datetime.now(), datetime.datetime.now()))
 
+    #turn game code into 3 length string
     game_code_string = '0' * (3 - len(str(game_code))) + str(game_code)
+
     return (game_code_string, str(game_id))
 
 def join_game(username, game_code):
     with sqlite3.connect(moosic_db) as c:
-        game = c.execute('''SELECT rowid, status FROM games WHERE game_code = ?;''',(game_code))
+
+        #get game_id and game_status of game 
+        game = c.execute('''SELECT rowid, game_status FROM games WHERE game_code = ?;''',(int(game_code),)).fetchone()
+
+        if not game:
+            return "No Game Room Found"
+
         game_id, game_status = game
 
         #check if game is in start state
         if game_status == "start":
             #check num of players
-            players = c.execute('''SELECT rowid FROM players WHERE game_id = ?;''',(game_id))
+            players = c.execute('''SELECT * FROM players WHERE game_id = ?;''',(game_id,)).fetchall()
             num_players = len(players)
             
+            #check if room is still open to players
             if num_players < GAME_ROOM_CAPACITY_LIMIT:
+
                 #insert player into database
-                c.execute('''INSERT INTO players VALUES (?,?,?,?);'''(game_id, username, datetime.datetime.now(), datetime.datetime.now()))
+                c.execute('''INSERT INTO players VALUES (?,?,?,?);''',(game_id, username, datetime.datetime.now(), datetime.datetime.now()))
 
                 return f"{username} has successfully joined game {game_code} with {num_players + 1} players. The game_id is {game_id}"
+
             else:
                 return "Failed to Join Game: Reached Capacity Limit"
 
@@ -119,10 +136,14 @@ def request_handler(request):
         # JOIN A GAME ###############
         ###############################
         elif type_ == "join":
+
+            #get values from request
             try:
                 username = request['form']['username']
                 game_code = request['form']['game_code']
             except Exception as e:
+
+                #not enough data provided
                 return "Please provide username and game code when joining a game"
             
             return join_game(username, game_code)

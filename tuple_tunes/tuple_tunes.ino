@@ -43,12 +43,13 @@ Joystick joystick(JOYSTICK_LR, JOYSTICK_UD);
 // Audio output (see lab05b)
 double MULT = 1.059463094359; // 12th root of 2 (precalculated) for note generation
 double A1 = 55; // A1 55 Hz for note generation
-const uint8_t NOTE_COUNT = 97; // number of half-steps included in our range of notes
+const uint8_t NOTE_COUNT = 97; // number of half-steps included in our range of notes// State and inputs
 
-// State and inputs
-char input[50] = {0};
+// State
 int state = 0;
 int menu_state = 0;
+int8_t game_code_input[] = {-1, -1, -1};
+char input_cursor = 0;
 bool is_locked = false;
 
 // Game variable options
@@ -71,11 +72,11 @@ int selected_key = 0;
 int selected_tempo = 0;
 
 // Game variables
-int room_num;
+char room_num[4];
 int song_key;
 int tempo;
 int player_count;
-char* measures[100] = {'\0'};
+char* measures[100] = {"\0"};
 /* can delete this comment later but for future reference,
  *  each element in measures will contain a single string formatted
  *  to contain all information in that measure:
@@ -85,16 +86,12 @@ char* measures[100] = {'\0'};
  */
 int current_measure;
 
-
 ////////////////////////////////
 // Project-specific functions //
 ////////////////////////////////
 
-void back_to_landing() {
-  menu_state = 0;
-  state = 0;
-  display_landing();
-  update_landing();
+void example() {
+  
 }
 
 /////////////////////////////////
@@ -176,93 +173,8 @@ void setup() {
 }
 
 void loop() {
-  int bv = button.read();
-  int js = joystick.read();
+  update_state();
 
-  if (state == 0) {             ////////////////////// landing //////////////////////
-    if (js == 1) { // up
-      menu_state = (menu_state + 2) % 3;
-      update_landing();
-    } else if (js == 3) { // down
-      menu_state = (menu_state + 1) % 3;
-      update_landing();
-    }
-      
-    if (bv) {
-      if (menu_state == 0) { // start
-        display_start_game();
-        update_start_game();
-        state = 1;
-      } else if (menu_state == 1) { // join
-        display_join_game();
-        state = 2;
-      } else { // gallery
-        display_gallery();
-        state = 3;
-      }
-      menu_state = 0;
-    }
-  } else if (state == 1) {      ////////////////////// start game //////////////////////
-    if (!is_locked && js == 1) { // up
-      menu_state = (menu_state + 3) % 4;
-      update_start_game();
-    } else if (!is_locked && js == 3) { // down
-      menu_state = (menu_state + 1) % 4;
-      update_start_game();
-    } else if (is_locked && js == 2) { // right
-      if (menu_state == 0) selected_key = (selected_key + 1) % 12;
-      else selected_tempo = (selected_tempo + 1) % 3;
-      
-      update_start_game();
-    } else if (is_locked && js == 4) { // left
-      if (menu_state == 0) selected_key = (selected_key + 11) % 12;
-      else selected_tempo = (selected_tempo + 2) % 3;
-
-      update_start_game();
-    }
-    
-    if (bv) {
-      if (menu_state == 0 || menu_state == 1) { // inputs
-        is_locked = !is_locked;
-        update_start_game();
-      } else if (menu_state == 2) { // start
-        menu_state = 0;
-        state = 4;
-        display_in_game();
-      } else  { // back
-        back_to_landing();
-      }
-    }
-    
-  } else if (state == 2) {      ////////////////////// join game //////////////////////
-    if (js == 1 || js == 3) {
-      if (is_locked) {
-        // TODO: update input
-      } else {
-        menu_state = menu_state + (js == 1 ? 2 : 1) % 3;
-      }
-      update_join_game();
-    } else if (is_locked && js) {
-      // update cursor in input
-      update_join_game();
-    }
-
-    if (bv) {
-      if (menu_state == 0) { // input
-        if (!is_locked) is_locked = true;
-        else is_locked = true; // TODO: set to whether input contains three digits
-      } else if (menu_state == 1) { // join
-        
-      } else { // back
-        back_to_landing();
-      }
-    }
-  } else if (state == 3) {      ////////////////////// gallery //////////////////////
-    
-  } else if (state == 4) {      ////////////////////// in-game //////////////////////
-    display_in_game();
-  } else if (state == 5) {      ////////////////////// game menu //////////////////////
-    display_game_menu();
-  }
-
+  // separating that huge chunk of nested ifs to a separate file so
+  // when we handle continuous fetching, it doesn't get mixed in with it all here
 }

@@ -6,7 +6,7 @@ Joystick::Joystick(int lr, int ud) {
   x_pin = lr;
   y_pin = ud;
   last_reading = 0;
-  joystick_change_time = millis(); //init
+  joystick_change_time = millis();
 }
 
 int Joystick::read() {

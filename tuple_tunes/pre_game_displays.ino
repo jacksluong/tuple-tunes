@@ -115,14 +115,14 @@ void update_start_game(int js) {
   
   char key_text[20] = "\0";
   sprintf(key_text, "  Key: %s", notes_flat[selected_key]);
-//  strcpy(key_text, "  Key: ");
-//  strcat(key_text, notes_flat[key_state]);
-//  strcat(key_text, "\0");
+  if ((selected_key <= 5 && selected_key % 2 != 0) || (selected_key > 5 && selected_key % 2 == 0)) {
+    is_flat_key = true;
+  } else {
+    is_flat_key = false;
+  }
+  Serial.println(is_flat_key);
   char tempo_text[20] = "\0";
   sprintf(tempo_text, "Tempo: %s", tempo_labels[selected_tempo]);
-//  strcpy(tempo_text, "Tempo: ");
-//  strcat(tempo_text, tempo_labels[tempo_state]);
-//  strcat(key_text, "\0");
 
   // Menu options
   draw_text(key_text, 86, 47, DARK_CYAN, 1);

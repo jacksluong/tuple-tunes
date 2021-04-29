@@ -1,0 +1,51 @@
+    <meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
+
+    **6.08 Final Project Week 1 Writeup**
+
+**Team 59:** Irene Huang, Si Liang (Brandon) Lei, Jacky Luong, Janette (Jan) Park, Joyce Yuan
+
+Meeting time: 4:30 - 5:00 PM Thursday
+
+# Video Demo
+
+![Video demonstration of deliverables on the ESP](https://www.youtube.com/watch?v=kUAtOqXbiPw)
+
+![Video demonstration of deliverables on Postman](https://www.youtube.com/watch?v=kUAtOqXbiPw)
+
+# Goal 1: Complete frontend for landing page and join/create game pages on ESP side
+
+We completed the frontend for a loading page prior to a landing page, which displays options for starting a new game, joining a game, and a gallery. Based on the user’s selection (using a joystick and button), it leads the user to the appropriate next page. In the Start Game page, it displays the option to set a key and tempo, as well as a start option and back option (to return to the landing page). In the Join Game page, it prompts the user to input a room number using the joystick, and the option to join the game or back (return to the landing page). In both the Start and Join game pages, a cursor is beside the option the user is currently on, and the cursor blinks when the user is locked into choosing a key, tempo, or room number.
+
+# Goal 2:  Complete controls of the pre-game system (changing the state of system with hardware)
+
+The joystick and button are fully functional, changing the state of the system as desired. The joystick is able to navigate through each of the pre-game menu pages (up and down between different options, different selections for each option—like what key and tempo for starting a new game). The button is able to properly select options and lock on to them or trigger a page change.
+
+# Goal 3: Complete frontend for in game (player in and off turn)
+
+The in-game display properly displays a grid representing the notes in a single measure as well as the measure number above it and an example note in the measure. It also displays the controls the players can see in the right sidebar. A cursor indicates which quarter-beat in the measure the player is currently on.
+
+# Goal 4: Make significant progress on frontend and backend (state machine) for in-game menu
+
+The frontend for in-game displays a 4x4 grid for the 16 notes in each measure, and the frontend for the menu displays the menu options. In the in-game, a cursor that blinks at the current note and locks at a short button press and enters the menu at a long button press. In the menu, a cursor scrolls through the menu options using the joystick. Currently we have the functionality to return to the in game display by clicking a short press when the cursor is on "Resume" as well as the functionality to return to the landing page by a short press when the cursor is on "Leave Game." The right side includes static info for the frontend display of menu information.
+
+# Goal 5: Set up database tables and server requests.
+
+We have brainstormed through the logic of all the requests and databases of our game, and set up the python code on the server side of things. Specifically, we have a few different python scripts within our server repository: init.py, which handles the initial get and post requests; logic.py, which handles the in game data fetching; start_functions.py, which sets up our database tables (respectively a games table, players table, and measures table; and in_game_functions.py, which handles in game logic functions. In this way, we can play a dummy version of our game through get and post requests on postman.
+
+# Additional progress:
+
+We were able to begin using the buzzer in the Start Game page by briefly playing the note when choosing a key.
+
+# Next Steps:
+
+Our goals for next week are:
+* Complete functionality to select a note and connect data from ESP to the server side via POST / GET requests
+* Output sound on speaker
+* Have a sandbox version of the game working (one player is able to query through the different tunes, hear each)
+* Connect transitions between pages when game is operating
+* Complete feature to show previous measures on frontend
+* End a game
+
+
+<style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
+<!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>

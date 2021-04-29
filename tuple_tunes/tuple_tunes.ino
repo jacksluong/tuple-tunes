@@ -57,12 +57,11 @@ uint16_t last_button_click = millis();
 int note_state = 0;
 
 // Game variable options
-char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
-char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
+char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "};
+char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "};      // C major
 char* tempo_labels[] = {"Slow", "Mid", "Fast"};
-bool is_flat_key = false;
 int tempo_speeds[] = {60, 96, 144};
-int selected_key = 0; // iterates through notes_flat in start game
+int selected_key = 0;
 int selected_tempo = 0;
 
 // Game variables
@@ -182,7 +181,7 @@ void setup() {
 void loop() {
   int bv = button.read();
   int js = joystick.read();
-    
+  
   if (bv) last_button_click = millis();
   if (is_locked) draw_cursor();
   

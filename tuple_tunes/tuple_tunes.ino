@@ -53,6 +53,7 @@ int8_t game_code_input[] = {-10, -10, -10};
 char input_cursor = 0;
 bool is_locked = false;
 uint16_t last_button_click = millis();
+int note_state = 0;
 
 // Game variable options
 char* key_labels[] = {"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"};

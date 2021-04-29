@@ -21,8 +21,8 @@ void display_in_game() {
   tft.drawLine(79.5, 19, 79.5, 118, TFT_WHITE);
 
   // Play notes
-  tft.setCursor(8, 30, 1);
-  tft.printf("C#");
+  tft.setCursor(8, 28, 1);
+  tft.printf("C#"); // example note
   
   // Right side info
   tft.setCursor(128, 20, 2);
@@ -37,12 +37,17 @@ void display_in_game() {
   }
 
   tft.println(room_num); // not to keep there, it's just for purposes of seeing the game code
-
+  
+  
   update_in_game();
 }
 
 void update_in_game() {
-  
+  if (note_state == 0) {
+    is_locked = true;
+  }
+  set_cursor_pos(2 + 26.5 * (note_state % 4), 29 + 25*(int(note_state/4)));
+  draw_cursor();
 }
 
 ///////////////

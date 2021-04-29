@@ -104,7 +104,22 @@ void update_state(int bv, int js) {
   } else if (state == 3) {      ////////////////////// gallery //////////////////////
     
   } else if (state == 4) {      ////////////////////// in-game //////////////////////
-    if (bv == 2) back_to_landing(); // for debugging/demo only
+    if (bv) {
+      if (bv == 1) {
+        if (!is_locked) {
+          is_locked = true;
+        } else {
+          is_locked = false;
+          int curr_x = 2 + 26.5 * (note_state % 4);
+          int curr_y = 29 + 25*(int(note_state/4));
+          tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK);
+          if (note_state < 16) note_state += 1;
+        }
+        update_in_game();
+      } else if (bv == 2) {
+        back_to_landing(); // for debugging/demo only
+      }
+    }
   } else if (state == 5) {      ////////////////////// game menu //////////////////////
     display_game_menu();
   }

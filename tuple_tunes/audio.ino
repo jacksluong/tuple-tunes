@@ -4,6 +4,7 @@
 
 uint32_t last_played = 0;
 double note_freqs_mid[] = {261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88};
+double note_freqs[36];
 
 struct Measure {
   double notes[16]; //the notes (array of doubles containing frequencies in Hz. I used https://pages.mtu.edu/~suits/notefreqs.html

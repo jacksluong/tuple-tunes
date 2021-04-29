@@ -56,21 +56,10 @@ uint16_t last_button_click = millis();
 int note_state = 0;
 
 // Game variable options
-char* key_labels[] = {"C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"};
-char* keys[] = {"C", "D", "E", "F", "G", "A", "B",      // C major
-                "Db", "Eb", "F", "Gb", "Ab", "Bb", "C", // Db major
-                "D", "E", "F#", "G", "A", "B", "C#",    // D major
-                "Eb", "F", "G", "Ab", "Bb", "C", "D",   // Eb major
-                "E", "F#", "G#", "A", "B", "C#", "D#",  // etc.
-                "F", "G", "A", "Bb", "C", "D", "E",
-                "Gb", "Ab", "Bb", "Cb", "Db", "Eb", "F",
-                "G", "A", "B", "C", "D", "E", "F#",
-                "Ab", "Bb", "C", "Db", "Eb", "F", "G",
-                "A", "B", "C#", "D", "E", "F#", "G#",
-                "Bb", "C", "D", "Eb", "F", "G", "A",
-                "B", "C#", "D#", "E", "F#", "G#", "A#"};
+char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "};
+char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "};      // C major
 char* tempo_labels[] = {"Slow", "Mid", "Fast"};
-int tempo_speeds[] = {70, 95, 120};
+int tempo_speeds[] = {60, 96, 144};
 int selected_key = 0;
 int selected_tempo = 0;
 

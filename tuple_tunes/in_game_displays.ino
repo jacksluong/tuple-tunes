@@ -79,9 +79,9 @@ void display_game_menu() {
   tft.setCursor(88, 25, 1);
   tft.printf(" Room#:%s\r\n", room_num);
   tft.setCursor(88, 50, 1);
-  tft.printf(" Key:%d\r\n", song_key);
+  tft.printf(" Key:%s\r\n", notes_flat[selected_key]);
   tft.setCursor(88, 75, 1);
-  tft.printf(" Tempo:%d\r\n", tempo);
+  tft.printf(" Tempo:%s\r\n", tempo_labels[selected_tempo]);
   tft.setCursor(88, 100, 1);
   tft.printf(" #Players:%d", player_count);
 

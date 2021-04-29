@@ -79,6 +79,11 @@ char* measures[100] = {"\0"};
  */
 int current_measure;
 
+struct Measure {
+  int notes[16]; //the notes (array of integers containing indices, later to find in note_freqs.)
+  float note_period; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
+};
+
 ////////////////////////////////
 // Project-specific functions //
 ////////////////////////////////

@@ -22,8 +22,7 @@ void play_measure(Measure measure) {
   while (m_index < 16) {
     note_index = measure.notes[m_index];
     
-    current_note = note_freq[];
-    play_note(
+    current_note = note_freqs[note_index];
     m_index = m_index + 1;
   }
 }

@@ -77,28 +77,19 @@ void display_game_menu() {
   tft.setCursor(88, 6, 1);
   tft.println("Game Info\r\n");
   tft.setCursor(88, 25, 1);
-  tft.printf(" Room#:%d\r\n", room_num);
+  tft.printf(" Room#:%s\r\n", room_num);
   tft.setCursor(88, 50, 1);
-  tft.printf(" Key:%s\r\n", song_key);
+  tft.printf(" Key:%d\r\n", song_key);
   tft.setCursor(88, 75, 1);
-  tft.printf(" Tempo:%s\r\n", tempo);
+  tft.printf(" Tempo:%d\r\n", tempo);
   tft.setCursor(88, 100, 1);
   tft.printf(" #Players:%d", player_count);
-
-  // draw triangle cursor for selection
-  if (menu_state == 0) {
-    tft.drawTriangle(2,25,3.5,27.5,2,30,TFT_WHITE);
-  } else if (menu_state == 1) {
-    tft.drawTriangle(2,50,3.5,52.5,2,55,TFT_WHITE);
-  } else if (menu_state == 2) {
-    tft.drawTriangle(2,75,3.5,77.5,2,80,TFT_WHITE);
-  } else if (menu_state == 3) {
-    tft.drawTriangle(2,100,3.5,102.5,2,105,TFT_WHITE);
-  }
 
   update_game_menu();
 }
 
 void update_game_menu() {
-  
+  tft.fillRect(2, 25, 4, 100, TFT_BLACK);
+  set_cursor_pos(2, 26 + 25 * (menu_state % 4));
+  draw_cursor();
 }

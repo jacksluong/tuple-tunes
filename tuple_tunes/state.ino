@@ -116,12 +116,28 @@ void update_state(int bv, int js) {
           if (note_state < 16) note_state += 1;
         }
         update_in_game();
-      } else if (bv == 2) {
-        back_to_landing(); // for debugging/demo only
+      } else { // go to game menu screen
+        state = 5;
+        menu_state = 0;
+        display_game_menu();
       }
     }
   } else if (state == 5) {      ////////////////////// game menu //////////////////////
-    display_game_menu();
+    if (js == 1) { // up
+      menu_state = (menu_state + 3) % 4;
+      update_game_menu();
+    } else if (js == 3) { // down
+      menu_state = (menu_state + 1) % 4;
+      update_game_menu();
+    }
+    if (bv) {
+      if (menu_state == 0) { // resume game
+        state = 4;
+        display_in_game();
+      } else if (menu_state == 3) { // leave game
+        back_to_landing();
+      }
+    }
   }
 
 }

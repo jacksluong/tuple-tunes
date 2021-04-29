@@ -31,5 +31,12 @@ void play_measure(Measure measure) {
       m_index = m_index + 1;
     }
   }
-  if (millis() - last_played > note_period) stop_sound();
+  bool still_blocking = true;
+  while(still_blocking){
+    if (millis() - last_played > note_period) {
+      stop_sound();
+      still_blocking = false;
+    }
+  }
+  
 }

@@ -12,10 +12,8 @@ struct Measure {
 void play_note(int index) {
   ledcWriteTone(AUDIO_PWM, note_freqs[index]);
   last_played = millis();
-  Serial.println("Playing sound");
 }
 
 void stop_sound() {
   ledcWriteTone(AUDIO_PWM, 0);
-  Serial.println("Off sound");
 }

@@ -4,10 +4,7 @@
 
 uint32_t last_played = 0;
 
-struct Measure {
-  int notes[16]; //the notes (array of integers containing indices, later to find in note_freqs.)
-  float note_period; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
-};
+
 
 void play_note(int index) {
   ledcWriteTone(AUDIO_PWM, note_freqs[index]);
@@ -20,7 +17,13 @@ void stop_sound() {
 
 void play_measure(Measure measure) {
   int m_index = 0;
+  int note_index;
+  double current_note = 0.0;
   while (m_index < 16) {
+    note_index = measure.notes[m_index];
+    
+    current_note = note_freq[];
+    play_note(
     m_index = m_index + 1;
   }
 }

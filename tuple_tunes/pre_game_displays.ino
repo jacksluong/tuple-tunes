@@ -94,7 +94,7 @@ void display_start_game() {
 
 //  char key_text[20];
 //  strcpy (key_text, "  Key: ");
-//  strcat(key_text, key_labels[selected_key]);
+//  strcat(key_text, notes_flat[selected_key]);
 //  char tempo_text[20];
 //  strcpy(tempo_text, "Tempo: ");
 //  strcat(tempo_text, tempo_labels[selected_tempo]);
@@ -114,9 +114,9 @@ void update_start_game(int js) {
   else if (is_locked && (js == 2 || js == 4)) tft.fillRect(80, 45, 80, 30, TFT_BLACK); // clear inputs
   
   char key_text[20] = "\0";
-  sprintf(key_text, "  Key: %s", key_labels[selected_key]);
+  sprintf(key_text, "  Key: %s", notes_flat[selected_key]);
 //  strcpy(key_text, "  Key: ");
-//  strcat(key_text, key_labels[key_state]);
+//  strcat(key_text, notes_flat[key_state]);
 //  strcat(key_text, "\0");
   char tempo_text[20] = "\0";
   sprintf(tempo_text, "Tempo: %s", tempo_labels[selected_tempo]);

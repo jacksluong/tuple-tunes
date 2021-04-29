@@ -42,9 +42,10 @@ Button button(BUTTON_PINS[0]);
 Joystick joystick(JOYSTICK_LR, JOYSTICK_UD);
 
 // Audio output (see lab05b)
-double MULT = 1.059463094359; // 12th root of 2 (precalculated) for note generation
-double A1 = 55; // A1 55 Hz for note generation
-const uint8_t NOTE_COUNT = 97; // number of half-steps included in our range of notes// State and inputs
+const int NOTE_COUNT = 36;
+double note_freqs[NOTE_COUNT];
+double MULT = 1.059463094359; //12th root of 2 (precalculated) for note generation
+double C3 = 130.81; //C3 130.81 Hz  for note generation
 
 // State
 int state = 0;
@@ -165,6 +166,12 @@ void setup() {
     Serial.println("Failed to Connect :/  Going to restart");
     Serial.println(WiFi.status());
     ESP.restart(); // restart the ESP (proper way)
+  }
+
+  note_freqs[0] = C3;
+  //fill in note_freq with appropriate frequencies from 55 Hz to 55*(MULT)^{NOTE_COUNT-1} Hz
+  for (int i = 1; i < NOTE_COUNT; i++) {
+    note_freqs[i] = MULT*note_freqs[i-1];
   }
   
   // Draw first screen

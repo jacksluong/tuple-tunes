@@ -7,7 +7,7 @@
  * Joystick class that can recognize directional input.
  */
 class Joystick {
-  static const uint8_t THRESHOLD = 45;
+  static const uint8_t THRESHOLD = 200;
   static const uint8_t COOLDOWN = 750;
   
   uint8_t x_pin;

@@ -181,7 +181,7 @@ void setup() {
 void loop() {
   int bv = button.read();
   int js = joystick.read();
-  
+    
   if (bv) last_button_click = millis();
   if (is_locked) draw_cursor();
   

@@ -82,7 +82,7 @@ int current_measure;
 
 struct Measure {
   int notes[16]; //the notes (array of integers containing indices, later to find in note_freqs.)
-  float note_period; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
+  int bpm; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
 };
 
 ////////////////////////////////
@@ -179,6 +179,9 @@ void setup() {
   for (int i = 1; i < NOTE_COUNT; i++) {
     note_freqs[i] = MULT*note_freqs[i-1];
   }
+
+  Measure test = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, 40};
+  play_measure(test);
   
   // Draw first screen
   back_to_landing();

@@ -9,11 +9,9 @@ def request_handler(request):
         try:
             type_ = request['form']['type']
             #types of post requests:
-            #create - creates a new game
-            #join - join a game
-            #start - start a game
-            #measure - adds a measure to the song
-            #ping - updates the ping
+                #create - creates a new game
+                #join - join a game
+                #start - start a game
 
         except Exception as e:
             return "Error: please return a type - create, join, start, measure, ping"
@@ -55,9 +53,6 @@ def request_handler(request):
                 return "Please provide a valid game id"
 
             return start_game(game_id)
-
-        #TODO: Have to live update players currently waiting with number of players in the current room (currently is static update, only when join)
-        #TODO: Maybe insert num_players into game_state?
 
         else:
             return "Invalid POST request! Please specify valid type"

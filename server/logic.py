@@ -21,6 +21,9 @@ def request_handler(request):
         except:
             return "Please either post type new_measure or ping to update player last ping"
         
+        #new_measure - adds a measure to the song
+        #ping - updates the ping
+
         #if we upload a new measure, we will update this info in our database
         if type_ == 'new_measure':
             try:
@@ -43,6 +46,7 @@ def request_handler(request):
             
             return update_last_ping(game_id, username)
         
+        #request to end game
         elif type_ == "end":
             try:
                 game_id = int(request['form']['game_id'])

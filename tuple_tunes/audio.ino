@@ -6,6 +6,12 @@ uint32_t last_played = 0;
 
 void play_note(int index) {
   ledcWriteTone(AUDIO_PWM, note_freqs[index]);
+//  dac_output_voltage(DAC_CHANNEL_2, 200);
+//  int num = 0;
+//  while (num < 500){
+//    dacWrite(AUDIO_TRANSDUCER, 3.3);
+//    num = num + 1
+//  }
   last_played = millis();
 }
 
@@ -40,3 +46,7 @@ void play_measure(Measure measure) {
   }
   
 }
+
+//void sine_wave(double freq) {
+//  dacWrite(AUDIO_TRANSDUCER, 3.3);
+//}

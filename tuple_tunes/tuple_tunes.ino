@@ -58,6 +58,11 @@ bool is_locked = false;
 uint16_t last_button_click = millis();
 int note_state = 0;
 
+// For playing back
+int m_index = 0;
+int note_index;
+bool still_playing = true;
+
 // Game variable options
 char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
 char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
@@ -82,10 +87,11 @@ char* measures[100] = {"\0"};
  */
 int current_measure;
 
-struct Measure {
-  int notes[16]; //the notes (array of integers containing indices, later to find in note_freqs.)
-  int bpm; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
-};
+//struct Measure {
+//  int notes[16]; //the notes (array of integers containing indices, later to find in note_freqs.)
+//  int bpm; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
+//};
+int test[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
 
 ////////////////////////////////
 // Project-specific functions //
@@ -184,14 +190,13 @@ void setup() {
     note_freqs[i] = MULT*note_freqs[i-1];
   }
   
-  Measure test = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, 40};
-  play_measure(test);
   
   // Draw first screen
   back_to_landing();
 }
 
 void loop() {
+  play_measure(test);
   int bv = button.read();
   int js = joystick.read();
     

@@ -19,14 +19,15 @@ void stop_sound() {
   ledcWriteTone(AUDIO_PWM, 0);
 }
 
-void play_measure(Measure measure) {
+void play_measure(int measure[16]) {
   int m_index = 0;
   int note_index;
-  double current_note = 0.0;
-  double note_period = 15000.0/(measure.bpm);
-  while (m_index < 16) {
-    note_index = measure.notes[m_index];
+  bool still_playing = true;
+  double note_period = 15000.0/(tempo_speeds[selected_tempo]); // change ig?
+  if (m_index < 16) {
+    note_index = measure[m_index];
     if (millis() - last_played > note_period){
+      still_playing = true;
       if (note_index == NOTE_COUNT) {
         stop_sound();
       }
@@ -37,11 +38,11 @@ void play_measure(Measure measure) {
       m_index = m_index + 1;
     }
   }
-  bool still_blocking = true;
-  while(still_blocking){
+  if (still_playing && m_index == 16){
     if (millis() - last_played > note_period) {
       stop_sound();
-      still_blocking = false;
+      still_playing = false;
+      m_index = 0;
     }
   }
   

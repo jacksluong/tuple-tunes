@@ -74,11 +74,15 @@ bool is_flat_key = false;
 int tempo_speeds[] = {60, 96, 144};
 int selected_key = 0; // iterates through notes_flat in start game
 int selected_tempo = 0;
-int selected_dur = 0; // selected duration for current note
+
 char* notes_dur[] = {"1/16", "1/8", "1/4", "1/2", "1"};
-int selected_sym = 0;
-char* symbols[] = {"#", "b", " "};
-char curr_note[10] = "\0"; // selected note
+char symbols[] = {'#', 'b', ' '};
+int key_jumps[] = {2, 2, 1, 2, 2, 2, 1};
+char curr_note[10] = "\0"; // current selected note to display on grid during in game
+int selected_note = 0; // current selected note index
+int selected_dur = 0; // selected duration index for current note
+int selected_sym = 0; // selected symbol index for current note
+int jump_index = 0; // selected jump index for determining next note in key
 
 // Game variables
 char room_num[4];

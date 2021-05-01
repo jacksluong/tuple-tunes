@@ -24,15 +24,22 @@ void display_in_game() {
   curr_note[0] = '\0';
   tft.setCursor(133, 20, 1); // print current selected note
   if (is_flat_key) {
-    strcat(curr_note, notes_flat[selected_key]); 
+    strcat(curr_note, notes_flat[selected_note]); 
   } else {
-    strcat(curr_note, notes_sharp[selected_key]); 
+    strcat(curr_note, notes_sharp[selected_note]); 
+  }
+  if (curr_note[1] == '#') {
+    selected_sym = 0;
+  } else if (curr_note[1] == 'b') {
+    selected_sym = 1;
+  } else if (curr_note[1] == ' ') {
+    selected_sym = 2;
   }
   tft.println(curr_note);
   tft.setCursor(125, 40, 1);
   tft.println(notes_dur[selected_dur]); // note duration
   tft.drawTriangle(117,41,112,43,117,45, TFT_WHITE);
-  tft.drawTriangle(153,41,158,43,153,45, TFT_WHITE);
+  tft.drawTriangle(151,41,156,43,151,45, TFT_WHITE);
   tft.setCursor(112, 60, 1); // add a note
   tft.println("Add Note");
   tft.setCursor(118, 80, 1); // submit measure
@@ -49,9 +56,11 @@ void display_in_game() {
 }
 
 void update_in_game() {
-  if (note_state == 0) {
-    is_locked = true;
-  }
+  
+  tft.setCursor(133, 20, 1); // print current selected note
+  tft.println(curr_note);
+  tft.setCursor(125, 40, 1);
+  tft.println(notes_dur[selected_dur]); // note duration
 
   // grid cursor
   set_cursor_pos(2 + 26.5 * (note_state % 4), 29 + 25*(int(note_state/4)));

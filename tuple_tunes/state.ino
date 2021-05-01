@@ -148,7 +148,12 @@ void update_state(int bv, int js) {
       if (menu_state == 0) { // resume game
         state = 4;
         display_in_game();
-      } else if (menu_state == 3) { // leave game
+      } else if (menu_state == 1) {
+        play_song_bool = true;
+      } else if (menu_state == 2) {
+        play_measure_bool = true;
+      }
+      else if (menu_state == 3) { // leave game
         back_to_landing();
       }
     }

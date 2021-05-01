@@ -59,10 +59,12 @@ uint16_t last_button_click = millis();
 int note_state = 0;
 
 // For playing back
+const int MEASURE_COUNT = 2;
 int m_index = 0;
+int s_index = 0;
 int note_index;
-bool play_measure_bool = true;
-bool play_song_bool = true;
+bool play_measure_bool = false;
+bool play_song_bool = false;
 
 // Game variable options
 char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
@@ -204,6 +206,7 @@ void setup() {
 
 void loop() {
   if (play_measure_bool)  play_measure(test2);
+  if (play_song_bool) play_song(test_song);
   int bv = button.read();
   int js = joystick.read();
     

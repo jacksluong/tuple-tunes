@@ -21,21 +21,19 @@ void display_in_game() {
   tft.drawLine(79.5, 19, 79.5, 118, TFT_WHITE);
   
   // Right side info
-  curr_note[0] = '\0';
-  tft.setCursor(133, 20, 1); // print current selected note
+  curr_note[0] = '\0'; // get first starting note in this key
   if (is_flat_key) {
     strcat(curr_note, notes_flat[selected_note]); 
   } else {
     strcat(curr_note, notes_sharp[selected_note]); 
   }
-  if (curr_note[1] == '#') {
+  if (curr_note[1] == '#') { // update starting index for selected symbol based on the note from this key
     selected_sym = 0;
   } else if (curr_note[1] == 'b') {
     selected_sym = 1;
   } else if (curr_note[1] == ' ') {
     selected_sym = 2;
   }
-  tft.println(curr_note);
   tft.setCursor(125, 40, 1);
   tft.println(notes_dur[selected_dur]); // note duration
   tft.drawTriangle(117,41,112,43,117,45, TFT_WHITE);
@@ -51,22 +49,20 @@ void display_in_game() {
 
   tft.println(room_num); // not to keep there, it's just for purposes of seeing the game code
   
-  
   update_in_game();
 }
 
 void update_in_game() {
-  
-  tft.setCursor(133, 20, 1); // print current selected note
-  tft.println(curr_note);
+  tft.setCursor(132, 20, 1); 
+  tft.println(curr_note); // print current selected note
   tft.setCursor(125, 40, 1);
-  tft.println(notes_dur[selected_dur]); // note duration
+  tft.println(notes_dur[selected_dur]); // print current selected note duration
 
   // grid cursor
   set_cursor_pos(2 + 26.5 * (note_state % 4), 29 + 25*(int(note_state/4)));
   draw_cursor();
 
-  // input cursor
+  // right side input cursor
   tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_WHITE);
 
   // include the next note on the grid
@@ -74,7 +70,6 @@ void update_in_game() {
     tft.setCursor(8 + 26.5 * (note_state % 4), 28 + 25*(int(note_state/4)), 1);
     tft.printf(curr_note);
   }
-  
 }
 
 ///////////////

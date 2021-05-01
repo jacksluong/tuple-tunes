@@ -61,7 +61,8 @@ int note_state = 0;
 // For playing back
 int m_index = 0;
 int note_index;
-bool still_playing = true;
+bool play_measure_bool = true;
+bool play_song_bool = true;
 
 // Game variable options
 char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
@@ -96,7 +97,9 @@ int current_measure;
 //  int notes[16]; //the notes (array of integers containing indices, later to find in note_freqs.)
 //  int bpm; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
 //};
-int test[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
+int test1[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
+int test2[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37};
+int test_song[2][16] = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37}};
 
 ////////////////////////////////
 // Project-specific functions //
@@ -194,14 +197,13 @@ void setup() {
   for (int i = 1; i < NOTE_COUNT; i++) {
     note_freqs[i] = MULT*note_freqs[i-1];
   }
-  
-  
   // Draw first screen
+  
   back_to_landing();
 }
 
 void loop() {
-  play_measure(test);
+  if (play_measure_bool)  play_measure(test2);
   int bv = button.read();
   int js = joystick.read();
     
@@ -209,7 +211,7 @@ void loop() {
   if (is_locked) draw_cursor();
   
   update_state(bv, js);
-  stop_sound();
+  //stop_sound();
   // separating that huge chunk of nested ifs to a separate file so
   // when we handle continuous fetching, it doesn't get mixed in with it all here
 }

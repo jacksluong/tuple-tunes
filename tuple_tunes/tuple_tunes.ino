@@ -71,6 +71,11 @@ bool is_flat_key = false;
 int tempo_speeds[] = {60, 96, 144};
 int selected_key = 0; // iterates through notes_flat in start game
 int selected_tempo = 0;
+int selected_dur = 0; // selected duration for current note
+char* notes_dur[] = {"1/16", "1/8", "1/4", "1/2", "1"};
+int selected_sym = 0;
+char* symbols[] = {"#", "b", " "};
+char curr_note[10] = "\0"; // selected note
 
 // Game variables
 char room_num[4];
@@ -204,7 +209,7 @@ void loop() {
   if (is_locked) draw_cursor();
   
   update_state(bv, js);
-
+  stop_sound();
   // separating that huge chunk of nested ifs to a separate file so
   // when we handle continuous fetching, it doesn't get mixed in with it all here
 }

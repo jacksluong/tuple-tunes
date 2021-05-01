@@ -95,6 +95,7 @@ void update_state(int bv, int js) {
         room_num[0] = '\0';
         sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
         menu_state = 0;
+        input_cursor = 0;
         state = 4;
         display_in_game();
       } else { // back
@@ -104,6 +105,12 @@ void update_state(int bv, int js) {
   } else if (state == 3) {      ////////////////////// gallery //////////////////////
     
   } else if (state == 4) {      ////////////////////// in-game //////////////////////
+    if (!is_locked && js == 1) { // up
+      menu_state = (menu_state + 3) % 4;
+    } else if (!is_locked && js == 3) { // down
+      menu_state = (menu_state + 1) % 4;
+    }
+    
     if (bv) {
       if (bv == 1) {
         if (!is_locked) {
@@ -113,8 +120,14 @@ void update_state(int bv, int js) {
           int curr_x = 2 + 26.5 * (note_state % 4);
           int curr_y = 29 + 25*(int(note_state/4));
           tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK);
-          if (note_state < 16) note_state += 1;
+//          if (note_state < 16) note_state += 1;
         }
+
+        // state changes
+        if (menu_state == 2) {
+          if (note_state < 16) note_state += selected_dur + 1; // to update cursor position for next note
+        }
+        
         update_in_game();
       } else { // go to game menu screen
         state = 5;
@@ -122,6 +135,7 @@ void update_state(int bv, int js) {
         display_game_menu();
       }
     }
+    Serial.println(is_locked);
   } else if (state == 5) {      ////////////////////// game menu //////////////////////
     if (js == 1) { // up
       menu_state = (menu_state + 3) % 4;

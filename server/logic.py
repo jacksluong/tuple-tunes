@@ -38,7 +38,7 @@ def request_handler(request):
 
             except Exception as e:
                 # return "Please post valid username, measure information, and game id with new turn"
-                return "-1&{e}"
+                return "-1"
             
             #return measure
             return play_turn(game_id, username, measure)
@@ -54,13 +54,14 @@ def request_handler(request):
             
             return update_last_ping(game_id, username)
         
-        #request to end game
-        elif type_ == "end":
-            try:
-                game_id = int(request['form']['game_id'])
-            except:
-                return "Please post valid username and game id"
-            return end_game(game_id)
+        #END GAME FUNCTIONALITY: if max_measures have been reached, the game automatically ends
+
+        # elif type_ == "end":
+        #     try:
+        #         game_id = int(request['form']['game_id'])
+        #     except:
+        #         return "Please post valid username and game id"
+        #     return end_game(game_id)
 
         else:
-            return "Post either new measure or ping to logic handler"
+            return "-1"

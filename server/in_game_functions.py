@@ -3,7 +3,7 @@ import sqlite3
 import datetime
 
 moosic_db = '/var/jail/home/team59/moosic1.db'
-
+MAX_MEASURES = 3
 
 def fetch(game_id, username, last_updated_measure):
     '''given the game id, username, and last updated measure of fetching player,
@@ -12,14 +12,17 @@ def fetch(game_id, username, last_updated_measure):
 
     with sqlite3.connect(moosic_db) as c:
         #update the player last ping for timeout purposes
-        update_last_ping(game_id, username)
+        ping_status = update_last_ping(game_id, username)
+        if ping_status == "0":
+            return ping_status
 
         #check for status of the game
         game_status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id,)).fetchone()
 
         #game has ended
         if game_status[0] == 'ended':
-            return '1'
+            song = get_song(game_id)
+            return f"1&{song}"
 
         #if currently in game: 
         elif game_status[0] == 'in_game':
@@ -28,9 +31,8 @@ def fetch(game_id, username, last_updated_measure):
             current_measure, turn = c.execute('''SELECT measure, turn FROM games WHERE rowid = ?;''', (game_id, )).fetchone()
 
             if last_updated_measure == current_measure:
-
                 #up to date!
-                return "3"
+                return "2"
             
             #get song created so far
             song = get_song(game_id)
@@ -42,7 +44,7 @@ def fetch(game_id, username, last_updated_measure):
             in_turn = players[turn % len(players)][0]
 
             # return f"Player in turn: {in_turn} \n Current Song: \n {song}"
-            return f"4&{in_turn}&{current_measure}&{song}"
+            return f"3&{in_turn}&{current_measure}&{song}"
 
 
 
@@ -52,7 +54,9 @@ def play_turn(game_id, username, measure):
 
     with sqlite3.connect(moosic_db) as c:
         #first, update ping
-        update_last_ping(game_id, username)
+        ping_status = update_last_ping(game_id, username)
+        if ping_status == "0":
+            return ping_status
 
         last_measure, turn = c.execute('''SELECT measure, turn FROM games WHERE rowid = ?;''',(game_id,)).fetchone()
         
@@ -64,8 +68,12 @@ def play_turn(game_id, username, measure):
         turn = turn + 1
         c.execute('''UPDATE games SET turn = ?, measure = ? WHERE rowid = ?;''', (turn, new_measure, game_id))
 
-        # return f"New measure {new_measure} inserted into game_id {game_id} by {username}: \n {measure}"
-        return f"1&{new_measure}"
+        #once we hit the limit of measures, END THE GAME
+        if new_measure == MAX_MEASURES:
+            c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ("ended", game_id))
+
+        #SUCCESSFUL!
+        return "1"
 
 
 def update_last_ping(game_id, username):
@@ -79,26 +87,9 @@ def update_last_ping(game_id, username):
             # return "INVALID GAME ID OR USERNAME"
             return "0"
 
-        # return f"Last ping of player {username} updated"
+        #Successful!
         return "1"
 
-def end_game(game_id):
-    with sqlite3.connect(moosic_db) as c:
-        try:    
-            game_status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
-        except:
-            return "0"
-
-        if game_status == "ended":
-            return "1"
-        
-        c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ("ended", game_id))
-        
-        #get song info
-        song = get_song(game_id)
-
-        #sucessful! return final song
-        return "2&{song}"
 
 def get_song(game_id):
     """

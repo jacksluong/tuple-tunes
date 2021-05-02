@@ -43,6 +43,7 @@ void update_state(int bv, int js) {
       menu_state = (menu_state + 1) % 4;
     } else if (is_locked && js == 2) { // right
       if (menu_state == 0) {
+        //selected key is index of the selected key, should not changed after locked
         selected_key = (selected_key + 1) % 12;
         play_note(selected_key);
       }
@@ -65,6 +66,7 @@ void update_state(int bv, int js) {
       } else if (menu_state == 2) { // start
         for (int i = 0; i < 3; i++) room_num[i] = '0';
         menu_state = 0;
+        note_index = selected_key;
         state = 4;
         display_in_game();
       } else  { // back
@@ -96,6 +98,7 @@ void update_state(int bv, int js) {
         sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
         menu_state = 0;
         state = 4;
+        note_index = selected_key;
         display_in_game();
       } else { // back
         back_to_landing();

@@ -16,7 +16,7 @@ int Joystick::read() {
   int reading;
   
   if (y_reading > 1000 - THRESHOLD) reading = 1; // range goes up to 1023 but more fluctation at big vals
-  else if (y_reading < THRESHOLD) reading = 3;
+  else if (y_reading < THRESHOLD) reading = 3; 
   else if (x_reading > 1000 - THRESHOLD) reading = 2;
   else if (x_reading < THRESHOLD) reading = 4;
   else reading = 0;

@@ -55,11 +55,15 @@ char input_cursor = 0;
 bool is_locked = false;
 uint16_t last_button_click = millis();
 int note_state = 0;
+int note_index = 0;
 
 // Game variable options
 char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "};
 char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "};      // C major
+int8_t scale_steps[] = {0, 2, 2, 1, 2, 2, 2, 1} //half steps that we need per scale
+int scale_index = 0;
 char* tempo_labels[] = {"Slow", "Mid", "Fast"};
+bool is_flat_key = false;
 int tempo_speeds[] = {60, 96, 144};
 int selected_key = 0;
 int selected_tempo = 0;

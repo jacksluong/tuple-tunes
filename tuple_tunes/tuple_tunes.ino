@@ -56,8 +56,8 @@ int8_t game_code_input[] = {-10, -10, -10};
 char input_cursor = 0;
 bool is_locked = false;
 uint16_t last_button_click = millis();
-int note_state = 0;
-int note_index = 0;
+int note_state = 0; //index of current note in the measure we are in
+int curr_note_index = 0;
 
 // For playing back
 const int MEASURE_COUNT = 2;
@@ -68,8 +68,12 @@ bool play_measure_bool = false;
 bool play_song_bool = false;
 
 // Game variable options
-int8_t scale_steps[] = {0, 2, 2, 1, 2, 2, 2, 1} //half steps that we need per scale
+int8_t scale_steps[] = {0, 2, 2, 1, 2, 2, 2, 1}; //half steps that we need per scale
 int scale_index = 0;
+int8_t adjustment = 0; //variable used to tweak adjustments with sharps and flats
+
+int curr_notes_array[16]; //use note state to get index
+
 char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
 char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
 char* tempo_labels[] = {"Slow", "Mid", "Fast"};
@@ -79,7 +83,7 @@ int selected_key = 0; // iterates through notes_flat in start game
 int selected_tempo = 0;
 
 char* notes_dur[] = {"1/16", "1/8", "1/4", "1/2", "1"};
-char symbols[] = {'#', 'b', ' '};
+char symbols[] = {'b', ' ', '#'}; //{'#', 'b', ' '}; changed around ordering to make internal easier
 int key_jumps[] = {2, 2, 1, 2, 2, 2, 1};
 char curr_note[10] = "\0"; // current selected note to display on grid during in game
 int selected_note = 0; // current selected note index

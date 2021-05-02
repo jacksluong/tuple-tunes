@@ -11,7 +11,8 @@ def request_handler(request):
             game_id = int(request['values']['game_id'])
             last_measure = int(request['values']['measure'])
         except:
-            return "Please provide username, game id, and last updated measure"
+            # return "Please provide username, game id, and last updated measure"
+            return "-1"
 
         return fetch(game_id, username, last_measure)
 
@@ -19,7 +20,8 @@ def request_handler(request):
         try:
             type_ = request['form']['type']
         except:
-            return "Please either post type new_measure or ping to update player last ping"
+            # return "Please either post type new_measure or ping to update player last ping"
+            return "-1"
         
         #new_measure - adds a measure to the song
         #ping - updates the ping
@@ -28,10 +30,15 @@ def request_handler(request):
         if type_ == 'new_measure':
             try:
                 username = request['form']['username']
-                measure = request['form']['measure'].split(' ')
                 game_id = int(request['form']['game_id'])
-            except:
-                return "Please post valid username, measure information, and game id with new turn"
+
+                #parse measure
+                measure_str = request['form']['measure'].split()
+                measure = [int(str_val) for str_val in measure_str]
+
+            except Exception as e:
+                # return "Please post valid username, measure information, and game id with new turn"
+                return "-1&{e}"
             
             #return measure
             return play_turn(game_id, username, measure)
@@ -42,7 +49,8 @@ def request_handler(request):
                 username = request['form']['username']
                 game_id = int(request['form']['game_id'])
             except:
-                return "Please post valid username and game id with ping"
+                # return "Please post valid username and game id with ping"
+                return "-1"
             
             return update_last_ping(game_id, username)
         

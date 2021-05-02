@@ -22,8 +22,8 @@ def request_handler(request):
             # return request
             try:
                 host = request['form']['username']
-                key = request['form']['key']
-                tempo = request['form']['tempo']
+                key = int(request['form']['key'])
+                tempo = int(request['form']['tempo'])
             except Exception as e:
                 # return "Please return host username, key, tempo whens creating a game"
                 return "-1"

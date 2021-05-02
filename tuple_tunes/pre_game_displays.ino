@@ -120,7 +120,6 @@ void update_start_game(int js) {
   } else {
     is_flat_key = false;
   }
-  Serial.println(is_flat_key);
   char tempo_text[20] = "\0";
   sprintf(tempo_text, "Tempo: %s", tempo_labels[selected_tempo]);
 

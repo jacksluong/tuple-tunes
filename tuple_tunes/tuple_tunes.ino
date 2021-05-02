@@ -5,6 +5,7 @@
 #include <WiFiClient.h>
 #include <BMP280_DEV.h>
 #include <ArduinoJson.h>
+#include <driver/dac.h>
 #include "Button.h"
 #include "Joystick.h"
 
@@ -15,6 +16,7 @@
 // Pins for buttons, LCD, AUDIO CONTROL, joystick
 int BUTTON_PINS[] = {32};
 uint8_t AUDIO_TRANSDUCER = 26;
+//dac_channel_t AUDIO_TRANSDUCER = 26;
 const int JOYSTICK_LR = 35;
 const int JOYSTICK_UD = 34;
 uint8_t AUDIO_PWM = 1;
@@ -57,16 +59,33 @@ uint16_t last_button_click = millis();
 int note_state = 0;
 int note_index = 0;
 
+// For playing back
+const int MEASURE_COUNT = 2;
+int m_index = 0;
+int s_index = 0;
+int note_index;
+bool play_measure_bool = false;
+bool play_song_bool = false;
+
 // Game variable options
-char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "};
-char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "};      // C major
 int8_t scale_steps[] = {0, 2, 2, 1, 2, 2, 2, 1} //half steps that we need per scale
 int scale_index = 0;
+char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
+char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
 char* tempo_labels[] = {"Slow", "Mid", "Fast"};
 bool is_flat_key = false;
 int tempo_speeds[] = {60, 96, 144};
-int selected_key = 0;
+int selected_key = 0; // iterates through notes_flat in start game
 int selected_tempo = 0;
+
+char* notes_dur[] = {"1/16", "1/8", "1/4", "1/2", "1"};
+char symbols[] = {'#', 'b', ' '};
+int key_jumps[] = {2, 2, 1, 2, 2, 2, 1};
+char curr_note[10] = "\0"; // current selected note to display on grid during in game
+int selected_note = 0; // current selected note index
+int selected_dur = 0; // selected duration index for current note
+int selected_sym = 0; // selected symbol index for current note
+int jump_index = 0; // selected jump index for determining next note in key
 
 // Game variables
 char room_num[4];
@@ -83,10 +102,13 @@ char* measures[100] = {"\0"};
  */
 int current_measure;
 
-struct Measure {
-  int notes[16]; //the notes (array of integers containing indices, later to find in note_freqs.)
-  int bpm; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
-};
+//struct Measure {
+//  int notes[16]; //the notes (array of integers containing indices, later to find in note_freqs.)
+//  int bpm; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
+//};
+int test1[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
+int test2[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37};
+int test_song[2][16] = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37}};
 
 ////////////////////////////////
 // Project-specific functions //
@@ -148,6 +170,8 @@ void setup() {
 
   //set up AUDIO_PWM which we will control in this lab for music:
   pinMode(AUDIO_TRANSDUCER, OUTPUT);
+  //dac_output_enable(DAC_CHANNEL_2);
+  //dac_output_voltage(DAC_CHANNEL_2, 200);
   ledcSetup(AUDIO_PWM, 0, 12);//12 bits of PWM precision
   ledcWrite(AUDIO_PWM, 80); //0 is a 0% duty cycle for the NFET
   stop_sound();
@@ -182,23 +206,22 @@ void setup() {
   for (int i = 1; i < NOTE_COUNT; i++) {
     note_freqs[i] = MULT*note_freqs[i-1];
   }
-
-  Measure test = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, 40};
-  play_measure(test);
-  
   // Draw first screen
+  
   back_to_landing();
 }
 
 void loop() {
+  if (play_measure_bool)  play_measure(test2);
+  if (play_song_bool) play_song(test_song);
   int bv = button.read();
   int js = joystick.read();
-  
+    
   if (bv) last_button_click = millis();
   if (is_locked) draw_cursor();
   
   update_state(bv, js);
-
+  //stop_sound();
   // separating that huge chunk of nested ifs to a separate file so
   // when we handle continuous fetching, it doesn't get mixed in with it all here
 }

@@ -52,7 +52,9 @@ def create_game(host, key, tempo):
     game_code_string = '0' * (3 - len(str(game_code))) + str(game_code)
 
     #TODO: Reformat return later on: (currently for demo purposes)
-    return f"Game Created Successfully! \n Game Code: {game_code_string} \n Game ID: {game_id} \n Key: {key} \n Tempo: {tempo} \n Host: {host}"
+    # return f"Game Created Successfully! \n Game Code: {game_code_string} \n Game ID: {game_id} \n Key: {key} \n Tempo: {tempo} \n Host: {host}"
+
+    return f"{game_code_string}&{game_id}"
 
 def join_game(username, game_code):
     """
@@ -62,11 +64,12 @@ def join_game(username, game_code):
     with sqlite3.connect(moosic_db) as c:
 
         #get game_id and game_status of game 
-        game = c.execute('''SELECT rowid, game_status FROM games WHERE game_code = ?;''',(int(game_code),)).fetchone()
+        game = c.execute('''SELECT rowid, game_status FROM games WHERE game_code = ?;''',(game_code),).fetchone()
 
         #if game room not found
         if not game:
-            return "No Game Room Found"
+            # return "No Game Room Found"
+            return "0"
 
         game_id, game_status = game
 
@@ -86,13 +89,16 @@ def join_game(username, game_code):
                 c.execute('''INSERT INTO players VALUES (?,?,?,?);''',(game_id, username, datetime.datetime.now(), datetime.datetime.now()))
 
                 #TODO: Reformat return later on: (currently for demo purposes)
-                return f"{username} has successfully joined! \n GAME ID: {game_id} \n GAME CODE: {game_code} \n Num Players: {num_players + 1} \n Current Players: {', '.join(player_names + [username])}"
+                # return f"{username} has successfully joined! \n GAME ID: {game_id} \n GAME CODE: {game_code} \n Num Players: {num_players + 1} \n Current Players: {', '.join(player_names + [username])}"
+
+                return f"3&{game_id}"
 
             else:
-                return "Failed to Join Game: Reached Capacity Limit"
+                # return "Failed to Join Game: Reached Capacity Limit"
+                return "1"
 
         else:
-            return "Game Has Already Started/Ended. Please provide different game code"
+            return "2"
 
 def start_game(game_id):
     """
@@ -104,16 +110,19 @@ def start_game(game_id):
         try:
             game_status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
         except Exception as e:
-            return "INVALID GAME CODE!"
+            # return "INVALID GAME CODE!"
+            return "0"
 
         #if game hasn't started yet
         if game_status == "start":
             c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ('in_game', game_id))
 
-            return f"Game w/ Game ID: {game_id} has started"
+            # return f"Game w/ Game ID: {game_id} has started"
+            return f"2"
         
         else:
-            return "INVALID! Game is in progress/ended!"
+            # return "INVALID! Game is in progress/ended!"
+            return "1"
 
 def fetch_game_status(game_id):
     """
@@ -126,7 +135,7 @@ def fetch_game_status(game_id):
         try:
             status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
         except Exception as e:
-            return f"INVALID GAME ID! ERROR: {e}"
+            return "0"
         
         #still in start state (waiting) state
         if status == "start":
@@ -134,13 +143,13 @@ def fetch_game_status(game_id):
             num_players = len(players)
             player_names = [val[0] for val in players]
 
-            return f"GAME w/ id {game_id} \n STATE: START (WAITING FOR HOST TO START) \n NUM PLAYERS: {num_players} \n CURRENT PLAYERS IN WAITING ROOM: {', '.join(player_names)}"
+            # return f"GAME w/ id {game_id} \n STATE: START (WAITING FOR HOST TO START) \n NUM PLAYERS: {num_players} \n CURRENT PLAYERS IN WAITING ROOM: {', '.join(player_names)}"
+
+            return f"1&{num_players}&{','.join(player_names)}"
 
         elif status == "in_game":
-            return f"GAME w/ id: {game_id} IS IN PROGRESS!"
+            return "2"
         
         elif status == "ended":
-            return f"GAME w/ id: {game_id} HAS ENDED!"
+            return "3"
         
-        else:
-            return f"Invalid game status code: {status}"

@@ -14,7 +14,8 @@ def request_handler(request):
                 #start - start a game
 
         except Exception as e:
-            return "Error: please return a type - create, join, start, measure, ping"
+            # return "Error: please return a type - create, join, start, measure, ping"
+            return "-1"
 
         # host creates game
         if type_ == "create":
@@ -24,7 +25,8 @@ def request_handler(request):
                 key = request['form']['key']
                 tempo = request['form']['tempo']
             except Exception as e:
-                return "Please return host username, key, tempo when creating a game"
+                # return "Please return host username, key, tempo whens creating a game"
+                return "-1"
 
             return create_game(host, key, tempo)
 
@@ -35,11 +37,12 @@ def request_handler(request):
             #get values from request
             try:
                 username = request['form']['username']
-                game_code = request['form']['game_code']
+                game_code = int(request['form']['game_code'])
             except Exception as e:
 
                 #not enough data provided
-                return "Please provide username and game code when joining a game"
+                # return "Please provide username and game code when joining a game"
+                return "-1"
             
             return join_game(username, game_code)
 
@@ -55,17 +58,20 @@ def request_handler(request):
             return start_game(game_id)
 
         else:
-            return "Invalid POST request! Please specify valid type"
+            # return "Invalid POST request! Please specify valid type"
+            return "-1"
 
     #GET REQUEST HANDLERS
     elif request["method"] == "GET":
         try:
             game_id = int(request['values']['game_id'])
         except:
-            return "Please provide valid game id!"
+            # return "Please provide valid game id!"
+            return "-1"
 
         return fetch_game_status(game_id)
 
     #INVALID REQUEST
     else:
-        return 'INVALID REQUEST TYPE: ONLY POST OR GET REQUESTS'
+        # return 'INVALID REQUEST TYPE: ONLY POST OR GET REQUESTS'
+        return "-1"

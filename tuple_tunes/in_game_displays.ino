@@ -19,18 +19,29 @@ void display_in_game() {
   tft.drawLine(26.5, 19, 26.5, 118, TFT_WHITE);
   tft.drawLine(53, 19, 53, 118, TFT_WHITE);
   tft.drawLine(79.5, 19, 79.5, 118, TFT_WHITE);
-
-  // Play notes
-  tft.setCursor(8, 28, 1);
-  tft.printf("C#"); // example note
   
   // Right side info
-  tft.setCursor(128, 20, 2);
-  tft.println("C#"); // selected note
-  tft.setCursor(126, 45, 1);
-  tft.println("1/4"); // note duration
-  tft.drawTriangle(117,45,112,47.5,117,50, TFT_WHITE);
-  tft.drawTriangle(153,45,158,47,153,50, TFT_WHITE);
+  curr_note[0] = '\0'; // get first starting note in this key
+  if (is_flat_key) {
+    strcat(curr_note, notes_flat[selected_note]); 
+  } else {
+    strcat(curr_note, notes_sharp[selected_note]); 
+  }
+  if (curr_note[1] == '#') { // update starting index for selected symbol based on the note from this key
+    selected_sym = 0;
+  } else if (curr_note[1] == 'b') {
+    selected_sym = 1;
+  } else if (curr_note[1] == ' ') {
+    selected_sym = 2;
+  }
+  tft.setCursor(125, 40, 1);
+  tft.println(notes_dur[selected_dur]); // note duration
+  tft.drawTriangle(117,41,112,43,117,45, TFT_WHITE);
+  tft.drawTriangle(151,41,156,43,151,45, TFT_WHITE);
+  tft.setCursor(112, 60, 1); // add a note
+  tft.println("Add Note");
+  tft.setCursor(118, 80, 1); // submit measure
+  tft.println("Submit");
 
   for (int i = 0; i < 3; i++) { // ellipses
     tft.fillCircle(4 * i + 146, 119, 1, TFT_WHITE);
@@ -38,16 +49,27 @@ void display_in_game() {
 
   tft.println(room_num); // not to keep there, it's just for purposes of seeing the game code
   
-  
   update_in_game();
 }
 
 void update_in_game() {
-  if (note_state == 0) {
-    is_locked = true;
-  }
+  tft.setCursor(132, 20, 1); 
+  tft.println(curr_note); // print current selected note
+  tft.setCursor(125, 40, 1);
+  tft.println(notes_dur[selected_dur]); // print current selected note duration
+
+  // grid cursor
   set_cursor_pos(2 + 26.5 * (note_state % 4), 29 + 25*(int(note_state/4)));
   draw_cursor();
+
+  // right side input cursor
+  tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_WHITE);
+
+  // include the next note on the grid
+  if (is_locked && menu_state == 0) {
+    tft.setCursor(8 + 26.5 * (note_state % 4), 28 + 25*(int(note_state/4)), 1);
+    tft.printf(curr_note);
+  }
 }
 
 ///////////////

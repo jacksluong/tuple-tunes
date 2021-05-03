@@ -85,8 +85,8 @@ int measures[MEASURE_COUNT][16];
 int current_measure = 0;
 int selected_note = 0;
 char current_note[5] = "\0";
-int selected_dur = 0; // selected duration index for current note
-int selected_sym = 0; // selected symbol index for current note
+int selected_duration = 0; // selected duration index for current note
+int selected_symbol = 0; // selected symbol index for current note
 int step_index = 0; // selected jump index for determining next note in key
 int note_state = 0;
 
@@ -157,7 +157,7 @@ void setup() {
   // Connect to WiFi
   WiFi.begin(NETWORK, PASSWORD);
 
-  uint8_t count = 0; // count used for WiFi check times
+  uint8_t count = 0;
   Serial.print("Attempting to connect to ");
   Serial.println(NETWORK);
   while (WiFi.status() != WL_CONNECTED && count < 12) {
@@ -165,18 +165,15 @@ void setup() {
     Serial.print(".");
     count++;
   }
-  delay(2000);
-  if (WiFi.isConnected()) { // if we connected then print our IP, Mac, and SSID we're on
-    Serial.println("CONNECTED!");
-    Serial.printf("%d:%d:%d:%d (%s) (%s)\n", WiFi.localIP()[3], WiFi.localIP()[2],
-                  WiFi.localIP()[1], WiFi.localIP()[0],
-                  WiFi.macAddress().c_str() , WiFi.SSID().c_str());
-    delay(500);
-  } else { // try again if failed to connect
-    Serial.println("Failed to Connect :/  Going to restart");
-    Serial.println(WiFi.status());
-    ESP.restart(); // restart the ESP (proper way)
+  while (!WiFi.isConnected()) {
+    delay(1000);
+    Serial.printf("Connecting... (%s)\n", WiFi.status());
   }
+  Serial.println("CONNECTED!");
+  Serial.printf("%d:%d:%d:%d (%s) (%s)\n", WiFi.localIP()[3], WiFi.localIP()[2],
+                WiFi.localIP()[1], WiFi.localIP()[0],
+                WiFi.macAddress().c_str() , WiFi.SSID().c_str());
+  delay(500);
   
   // Compute note frequencies
   note_freqs[0] = C3;

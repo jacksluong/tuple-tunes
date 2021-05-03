@@ -5,6 +5,23 @@ void back_to_landing() {
   update_landing();
 }
 
+void reset_game() {
+  note_index = 0; 
+  measure_index = 0;
+  playing_measure = false;
+  playing_song = false;
+
+  // Game state variables
+  player_count = 0;
+  current_measure = 0;
+  selected_note = 0;
+  current_note[5] = "\0";
+  selected_duration = 0;
+  selected_symbol = 0;
+  step_index = 0; 
+  note_state = 0;
+}
+
 void update_state(int bv, int js) {
   if (state == 0) {             ////////////////////// landing //////////////////////
     if (js == 1) { // up
@@ -135,27 +152,27 @@ void update_state(int bv, int js) {
         }
         if (js == 2 || js == 4) { // update current selected symbol if note has changed
           if (current_note[1] == '#') {
-            selected_sym = 0;
+            selected_symbol = 0;
           } else if (current_note[1] == 'b') {
-            selected_sym = 1;
+            selected_symbol = 1;
           } else if (current_note[1] == ' ') {
-            selected_sym = 2;
+            selected_symbol = 2;
           }
         }
         // changing sharp/flat/neutral
         if (js == 1) { // up
-          selected_sym = (selected_sym + 1) % 3;
-          current_note[1] = SYMBOLS[selected_sym];
+          selected_symbol = (selected_symbol + 1) % 3;
+          current_note[1] = SYMBOLS[selected_symbol];
         } else if (js == 3) { // down
-          selected_sym = (selected_sym + 2) % 3;
-          current_note[1] = SYMBOLS[selected_sym];
+          selected_symbol = (selected_symbol + 2) % 3;
+          current_note[1] = SYMBOLS[selected_symbol];
         }
       } else if (menu_state == 1) { // duration selection (joystick left and right)
         tft.fillRect(125,40,25,15,TFT_BLACK); // clear duration
         if (js == 2) { // right
-          selected_dur = (selected_dur + 1) % 5;
+          selected_duration = (selected_duration + 1) % 5;
         } else if (js == 4) { // left
-          selected_dur = (selected_dur + 4) % 5;
+          selected_duration = (selected_duration + 4) % 5;
         }
       }
     }
@@ -175,7 +192,7 @@ void update_state(int bv, int js) {
           tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
           tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
           
-          if (note_state < 16) note_state += pow(2,selected_dur); // to update grid cursor position for next note
+          if (note_state < 16) note_state += pow(2,selected_duration); // to update grid cursor position for next note
           is_locked = false;
           menu_state = 0;
         }

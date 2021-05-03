@@ -2,6 +2,8 @@
 // In-game //
 /////////////
 
+uint8_t GRAY[] = {70, 70, 70};
+
 void display_in_game() {
   tft.fillScreen(TFT_BLACK);
   
@@ -16,9 +18,9 @@ void display_in_game() {
     tft.drawRect(0, 25 * i + 19, 107, 25, TFT_WHITE);
   }
   
-  tft.drawLine(26.5, 19, 26.5, 118, TFT_WHITE);
-  tft.drawLine(53, 19, 53, 118, TFT_WHITE);
-  tft.drawLine(79.5, 19, 79.5, 118, TFT_WHITE);
+  tft.drawLine(26.5, 19, 26.5, 118, rgb_to_565(GRAY));
+  tft.drawLine(53, 19, 53, 118, rgb_to_565(GRAY));
+  tft.drawLine(79.5, 19, 79.5, 118, rgb_to_565(GRAY));
   
   // Right side info
   current_note[0] = '\0'; // get first starting note in this key
@@ -28,14 +30,14 @@ void display_in_game() {
     strcat(current_note, NOTES_SHARP[selected_note]); 
   }
   if (current_note[1] == '#') { // update starting index for selected symbol based on the note from this key
-    selected_sym = 0;
+    selected_symbol = 0;
   } else if (current_note[1] == 'b') {
-    selected_sym = 1;
+    selected_symbol = 1;
   } else if (current_note[1] == ' ') {
-    selected_sym = 2;
+    selected_symbol = 2;
   }
   tft.setCursor(125, 40, 1);
-  tft.println(NOTE_DURATIONS[selected_dur]); // note duration
+  tft.println(NOTE_DURATIONS[selected_duration]); // note duration
   tft.drawTriangle(117,41,112,43,117,45, TFT_WHITE);
   tft.drawTriangle(151,41,156,43,151,45, TFT_WHITE);
   tft.setCursor(112, 60, 1); // add a note
@@ -56,7 +58,7 @@ void update_in_game() {
   tft.setCursor(132, 20, 1); 
   tft.println(current_note); // print current selected note
   tft.setCursor(125, 40, 1);
-  tft.println(NOTE_DURATIONS[selected_dur]); // print current selected note duration
+  tft.println(NOTE_DURATIONS[selected_duration]); // print current selected note duration
 
   // grid cursor
   set_cursor_pos(2 + 26.5 * (note_state % 4), 29 + 25*(int(note_state/4)));

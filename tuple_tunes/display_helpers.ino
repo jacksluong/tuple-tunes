@@ -58,3 +58,21 @@ void draw_text(char* text, uint8_t x, uint8_t y, uint8_t* rgb, uint8_t font_size
   tft.setTextColor(tft.color565(rgb[0], rgb[1], rgb[2]));
   tft.println(text);
 }
+
+/*
+ * Converts selected note (int) to its appropriate string representation in the grid.
+ */
+char* note_to_grid_string(int index) {
+  char s[3];
+  if (index == 37) strcpy(s, "~");
+  else if (index == 36) strcpy(s, "R");
+  else strcpy(s, NOTES_FLAT[index % 12]);
+  return s;
+}
+
+ /*
+  * Converts selected note (int) to its appropriate string representation in the selection menu.
+  */
+char* note_to_string(int index, int adjustment) {
+  
+}

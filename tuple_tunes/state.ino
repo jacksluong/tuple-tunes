@@ -6,6 +6,7 @@ void back_to_landing() {
 }
 
 void reset_game() {
+  // Playback variables
   note_index = 0; 
   measure_index = 0;
   playing_measure = false;
@@ -14,12 +15,16 @@ void reset_game() {
   // Game state variables
   player_count = 0;
   current_measure = 0;
-  selected_note = 0;
-  current_note[5] = "\0";
+  selected_note = selected_key;
+  current_note[0] = '\0';
   selected_duration = 0;
   selected_symbol = 0;
   step_index = 0; 
   note_state = 0;
+
+  // Other variables
+  menu_state = 0;
+  input_cursor = 0;
 }
 
 void update_state(int bv, int js) {
@@ -60,7 +65,7 @@ void update_state(int bv, int js) {
       menu_state = (menu_state + 1) % 4;
     } else if (is_locked && js == 2) { // right
       if (menu_state == 0) {
-        //selected key is index of the selected key, should not changed after locked
+        // selected key is index of the selected key, should not changed after locked
         selected_key = (selected_key + 1) % 12;
         play_note(selected_key);
       }
@@ -81,11 +86,11 @@ void update_state(int bv, int js) {
         else if (menu_state == 0) play_note(selected_key);
         update_start_game(1);
       } else if (menu_state == 2) { // start
-        for (int i = 0; i < 3; i++) room_num[i] = '0';
-        menu_state = 0;
-        selected_note = selected_key;
-        state = 4;
-        selected_note = selected_key;
+        for (int i = 0; i < 3; i++) room_num[i] = '0'; // TODO: hardcoded room number
+//        menu_state = 0;
+//        state = 4;
+//        selected_note = selected_key;
+        reset_game();
         display_in_game();
       } else  { // back
         back_to_landing();
@@ -114,10 +119,11 @@ void update_state(int bv, int js) {
       } else if (menu_state == 1) { // join
         room_num[0] = '\0';
         sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
-        menu_state = 0;
-        input_cursor = 0;
-        state = 4;
-        selected_note = selected_key;
+//        menu_state = 0;
+//        input_cursor = 0;
+//        state = 4;
+//        selected_note = selected_key;
+        reset_game();
         display_in_game();
       } else { // back
         back_to_landing();
@@ -144,12 +150,13 @@ void update_state(int bv, int js) {
           step_index = (step_index + 6) % 7;
           selected_note = (selected_note + 12 - SCALE_STEPS[step_index]) % 12;
         }
-        current_note[0] = '\0';
-        if (is_flat_key) {
-          strcat(current_note, NOTES_FLAT[selected_note]);
-        } else {
-          strcat(current_note, NOTES_SHARP[selected_note]); 
-        }
+//        current_note[0] = '\0';
+//        if (is_flat_key) {
+//          strcat(current_note, NOTES_FLAT[selected_note]);
+//        } else {
+//          strcat(current_note, NOTES_SHARP[selected_note]); 
+//        }
+        strcpy(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[selected_note % 12]);
         if (js == 2 || js == 4) { // update current selected symbol if note has changed
           if (current_note[1] == '#') {
             selected_symbol = 0;
@@ -178,32 +185,30 @@ void update_state(int bv, int js) {
     }
     update_in_game();
     
-    if (bv) {
-      if (bv == 1) {
-        if (!is_locked) {
-          is_locked = true;
-        } else {
-          is_locked = false;
-        }
-        // state changes
-        if (menu_state == 2) { // add a note
-          int curr_x = 2 + 26.5 * (note_state % 4);
-          int curr_y = 29 + 25*(int(note_state/4));
-          tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
-          tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
-          
-          if (note_state < 16) note_state += pow(2,selected_duration); // to update grid cursor position for next note
-          is_locked = false;
-          menu_state = 0;
-        }
-        update_in_game();
-      } else { // go to game menu screen
-        tft.fillScreen(TFT_BLACK);
-        state = 5;
-        menu_state = 0;
+    if (bv == 1) {
+      if (!is_locked) {
+        is_locked = true;
+      } else {
         is_locked = false;
-        display_game_menu();
       }
+      // state changes
+      if (menu_state == 2) { // add a note
+        int curr_x = 2 + 26.5 * (note_state % 4);
+        int curr_y = 29 + 25*(int(note_state/4));
+        tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
+        tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
+        
+        if (note_state < 16) note_state += pow(2,selected_duration); // to update grid cursor position for next note
+        is_locked = false;
+        menu_state = 0;
+      }
+      update_in_game();
+    } else if (bv == 2) { // go to game menu screen
+      tft.fillScreen(TFT_BLACK);
+      state = 5;
+      menu_state = 0;
+      is_locked = false;
+      display_game_menu();
     }
   } else if (state == 5) {      ////////////////////// game menu //////////////////////
     if (js == 1) { // up

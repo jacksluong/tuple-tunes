@@ -7,7 +7,7 @@ void back_to_landing() {
 
 void reset_game() {
   // Playback variables
-  note_index = 0; 
+  note_index = 0;
   measure_index = 0;
   playing_measure = false;
   playing_song = false;
@@ -15,16 +15,17 @@ void reset_game() {
   // Game state variables
   player_count = 0;
   current_measure = 0;
-  selected_note = selected_key;
+  curr_note_index = selected_key;
   current_note[0] = '\0';
   selected_duration = 0;
   selected_symbol = 0;
-  step_index = 0; 
+  step_index = 0;
   note_state = 0;
 
   // Other variables
   menu_state = 0;
   input_cursor = 0;
+  state = 4;
 }
 
 void update_state(int bv, int js) {
@@ -36,7 +37,7 @@ void update_state(int bv, int js) {
       menu_state = (menu_state + 1) % 3;
       update_landing();
     }
-      
+
     if (bv) {
       if (menu_state == 0) { // start
         state = 1;
@@ -56,7 +57,7 @@ void update_state(int bv, int js) {
       }
       menu_state = 0;
     }
-    
+
   } else if (state == 1) {      ////////////////////// start game //////////////////////
     if (millis() - last_played > 300) stop_sound();
     if (!is_locked && js == 1) { // up
@@ -78,7 +79,7 @@ void update_state(int bv, int js) {
       else selected_tempo = (selected_tempo + 2) % 3;
     }
     update_start_game(js);
-    
+
     if (bv) {
       if (menu_state == 0 || menu_state == 1) { // inputs
         is_locked = !is_locked;
@@ -87,16 +88,16 @@ void update_state(int bv, int js) {
         update_start_game(1);
       } else if (menu_state == 2) { // start
         for (int i = 0; i < 3; i++) room_num[i] = '0'; // TODO: hardcoded room number
-//        menu_state = 0;
-//        state = 4;
-//        selected_note = selected_key;
+        //        menu_state = 0;
+        //        state = 4;
+        //        selected_note = selected_key;
         reset_game();
         display_in_game();
       } else  { // back
         back_to_landing();
       }
     }
-    
+
   } else if (state == 2) {      ////////////////////// join game //////////////////////
     if (js == 1 || js == 3) {
       if (is_locked) {
@@ -119,10 +120,10 @@ void update_state(int bv, int js) {
       } else if (menu_state == 1) { // join
         room_num[0] = '\0';
         sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
-//        menu_state = 0;
-//        input_cursor = 0;
-//        state = 4;
-//        selected_note = selected_key;
+        //        menu_state = 0;
+        //        input_cursor = 0;
+        //        state = 4;
+        //        selected_note = selected_key;
         reset_game();
         display_in_game();
       } else { // back
@@ -130,7 +131,7 @@ void update_state(int bv, int js) {
       }
     }
   } else if (state == 3) {      ////////////////////// gallery //////////////////////
-    
+
   } else if (state == 4) {      ////////////////////// in-game //////////////////////
     if (!is_locked && js) { // scrolling up and down the menu
       tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK);
@@ -141,41 +142,88 @@ void update_state(int bv, int js) {
       }
     } else if (is_locked && js) { // scrolling through note and duration selection
       if (menu_state == 0) { // note and sharp/flat/neutral selection
-        tft.fillRect(133,20,20,15,TFT_BLACK); // clear note
-        tft.fillRect(8 + 26.5 * (note_state % 4),28 + 25*(int(note_state/4)),15,15,TFT_BLACK); // clear grid cell
+        tft.fillRect(133, 20, 20, 15, TFT_BLACK); // clear note
+        tft.fillRect(8 + 26.5 * (note_state % 4), 28 + 25 * (int(note_state / 4)), 15, 15, TFT_BLACK); // clear grid cell
         if (js == 2) { // right
-          selected_note = (selected_note + SCALE_STEPS[step_index]) % 12;
-          step_index = (step_index + 1) % 7;
-        } else if (js == 4) { // left
-          step_index = (step_index + 6) % 7;
-          selected_note = (selected_note + 12 - SCALE_STEPS[step_index]) % 12;
-        }
-//        current_note[0] = '\0';
-//        if (is_flat_key) {
-//          strcat(current_note, NOTES_FLAT[selected_note]);
-//        } else {
-//          strcat(current_note, NOTES_SHARP[selected_note]); 
-//        }
-        strcpy(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[selected_note % 12]);
-        if (js == 2 || js == 4) { // update current selected symbol if note has changed
-          if (current_note[1] == '#') {
-            selected_symbol = 0;
-          } else if (current_note[1] == 'b') {
-            selected_symbol = 1;
-          } else if (current_note[1] == ' ') {
-            selected_symbol = 2;
+          if (curr_note_index + SCALE_STEPS[(step_index + 1) % 8] <= 35) {
+            step_index = (step_index + 1) % 8;
+            curr_note_index = curr_note_index + SCALE_STEPS[step_index];
+            selected_note = curr_note_index % 12;
           }
+          Serial.printf("Current note index updated %d \n", curr_note_index);
+
+        } else if (js == 4) { // left
+
+          if (curr_note_index - SCALE_STEPS[step_index] >= 0) { // TODO
+            curr_note_index = curr_note_index - SCALE_STEPS[step_index];
+            selected_note = curr_note_index % 12;
+            step_index = (step_index + 7) % 8; //same as subtracting 1
+          }
+
+          Serial.printf("Current note index updated %d \n", curr_note_index);
         }
+
+        //current note is what we will be displaying
+        current_note[0] = '\0';
+
+        //this is our case for representing rests
+        if (step_index == 7) {
+          strcat(current_note, "R");
+          Serial.println("Current note is rest");
+        } else if (is_flat_key) {
+          strcat(current_note, NOTES_FLAT[selected_note]);
+          Serial.printf("Current note is %s", current_note);
+        } else {
+          strcat(current_note, NOTES_SHARP[selected_note]);
+          Serial.printf("Current note is %s", current_note);
+        }
+
+
+        if (js == 2 || js == 4) { // update current selected symbol if note has changed
+
+          if (current_note[1] == '#') {
+            selected_symbol = 2;
+          } else if (current_note[1] == 'b') {
+            selected_symbol = 0;
+          } else if (current_note[1] == ' ' || current_note[1] == '\0') {
+            selected_symbol = 1;
+          }
+
+          adjustment = 0; //we need to reset adjustment each time
+
+
+        }
+
         // changing sharp/flat/neutral
         if (js == 1) { // up
+          //later on, we will add adjustment to note index
+          if (selected_symbol == 2) {
+            adjustment = adjustment - 2;
+          } else {
+            adjustment = adjustment + 1;
+          }
+
           selected_symbol = (selected_symbol + 1) % 3;
           current_note[1] = SYMBOLS[selected_symbol];
+
+          Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+
         } else if (js == 3) { // down
+
+          if (selected_symbol == 0) {
+            adjustment = adjustment + 2;
+          } else {
+            adjustment = adjustment - 1;
+          }
+
           selected_symbol = (selected_symbol + 2) % 3;
           current_note[1] = SYMBOLS[selected_symbol];
+
+          Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
         }
+
       } else if (menu_state == 1) { // duration selection (joystick left and right)
-        tft.fillRect(125,40,25,15,TFT_BLACK); // clear duration
+        tft.fillRect(125, 40, 25, 15, TFT_BLACK); // clear duration
         if (js == 2) { // right
           selected_duration = (selected_duration + 1) % 5;
         } else if (js == 4) { // left
@@ -184,7 +232,7 @@ void update_state(int bv, int js) {
       }
     }
     update_in_game();
-    
+
     if (bv == 1) {
       if (!is_locked) {
         is_locked = true;
@@ -194,22 +242,39 @@ void update_state(int bv, int js) {
       // state changes
       if (menu_state == 2) { // add a note
         int curr_x = 2 + 26.5 * (note_state % 4);
-        int curr_y = 29 + 25*(int(note_state/4));
+        int curr_y = 29 + 25 * (int(note_state / 4));
         tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
         tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
-        
-        if (note_state < 16) note_state += pow(2,selected_duration); // to update grid cursor position for next note
+
+        int temp_note_state = note_state;
+
+        if (note_state < 16) note_state += pow(2, selected_duration); // to update grid cursor position for next note
         is_locked = false;
         menu_state = 0;
+
+        //adding the note to the notes array
+        if (current_note[0] == 'R') {
+          curr_note_index = 36;
+        } else {
+          curr_note_index = curr_note_index + adjustment;
+        }
+
+        curr_notes_array[temp_note_state] = curr_note_index;
+        temp_note_state = temp_note_state + 1;
+
+        int i;
+
+        for (i = 0; i < selected_duration; i = i + 1) {
+          curr_notes_array[temp_note_state] = 37;
+          temp_note_state = temp_note_state + 1;
+        }
+
+        Serial.printf("Note index inserted %d", curr_note_index);
+        //Serial.println(curr_notes_array);
       }
       update_in_game();
-    } else if (bv == 2) { // go to game menu screen
-      tft.fillScreen(TFT_BLACK);
-      state = 5;
-      menu_state = 0;
-      is_locked = false;
-      display_game_menu();
     }
+
   } else if (state == 5) {      ////////////////////// game menu //////////////////////
     if (js == 1) { // up
       menu_state = (menu_state + 3) % 4;

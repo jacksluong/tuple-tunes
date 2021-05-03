@@ -61,9 +61,9 @@ uint16_t last_button_click = millis();
 const char* TEMPO_LABELS[] = {"Slow", "Mid", "Fast"};
 const uint8_t TEMPO_SPEEDS[] = {60, 96, 144};
 const char* NOTE_DURATIONS[] = {"1/16", "1/8", "1/4", "1/2", "1"};
-const char SYMBOLS[] = {'#', 'b', ' '};
+const char SYMBOLS[] = {'b', ' ', '#'};
 const int MEASURE_COUNT = 2;
-const uint8_t SCALE_STEPS[] = {2, 2, 1, 2, 2, 2, 1, 0}; // half steps that we need per scale
+const uint8_t SCALE_STEPS[] = {0, 2, 2, 1, 2, 2, 2, 1}; // half steps that we need per scale
 const char* NOTES_FLAT[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
 const char* NOTES_SHARP[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
 
@@ -84,7 +84,10 @@ int player_count = 0;
 int measures[MEASURE_COUNT][16];
 int current_measure = 0;
 int selected_note = 0;
+int curr_note_index = 0;
+int adjustment = 0;
 char current_note[5] = "\0";
+int curr_notes_array[16]; //use note state to get index, temporary until we implement measures
 int selected_duration = 0; // selected duration index for current note
 int selected_symbol = 0; // selected symbol index for current note
 int step_index = 0; // selected jump index for determining next note in key

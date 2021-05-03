@@ -30,9 +30,9 @@ const uint16_t OUT_BUFFER_SIZE = 2000;
 char response[OUT_BUFFER_SIZE];
 
 // LED
-const uint32_t red = 0;
-const uint32_t green = 13;
-const uint32_t blue = 15;
+const uint8_t red = 0;
+const uint8_t green = 13;
+const uint8_t blue = 15;
 
 // Display
 TFT_eSPI tft = TFT_eSPI();
@@ -49,78 +49,51 @@ double note_freqs[NOTE_COUNT];
 double MULT = 1.059463094359; //12th root of 2 (precalculated) for note generation
 double C3 = 130.81; //C3 130.81 Hz  for note generation
 
-// State
+// State / Control
 int state = 0;
 int menu_state = 0;
 int8_t game_code_input[] = {-10, -10, -10};
 char input_cursor = 0;
 bool is_locked = false;
 uint16_t last_button_click = millis();
-int note_state = 0; //index of current note in the measure we are in
-int curr_note_index = 0;
 
-// For playing back
+// Game constants
+const char* TEMPO_LABELS[] = {"Slow", "Mid", "Fast"};
+const uint8_t TEMPO_SPEEDS[] = {60, 96, 144};
+const char* NOTE_DURATIONS[] = {"1/16", "1/8", "1/4", "1/2", "1"};
+const char SYMBOLS[] = {'#', 'b', ' '};
 const int MEASURE_COUNT = 2;
-int m_index = 0;
-int s_index = 0;
-int note_index;
-bool play_measure_bool = false;
-bool play_song_bool = false;
+const uint8_t SCALE_STEPS[] = {2, 2, 1, 2, 2, 2, 1, 0}; // half steps that we need per scale
+const char* NOTES_FLAT[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
+const char* NOTES_SHARP[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
 
-// Game variable options
-int8_t scale_steps[] = {0, 2, 2, 1, 2, 2, 2, 1}; //half steps that we need per scale
-int scale_index = 0;
-int8_t adjustment = 0; //variable used to tweak adjustments with sharps and flats
+// Playback
+int note_index = 0; // current note being played in measure
+int measure_index = 0; // current measure being played in song
+bool playing_measure = false;
+bool playing_song = false;
 
-int curr_notes_array[16]; //use note state to get index
-
-char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
-char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
-char* tempo_labels[] = {"Slow", "Mid", "Fast"};
+// Game state options
 bool is_flat_key = false;
-int tempo_speeds[] = {20, 96, 144};
-int selected_key = 0; // iterates through notes_flat in start game
+int selected_key = 0; // iterates through NOTES_FLAT in start game
 int selected_tempo = 0;
+char room_num[4];
 
-char* notes_dur[] = {"1/16", "1/8", "1/4", "1/2", "1"};
-char symbols[] = {'b', ' ', '#'}; //{'#', 'b', ' '}; changed around ordering to make internal easier
-int key_jumps[] = {2, 2, 1, 2, 2, 2, 1};
-char curr_note[10] = "\0"; // current selected note to display on grid during in game
-int selected_note = 0; // current selected note index
+// Game state variables
+int player_count = 0;
+int measures[MEASURE_COUNT][16];
+int current_measure = 0;
+int selected_note = 0;
+char current_note[5] = "\0";
 int selected_dur = 0; // selected duration index for current note
 int selected_sym = 0; // selected symbol index for current note
-int jump_index = 0; // selected jump index for determining next note in key
+int step_index = 0; // selected jump index for determining next note in key
+int note_state = 0;
 
-// Game variables
-char room_num[4];
-int song_key;
-int tempo;
-int player_count;
-char* measures[100] = {"\0"};
-/* can delete this comment later but for future reference,
- *  each element in measures will contain a single string formatted
- *  to contain all information in that measure:
- *  e.g. "E E E ~ E E E ~ E G C D E ~ R ~ "
- *  (16 tokens, separated by spaces, with an additional one at the end
- *  to make life easier when parsing)
- */
-int current_measure;
-
-//struct Measure {
-//  int notes[16]; //the notes (array of integers containing indices, later to find in note_freqs.)
-//  int bpm; //the timing of each note in milliseconds (take bpm, scale appropriately for note. This is 15000/bpm.
-//};
+// Tests
 int test1[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
 int test2[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37};
 int test_song[2][16] = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37}};
-
-////////////////////////////////
-// Project-specific functions //
-////////////////////////////////
-
-void example() {
-  
-}
 
 /////////////////////////////////
 // Convenient helper functions //
@@ -204,20 +177,20 @@ void setup() {
     Serial.println(WiFi.status());
     ESP.restart(); // restart the ESP (proper way)
   }
-
+  
+  // Compute note frequencies
   note_freqs[0] = C3;
-  //fill in note_freq with appropriate frequencies from 55 Hz to 55*(MULT)^{NOTE_COUNT-1} Hz
   for (int i = 1; i < NOTE_COUNT; i++) {
     note_freqs[i] = MULT*note_freqs[i-1];
   }
-  // Draw first screen
   
+  // Draw first screen
   back_to_landing();
 }
 
 void loop() {
-  if (play_measure_bool)  play_measure(test2);
-  if (play_song_bool) play_song(test_song);
+  if (playing_measure)  play_measure(test2);
+  if (playing_song) play_song(test_song);
   int bv = button.read();
   int js = joystick.read();
     

@@ -20,27 +20,27 @@ void stop_sound() {
 }
 
 void play_measure(int measure_input[16]) {
-  double note_period = 15000.0/(tempo_speeds[selected_tempo]); // change ig?
-  if (m_index < 16) {
-    note_index = measure_input[m_index];
+  double note_period = 15000.0/(TEMPO_SPEEDS[selected_tempo]); // change ig?
+  if (note_index < 16) {
+    selected_note = measure_input[note_index];
     if (millis() - last_played > note_period){
-      if (note_index == NOTE_COUNT) {
+      if (selected_note == NOTE_COUNT) {
         stop_sound();
       }
-      else if (note_index < NOTE_COUNT) {
-        play_note(note_index);
+      else if (selected_note < NOTE_COUNT) {
+        play_note(selected_note);
       }
       last_played = millis();
-      m_index = m_index + 1;
+      note_index = note_index + 1;
     }
   }
-  if (m_index == 16){
+  if (note_index == 16){
     if (millis() - last_played > note_period) {
       stop_sound();
-      play_measure_bool = false;
-      m_index = 0;
-      if (play_song_bool) {
-        s_index = s_index + 1;
+      playing_measure = false;
+      note_index = 0;
+      if (playing_song) {
+        measure_index = measure_index + 1;
       }
     }
   }
@@ -48,17 +48,17 @@ void play_measure(int measure_input[16]) {
 }
 
 void play_song(int song_input[2][16]){
-  if (s_index < MEASURE_COUNT) {
-    if (song_input[s_index][0] > -1) play_measure(song_input[s_index]);
+  if (measure_index < MEASURE_COUNT) {
+    if (song_input[measure_index][0] > -1) play_measure(song_input[measure_index]);
     else {
-      play_song_bool = false;
-      s_index = 0;
+      playing_song = false;
+      measure_index = 0;
     }
   }
-  if (s_index == MEASURE_COUNT) {
-    s_index = 0;
+  if (measure_index == MEASURE_COUNT) {
+    measure_index = 0;
     stop_sound();
-    play_song_bool = false;
+    playing_song = false;
   }
 }
 

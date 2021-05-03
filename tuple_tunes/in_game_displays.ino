@@ -21,21 +21,21 @@ void display_in_game() {
   tft.drawLine(79.5, 19, 79.5, 118, TFT_WHITE);
   
   // Right side info
-  curr_note[0] = '\0'; // get first starting note in this key
+  current_note[0] = '\0'; // get first starting note in this key
   if (is_flat_key) {
-    strcat(curr_note, notes_flat[selected_note]); 
+    strcat(current_note, NOTES_FLAT[selected_note]); 
   } else {
-    strcat(curr_note, notes_sharp[selected_note]); 
+    strcat(current_note, NOTES_SHARP[selected_note]); 
   }
-  if (curr_note[1] == '#') { // update starting index for selected symbol based on the note from this key
+  if (current_note[1] == '#') { // update starting index for selected symbol based on the note from this key
     selected_sym = 0;
-  } else if (curr_note[1] == 'b') {
+  } else if (current_note[1] == 'b') {
     selected_sym = 1;
-  } else if (curr_note[1] == ' ') {
+  } else if (current_note[1] == ' ') {
     selected_sym = 2;
   }
   tft.setCursor(125, 40, 1);
-  tft.println(notes_dur[selected_dur]); // note duration
+  tft.println(NOTE_DURATIONS[selected_dur]); // note duration
   tft.drawTriangle(117,41,112,43,117,45, TFT_WHITE);
   tft.drawTriangle(151,41,156,43,151,45, TFT_WHITE);
   tft.setCursor(112, 60, 1); // add a note
@@ -54,9 +54,9 @@ void display_in_game() {
 
 void update_in_game() {
   tft.setCursor(132, 20, 1); 
-  tft.println(curr_note); // print current selected note
+  tft.println(current_note); // print current selected note
   tft.setCursor(125, 40, 1);
-  tft.println(notes_dur[selected_dur]); // print current selected note duration
+  tft.println(NOTE_DURATIONS[selected_dur]); // print current selected note duration
 
   // grid cursor
   set_cursor_pos(2 + 26.5 * (note_state % 4), 29 + 25*(int(note_state/4)));
@@ -68,7 +68,7 @@ void update_in_game() {
   // include the next note on the grid
   if (is_locked && menu_state == 0) {
     tft.setCursor(8 + 26.5 * (note_state % 4), 28 + 25*(int(note_state/4)), 1);
-    tft.printf(curr_note);
+    tft.printf(current_note);
   }
 }
 
@@ -101,9 +101,9 @@ void display_game_menu() {
   tft.setCursor(88, 25, 1);
   tft.printf(" Room#:%s\r\n", room_num);
   tft.setCursor(88, 50, 1);
-  tft.printf(" Key:%s\r\n", notes_flat[selected_key]);
+  tft.printf(" Key:%s\r\n", NOTES_FLAT[selected_key]);
   tft.setCursor(88, 75, 1);
-  tft.printf(" Tempo:%s\r\n", tempo_labels[selected_tempo]);
+  tft.printf(" Tempo:%s\r\n", TEMPO_LABELS[selected_tempo]);
   tft.setCursor(88, 100, 1);
   tft.printf(" #Players:%d", player_count);
 

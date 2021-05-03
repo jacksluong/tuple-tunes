@@ -78,7 +78,7 @@ char* notes_flat[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A "
 char* notes_sharp[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
 char* tempo_labels[] = {"Slow", "Mid", "Fast"};
 bool is_flat_key = false;
-int tempo_speeds[] = {60, 96, 144};
+int tempo_speeds[] = {20, 96, 144};
 int selected_key = 0; // iterates through notes_flat in start game
 int selected_tempo = 0;
 

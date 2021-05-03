@@ -109,6 +109,7 @@ void update_state(int bv, int js) {
   } else if (state == 3) {      ////////////////////// gallery //////////////////////
     
     } else if (state == 4) {      ////////////////////// in-game //////////////////////
+    if (millis() - last_played > 300) stop_sound();
     if (!is_locked && js) { // scrolling up and down the menu
       tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK);
       if (js == 1) { // up
@@ -126,10 +127,11 @@ void update_state(int bv, int js) {
 
           scale_index = (scale_index + 1) % 8;
           curr_note_index = curr_note_index + scale_steps[scale_index];
-
+          
           if (curr_note_index > 35){
             curr_note_index = 35;
           }
+          play_note(curr_note_index);
 
           Serial.printf("Current note index updated %d \n", curr_note_index);
         
@@ -139,10 +141,11 @@ void update_state(int bv, int js) {
 
           scale_index = (scale_index + 7) % 8; //same as subtracting 1
           curr_note_index = curr_note_index - scale_steps[scale_index];
-
+          
           if (curr_note_index < 0){
             curr_note_index = 0;
           }
+          play_note(curr_note_index);
 
           Serial.printf("Current note index updated %d \n", curr_note_index);
         }
@@ -152,13 +155,16 @@ void update_state(int bv, int js) {
 
         //this is our case for representing rests
         if(scale_index == 0){
+          stop_sound();
           strcat(curr_note, "R");
           Serial.println("Current note is rest");
         } else if (is_flat_key) {
           strcat(curr_note, notes_flat[selected_note]);
+          //strcat(curr_note, notes_flat[curr_note_index%12]);
           Serial.printf("Current note is %s", curr_note);
         } else {
           strcat(curr_note, notes_sharp[selected_note]); 
+          //strcat(curr_note, notes_flat[curr_note_index%12]);
           Serial.printf("Current note is %s", curr_note);
         }
 
@@ -226,6 +232,9 @@ void update_state(int bv, int js) {
           is_locked = false;
         }
         // state changes
+        if (menu_state == 0) { // begin scrolling through notes
+          play_note(selected_key);
+        }
         if (menu_state == 2) { // add a note
           int curr_x = 2 + 26.5 * (note_state % 4);
           int curr_y = 29 + 25*(int(note_state/4));

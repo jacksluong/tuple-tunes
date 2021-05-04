@@ -21,9 +21,9 @@ void stop_sound() {
   ledcWriteTone(AUDIO_PWM, 0);
 }
 
-void play_measure(int measure_input[16]) {
+void play_measure(int measure_input[16], int num_notes) {
   double note_period = 15000.0/(TEMPO_SPEEDS[selected_tempo]); // change ig?
-  if (note_index < 16) {
+  if (note_index < num_notes) {
     selected_note = measure_input[note_index];
     if (millis() - last_played > note_period){
       if (selected_note == NOTE_COUNT) {
@@ -36,7 +36,7 @@ void play_measure(int measure_input[16]) {
       note_index = note_index + 1;
     }
   }
-  if (note_index == 16){
+  if (note_index == num_notes){
     if (millis() - last_played > note_period) {
       stop_sound();
       playing_measure = false;
@@ -51,7 +51,7 @@ void play_measure(int measure_input[16]) {
 
 void play_song(int song_input[2][16]){
   if (measure_index < MEASURE_COUNT) {
-    if (song_input[measure_index][0] > -1) play_measure(song_input[measure_index]);
+    if (song_input[measure_index][0] > -1) play_measure(song_input[measure_index], 16);
     else {
       playing_song = false;
       measure_index = 0;

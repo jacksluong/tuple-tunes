@@ -218,7 +218,7 @@ void update_state(int bv, int js) {
           } else {
             adjustment = adjustment + 1;
           }
-
+          play_note(curr_note_index + adjustment);
           selected_symbol = (selected_symbol + 1) % 3;
           current_note[1] = SYMBOLS[selected_symbol];
 
@@ -231,7 +231,7 @@ void update_state(int bv, int js) {
           } else {
             adjustment = adjustment - 1;
           }
-
+          play_note(curr_note_index + adjustment);
           selected_symbol = (selected_symbol + 2) % 3;
           current_note[1] = SYMBOLS[selected_symbol];
 
@@ -275,10 +275,11 @@ void update_state(int bv, int js) {
         if (current_note[0] == 'R') {
           curr_note_index = 36;
         } else {
-          curr_note_index = curr_note_index + adjustment;
+          //curr_note_index = curr_note_index + adjustment;
         }
 
-        curr_notes_array[temp_note_state] = curr_note_index;
+        //curr_notes_array[temp_note_state] = curr_note_index;
+        curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
         temp_note_state = temp_note_state + 1;
 
         int i;

@@ -50,6 +50,17 @@ void display_in_game() {
   }
 
   tft.println(room_num); // not to keep there, it's just for purposes of seeing the game code
+
+//  for (int i = 0; i < strlen(measures[current_measure]); i++) {
+//    tft.setCursor(8 + 26.5 * (i % 4), 28 + 25*(int(i/4)), 1);
+//    tft.printf(measures[current_measure][i]);
+//  }
+
+  for (int i = 0; i < note_state; i++) {
+      tft.setCursor(8 + 26.5 * (i % 4), 28 + 25*(int(i/4)), 1);
+      tft.println(curr_notes_array[i]);
+      
+  }
   
   update_in_game();
 }

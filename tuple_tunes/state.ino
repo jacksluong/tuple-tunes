@@ -17,6 +17,8 @@ void reset_game() {
   current_measure = 0;
   curr_note_index = selected_key;
   current_note[0] = '\0';
+  selected_key = 0;
+  selected_note = curr_note_index % 12;
   selected_duration = 0;
   selected_symbol = 0;
   step_index = 0;
@@ -129,7 +131,6 @@ void update_state(int bv, int js) {
         //        menu_state = 0;
         //        input_cursor = 0;
         //        state = 4;
-        //        selected_note = selected_key;
         reset_game();
         display_in_game();
       } else { // back
@@ -162,19 +163,17 @@ void update_state(int bv, int js) {
           }
           
           play_note(curr_note_index);
-          
           Serial.printf("Current note index updated %d \n", curr_note_index);
 
         } else if (js == 4) { // left
 
           if (curr_note_index - SCALE_STEPS[step_index] >= 0) { // TODO
             curr_note_index = curr_note_index - SCALE_STEPS[step_index];
-            selected_note = curr_note_index % 12;
             step_index = (step_index + 7) % 8; //same as subtracting 1
+            selected_note = curr_note_index % 12;
           }
           
           play_note(curr_note_index);
-          
           Serial.printf("Current note index updated %d \n", curr_note_index);
         }
 
@@ -194,9 +193,7 @@ void update_state(int bv, int js) {
           Serial.printf("Current note is %s", current_note);
         }
 
-
         if (js == 2 || js == 4) { // update current selected symbol if note has changed
-
           if (current_note[1] == '#') {
             selected_symbol = 2;
           } else if (current_note[1] == 'b') {
@@ -204,10 +201,7 @@ void update_state(int bv, int js) {
           } else if (current_note[1] == ' ' || current_note[1] == '\0') {
             selected_symbol = 1;
           }
-
           adjustment = 0; //we need to reset adjustment each time
-
-
         }
 
         // changing sharp/flat/neutral
@@ -225,7 +219,6 @@ void update_state(int bv, int js) {
           Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
 
         } else if (js == 3) { // down
-
           if (selected_symbol == 0) {
             adjustment = adjustment + 2;
           } else {
@@ -234,7 +227,6 @@ void update_state(int bv, int js) {
           play_note(curr_note_index + adjustment);
           selected_symbol = (selected_symbol + 2) % 3;
           current_note[1] = SYMBOLS[selected_symbol];
-
           Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
         }
 
@@ -266,7 +258,6 @@ void update_state(int bv, int js) {
         tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
 
         int temp_note_state = note_state;
-
         if (note_state < 16) note_state += pow(2, selected_duration); // to update grid cursor position for next note
         is_locked = false;
         menu_state = 0;
@@ -283,8 +274,7 @@ void update_state(int bv, int js) {
         temp_note_state = temp_note_state + 1;
 
         int i;
-
-        for (i = 0; i < selected_duration; i = i + 1) {
+        for (i = 0; i < pow(2, selected_duration); i = i + 1) {
           curr_notes_array[temp_note_state] = 37;
           temp_note_state = temp_note_state + 1;
         }
@@ -328,6 +318,7 @@ void update_state(int bv, int js) {
         stop_sound();
         update_game_menu();
       } else if (menu_state == 4) { // leave game
+        reset_game();
         back_to_landing();
       }
     }

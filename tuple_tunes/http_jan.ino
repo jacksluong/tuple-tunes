@@ -48,27 +48,6 @@ void get_song_measures() {
     }
   } 
   
-  
-
-
-//  bool still_parsing = true;
-
-//  if (response[0] == "1") {
-//    char* current_note = &(response[0]) + 2;
-//    char* next_note = strchr(current_note, ',') + 1;
-//    *(strchr(current_note, ',')) = '\0';
-//    while (still_parsing) {
-//      measures[measure_index_http][note_index_http] = atoi(current_note);
-//      
-//    }
-//    
-//    char* target_str = strchr(measures,',') + 2;
-//    *(strchr(response_buffer, ',')) = '\0';
-//    char* setting_str = strchr(target_str, ',') + 2;
-//    *(strchr(target_str, ',')) = '\0';
-//    *(strchr(setting_str, ')')) = '\0';
-//  }
-  
 }
 
 void submit_measure() {

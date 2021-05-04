@@ -28,7 +28,13 @@ char USERNAME[] = "Irene";
 
 int game_id;
 char game_code[5];
+char measure_response[200];
+char player_in_turn[50];
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ea249acc5a8d2e2f81ec7343938a42540dbaa0a3
 char SERVER[] = "608dev-2.net";
 char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py?";
 char START_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py?";
@@ -71,7 +77,7 @@ const char* TEMPO_LABELS[] = {"Slow", "Mid", "Fast"};
 const uint8_t TEMPO_SPEEDS[] = {60, 96, 144};
 const char* NOTE_DURATIONS[] = {"1/16", "1/8", "1/4", "1/2", "1"};
 const char SYMBOLS[] = {'b', ' ', '#'};
-const int MEASURE_COUNT = 2;
+const int MEASURE_COUNT = 3;
 const uint8_t SCALE_STEPS[] = {0, 2, 2, 1, 2, 2, 2, 1}; // half steps that we need per scale
 const char* NOTES_FLAT[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
 const char* NOTES_SHARP[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
@@ -197,7 +203,7 @@ void setup() {
   }
 
   //testing
-  start_game_http();
+  //start_game_http();
   
   // Draw first screen
   back_to_landing();

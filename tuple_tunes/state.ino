@@ -206,29 +206,99 @@ void update_state(int bv, int js) {
 
         // changing sharp/flat/neutral
         if (js == 1) { // up
-          //later on, we will add adjustment to note index
-          if (selected_symbol == 2) {
-            adjustment = adjustment - 2;
-          } else {
-            adjustment = adjustment + 1;
-          }
-          play_note(curr_note_index + adjustment);
-          selected_symbol = (selected_symbol + 1) % 3;
-          current_note[1] = SYMBOLS[selected_symbol];
 
-          Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+          /////////////////////////////
+          // edge cases //////////////
+          ////////////////////////////
+          if (curr_note_index == 0){ //edge case for Cb
+            if (selected_symbol == 2){
+              adjustment = adjustment - 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1) {
+              adjustment = adjustment + 1;
+              selected_symbol == 2;
+            } else {
+              Serial.println("we should not be rendering Cb");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];            
+          }
+
+          else if (curr_note_index == 35){ //B
+            if (selected_symbol == 0){
+              adjustment = adjustment + 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1){
+              adjustment = adjustment - 1;
+              selected_symbol = 0;
+            } else {
+              Serial.println("we should not be rendering B#");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+          }
+
+          ///////////////////////////////////
+
+          else { //this is for all other notes
+             //later on, we will add adjustment to note index
+            if (selected_symbol == 2) {
+              adjustment = adjustment - 2;
+            } else {
+              adjustment = adjustment + 1;
+            }
+            play_note(curr_note_index + adjustment);
+            selected_symbol = (selected_symbol + 1) % 3;
+            current_note[1] = SYMBOLS[selected_symbol];
+  
+            Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+            
+          }
 
         } else if (js == 3) { // down
-          if (selected_symbol == 0) {
-            adjustment = adjustment + 2;
-          } else {
-            adjustment = adjustment - 1;
+
+          /////////////////////////////
+          // edge cases //////////////
+          ////////////////////////////
+          if (curr_note_index == 0){ //edge case for Cb
+            if (selected_symbol == 2){
+              adjustment = adjustment - 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1) {
+              adjustment = adjustment + 1;
+              selected_symbol == 2;
+            } else {
+              Serial.println("we should not be rendering Cb");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];            
           }
-          play_note(curr_note_index + adjustment);
-          selected_symbol = (selected_symbol + 2) % 3;
-          current_note[1] = SYMBOLS[selected_symbol];
-          Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
-        }
+
+          else if (curr_note_index == 35){
+            if (selected_symbol == 0){
+              adjustment = adjustment + 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1){
+              adjustment = adjustment - 1;
+              selected_symbol = 0;
+            } else {
+              Serial.println("we should not be rendering B#");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+          }
+
+          ///////////////////////////////////
+
+
+          else {
+              if (selected_symbol == 0) {
+                adjustment = adjustment + 2;
+              } else {
+                adjustment = adjustment - 1;
+              }
+              play_note(curr_note_index + adjustment);
+              selected_symbol = (selected_symbol + 2) % 3;
+              current_note[1] = SYMBOLS[selected_symbol];
+              Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+            }
+          }
 
       } else if (menu_state == 1) { // duration selection (joystick left and right)
         tft.fillRect(125, 40, 25, 15, TFT_BLACK); // clear duration
@@ -277,6 +347,7 @@ void update_state(int bv, int js) {
         for (i = 0; i < pow(2, selected_duration); i = i + 1) {
           curr_notes_array[temp_note_state] = 37;
           temp_note_state = temp_note_state + 1;
+          
         }
 
         Serial.printf("Note index inserted %d", curr_note_index);

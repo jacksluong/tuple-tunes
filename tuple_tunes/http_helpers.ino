@@ -32,9 +32,9 @@ const char API_KEY[] = "AIzaSyCwyynsePu7xijUYTOgR7NdVqxH2FAG9DQ"; // for googlea
 /////////////
 
 const int RESPONSE_TIMEOUT = 6000;
-const uint16_t IN_BUFFER_SIZE = 2000;
+//const uint16_t IN_BUFFER_SIZE = 2000;
 const uint16_t JSON_BODY_SIZE = 3000;
-char request[IN_BUFFER_SIZE];
+//char request[IN_BUFFER_SIZE];
 
 //////////////////
 // My functions //

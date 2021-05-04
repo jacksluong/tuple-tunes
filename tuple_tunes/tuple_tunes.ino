@@ -24,17 +24,19 @@ uint8_t AUDIO_PWM = 1;
 // HTTP
 char NETWORK[] = "MIT";
 char PASSWORD[] = "";
-char USERNAME[] = "jkluong";
+char USERNAME[] = "Irene";
 
 int game_id;
 char game_code[5];
 
-char SERVER[] = "http://608dev-2.net";
-char IN_GAME_ADDRESS[] = "sandbox/sc/team59/server/logic.py";
-char START_GAME_ADDRESS[] = "sandbox/sc/team59/server/init.py";
+char SERVER[] = "608dev-2.net";
+char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py?";
+char START_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py?";
 
 const uint16_t OUT_BUFFER_SIZE = 2000;
 char response[OUT_BUFFER_SIZE];
+const uint16_t IN_BUFFER_SIZE = 2000;
+char request[IN_BUFFER_SIZE];
 
 // LED
 const uint8_t red = 0;
@@ -193,6 +195,9 @@ void setup() {
   for (int i = 1; i < NOTE_COUNT; i++) {
     note_freqs[i] = MULT*note_freqs[i-1];
   }
+
+  //testing
+  start_game_http();
   
   // Draw first screen
   back_to_landing();

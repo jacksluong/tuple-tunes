@@ -2,6 +2,16 @@ void get_song_measures() {
 //  char body[200]; //for body
 //  sprintf(body, "username=%s&game_id=%d&measure=%d", USERNAME, game_id, current_measure);
 //  make_get_request(SERVER, IN_GAME_ADDRESS, body, response, false)
+//  int measure_index_http = 0;
+//  int note_index_http = 0;
+//  char * p = strtok(response, ",");
+//  while (p != NULL) {
+//    measures[measure_index_http][note_index_http] = atoi(p);
+//    insert atoi(p) into measures
+//    p = strtok(NULL, ",");
+//    some code to change the indices
+//  }
+//  THE BELOW STUFF IS DUMB PLS IGNORE
 //  bool still_parsing = true;
 //  int measure_index_http = 0;
 //  int note_index_http = 0;
@@ -20,6 +30,7 @@ void get_song_measures() {
 //    *(strchr(target_str, ',')) = '\0';
 //    *(strchr(setting_str, ')')) = '\0';
 //  }
+
   
 }
 

@@ -26,6 +26,9 @@ char NETWORK[] = "MIT";
 char PASSWORD[] = "";
 char USERNAME[] = "jkluong";
 
+int game_id;
+char game_code[5];
+
 const uint16_t OUT_BUFFER_SIZE = 2000;
 char response[OUT_BUFFER_SIZE];
 
@@ -79,6 +82,8 @@ bool is_flat_key = false;
 int selected_key = 0; // iterates through NOTES_FLAT in start game
 int selected_tempo = 0;
 char room_num[4];
+
+
 
 // Game state variables
 int player_count = 0;

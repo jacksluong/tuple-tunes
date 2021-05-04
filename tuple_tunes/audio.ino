@@ -5,14 +5,16 @@
 uint32_t last_played = 0;
 
 void play_note(int index) {
-  ledcWriteTone(AUDIO_PWM, note_freqs[index]);
+  if (sound_on) {
+    ledcWriteTone(AUDIO_PWM, note_freqs[index]);
+    last_played = millis();
+  }
 //  dac_output_voltage(DAC_CHANNEL_2, 200);
 //  int num = 0;
 //  while (num < 500){
 //    dacWrite(AUDIO_TRANSDUCER, 3.3);
 //    num = num + 1
 //  }
-  last_played = millis();
 }
 
 void stop_sound() {

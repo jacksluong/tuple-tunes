@@ -72,6 +72,7 @@ void update_in_game() {
     tft.setCursor(8 + 26.5 * (note_state % 4), 28 + 25*(int(note_state/4)), 1);
     tft.printf(current_note);
   }
+
 }
 
 ///////////////
@@ -88,32 +89,68 @@ void display_game_menu() {
   // left side actionables
   tft.setCursor(2, 6, 1);
   tft.println("Menu\r\n");
-  tft.setCursor(4, 25, 1);
+  tft.setCursor(4, 20, 1);
   tft.println(" Resume\r\n");
-  tft.setCursor(4, 50, 1);
-  tft.println(" Play Song\r\n");
-  tft.setCursor(4, 75, 1);
-  tft.println(" Play Measure\r\n");
+  tft.setCursor(4, 40, 1);
+  if (!playing_song) {
+    tft.println(" Play Song\r\n");
+  } else {
+    tft.println(" Stop Song\r\n");
+  }
+  tft.setCursor(4, 60, 1);
+  if (!playing_measure) {
+    tft.println(" Play Measure\r\n");
+  } else {
+    tft.println(" Stop Measure\r\n");
+  }
+  tft.setCursor(4, 80, 1);
+  if (sound_on) {
+    tft.println(" Mute\r\n");
+  } else {
+    tft.println(" Unmute\r\n");
+  }
   tft.setCursor(4, 100, 1);
   tft.println(" Leave Game\r\n");
 
   // right side static
   tft.setCursor(88, 6, 1);
   tft.println("Game Info\r\n");
-  tft.setCursor(88, 25, 1);
+  tft.setCursor(88, 20, 1);
   tft.printf(" Room#:%s\r\n", room_num);
-  tft.setCursor(88, 50, 1);
+  tft.setCursor(88, 40, 1);
   tft.printf(" Key:%s\r\n", NOTES_FLAT[selected_key]);
-  tft.setCursor(88, 75, 1);
+  tft.setCursor(88, 60, 1);
   tft.printf(" Tempo:%s\r\n", TEMPO_LABELS[selected_tempo]);
+  tft.setCursor(88, 80, 1);
+  tft.printf(" #Players:%d\r\n", player_count);
   tft.setCursor(88, 100, 1);
-  tft.printf(" #Players:%d", player_count);
+  if (sound_on) {
+    tft.println(" Sound On");
+  } else {
+    tft.println(" Sound off");
+  }
 
   update_game_menu();
 }
 
 void update_game_menu() {
-  tft.fillRect(2, 25, 4, 100, TFT_BLACK);
-  set_cursor_pos(2, 26 + 25 * (menu_state % 4));
+  tft.fillRect(2, 20, 4, 100, TFT_BLACK);
+  set_cursor_pos(2, 21 + 20 * (menu_state % 5));
   draw_cursor();
+
+  tft.fillRect(6, 78, 50, 22, TFT_BLACK);
+  tft.setCursor(4, 80, 1);
+  if (sound_on) {
+    tft.println(" Mute\r\n");
+  } else {
+    tft.println(" Unmute\r\n");
+  }
+
+  tft.fillRect(88, 98, 70, 22, TFT_BLACK);
+  tft.setCursor(88, 100, 1);
+  if (sound_on) {
+    tft.println(" Sound On");
+  } else {
+    tft.println(" Sound Off");
+  }
 }

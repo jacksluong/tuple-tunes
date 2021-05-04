@@ -72,6 +72,7 @@ int note_index = 0; // current note being played in measure
 int measure_index = 0; // current measure being played in song
 bool playing_measure = false;
 bool playing_song = false;
+bool sound_on = true;
 
 // Game state options
 bool is_flat_key = false;
@@ -189,8 +190,8 @@ void setup() {
 }
 
 void loop() {
-  if (playing_measure)  play_measure(test2);
-  if (playing_song) play_song(test_song);
+  if (playing_measure && sound_on)  play_measure(test2);
+  if (playing_song && sound_on) play_song(test_song);
   int bv = button.read();
   int js = joystick.read();
     

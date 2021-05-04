@@ -38,7 +38,7 @@ void update_state(int bv, int js) {
       update_landing();
     }
 
-    if (bv) {
+    if (bv == 1) {
       if (menu_state == 0) { // start
         state = 1;
         display_start_game();
@@ -56,6 +56,9 @@ void update_state(int bv, int js) {
         display_gallery();
       }
       menu_state = 0;
+    } else if (bv == 2) {
+      sound_on = !sound_on;
+      update_landing();
     }
 
   } else if (state == 1) {      ////////////////////// start game //////////////////////
@@ -80,7 +83,7 @@ void update_state(int bv, int js) {
     }
     update_start_game(js);
 
-    if (bv) {
+    if (bv == 1) {
       if (menu_state == 0 || menu_state == 1) { // inputs
         is_locked = !is_locked;
         if (!is_locked) stop_sound();
@@ -96,6 +99,9 @@ void update_state(int bv, int js) {
       } else  { // back
         back_to_landing();
       }
+    } else if (bv == 2) {
+      sound_on = !sound_on;
+      update_start_game(6);
     }
 
   } else if (state == 2) {      ////////////////////// join game //////////////////////
@@ -110,7 +116,7 @@ void update_state(int bv, int js) {
     }
     update_join_game(js);
 
-    if (bv) {
+    if (bv == 1) {
       if (menu_state == 0) { // input
         if (!is_locked) is_locked = true;
         else if (game_code_input[0] >= 0 && // three numbers specified
@@ -129,10 +135,14 @@ void update_state(int bv, int js) {
       } else { // back
         back_to_landing();
       }
+    } else if (bv == 2) {
+      sound_on = !sound_on;
+      update_join_game(6);
     }
   } else if (state == 3) {      ////////////////////// gallery //////////////////////
 
   } else if (state == 4) {      ////////////////////// in-game //////////////////////
+    if (millis() - last_played > 300) stop_sound();
     if (!is_locked && js) { // scrolling up and down the menu
       tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK);
       if (js == 1) { // up
@@ -150,6 +160,9 @@ void update_state(int bv, int js) {
             curr_note_index = curr_note_index + SCALE_STEPS[step_index];
             selected_note = curr_note_index % 12;
           }
+          
+          play_note(curr_note_index);
+          
           Serial.printf("Current note index updated %d \n", curr_note_index);
 
         } else if (js == 4) { // left
@@ -159,7 +172,9 @@ void update_state(int bv, int js) {
             selected_note = curr_note_index % 12;
             step_index = (step_index + 7) % 8; //same as subtracting 1
           }
-
+          
+          play_note(curr_note_index);
+          
           Serial.printf("Current note index updated %d \n", curr_note_index);
         }
 
@@ -168,6 +183,7 @@ void update_state(int bv, int js) {
 
         //this is our case for representing rests
         if (step_index == 7) {
+          stop_sound();
           strcat(current_note, "R");
           Serial.println("Current note is rest");
         } else if (is_flat_key) {
@@ -240,6 +256,9 @@ void update_state(int bv, int js) {
         is_locked = false;
       }
       // state changes
+      if (menu_state == 0) {
+        play_note(curr_note_index);
+      }
       if (menu_state == 2) { // add a note
         int curr_x = 2 + 26.5 * (note_state % 4);
         int curr_y = 29 + 25 * (int(note_state / 4));
@@ -273,26 +292,41 @@ void update_state(int bv, int js) {
         //Serial.println(curr_notes_array);
       }
       update_in_game();
+    } else if (bv == 2) { // go to game menu screen
+        tft.fillScreen(TFT_BLACK);
+        state = 5;
+        menu_state = 0;
+        is_locked = false;
+        display_game_menu();
     }
+    
 
   } else if (state == 5) {      ////////////////////// game menu //////////////////////
     if (js == 1) { // up
-      menu_state = (menu_state + 3) % 4;
+      menu_state = (menu_state + 4) % 5;
       update_game_menu();
     } else if (js == 3) { // down
-      menu_state = (menu_state + 1) % 4;
+      menu_state = (menu_state + 1) % 5;
       update_game_menu();
     }
     if (bv) {
+      update_game_menu();
       if (menu_state == 0) { // resume game
         state = 4;
         display_in_game();
       } else if (menu_state == 1) {
-        playing_song = true;
+        if (playing_song) stop_sound();
+        playing_song = ! playing_song;
       } else if (menu_state == 2) {
-        playing_measure = true;
-      }
-      else if (menu_state == 3) { // leave game
+        if (playing_measure) stop_sound();
+        playing_measure = ! playing_measure;
+      } else if (menu_state == 3) {
+        sound_on = !sound_on;
+        playing_song = false;
+        playing_measure = false;
+        stop_sound();
+        update_game_menu();
+      } else if (menu_state == 4) { // leave game
         back_to_landing();
       }
     }

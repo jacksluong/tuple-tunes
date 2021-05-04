@@ -49,19 +49,29 @@ void display_in_game() {
     tft.fillCircle(4 * i + 146, 119, 1, TFT_WHITE);
   }
 
-  tft.println(room_num); // not to keep there, it's just for purposes of seeing the game code
-
 //  for (int i = 0; i < strlen(measures[current_measure]); i++) {
 //    tft.setCursor(8 + 26.5 * (i % 4), 28 + 25*(int(i/4)), 1);
 //    tft.printf(measures[current_measure][i]);
 //  }
-
+  int last_i;
   for (int i = 0; i < note_state; i++) {
       tft.setCursor(8 + 26.5 * (i % 4), 28 + 25*(int(i/4)), 1);
-      tft.println(curr_notes_array[i]);
-      
+      int note_i = curr_notes_array[i] % 12;
+      if (curr_notes_array[i] != 37) {
+        last_i = note_i;        
+      } else {
+        note_i = last_i;
+      }
+       
+      if (is_flat_key) {
+        tft.println(NOTES_FLAT[note_i]);
+      } else {
+        tft.println(NOTES_SHARP[note_i]);
+      }
   }
-  
+  if (note_state < 16) {
+    is_locked = true;
+  }
   update_in_game();
 }
 
@@ -70,11 +80,13 @@ void update_in_game() {
   tft.println(current_note); // print current selected note
   tft.setCursor(125, 40, 1);
   tft.println(NOTE_DURATIONS[selected_duration]); // print current selected note duration
-
+  
   // grid cursor
-  set_cursor_pos(2 + 26.5 * (note_state % 4), 29 + 25*(int(note_state/4)));
-  draw_cursor();
-
+  if (note_state < 16) {
+    set_cursor_pos(2 + 26.5 * (note_state % 4), 29 + 25*(int(note_state/4)));
+    draw_cursor();
+  }
+  
   // right side input cursor
   tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_WHITE);
 
@@ -83,7 +95,6 @@ void update_in_game() {
     tft.setCursor(8 + 26.5 * (note_state % 4), 28 + 25*(int(note_state/4)), 1);
     tft.printf(current_note);
   }
-
 }
 
 ///////////////

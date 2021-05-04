@@ -28,6 +28,7 @@ void reset_game() {
   menu_state = 0;
   input_cursor = 0;
   state = 4;
+  is_locked = true;
 }
 
 void update_state(int bv, int js) {
@@ -242,7 +243,7 @@ void update_state(int bv, int js) {
     update_in_game();
 
     if (bv == 1) {
-      if (!is_locked) {
+      if (!is_locked && menu_state != 2) {
         is_locked = true;
       } else {
         is_locked = false;
@@ -258,29 +259,39 @@ void update_state(int bv, int js) {
         tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
 
         int temp_note_state = note_state;
-        if (note_state < 16) note_state += pow(2, selected_duration); // to update grid cursor position for next note
-        is_locked = false;
-        menu_state = 0;
-
-        //adding the note to the notes array
-        if (current_note[0] == 'R') {
-          curr_note_index = 36;
+        Serial.printf("Added is %d", note_state + pow(2, selected_duration));
+        if ((note_state + pow(2, selected_duration) >= 16) || (note_state >= 16)) {
+          note_state = 16;  // to update grid cursor position for next note
+          menu_state = 3;
         } else {
-          //curr_note_index = curr_note_index + adjustment;
-        }
-
-        //curr_notes_array[temp_note_state] = curr_note_index;
-        curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
-        temp_note_state = temp_note_state + 1;
-
-        int i;
-        for (i = 0; i < pow(2, selected_duration); i = i + 1) {
-          curr_notes_array[temp_note_state] = 37;
+          note_state += pow(2, selected_duration);
+          is_locked = false;
+          menu_state = 0;
+    
+          //adding the note to the notes array
+          if (current_note[0] == 'R') {
+            curr_note_index = 36;
+          } else {
+            //curr_note_index = curr_note_index + adjustment;
+          }
+    
+          //curr_notes_array[temp_note_state] = curr_note_index;
+          curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
           temp_note_state = temp_note_state + 1;
+    
+          int i;
+          for (i = 0; i < pow(2, selected_duration); i = i + 1) {
+            curr_notes_array[temp_note_state] = 37;
+            temp_note_state = temp_note_state + 1;
+          }
         }
-
-        Serial.printf("Note index inserted %d", curr_note_index);
-        //Serial.println(curr_notes_array);
+      } else if (menu_state == 3) {
+          tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
+          
+          note_state = 0;
+          current_measure += 1;
+          menu_state = 0;
+          display_in_game();
       }
       update_in_game();
     } else if (bv == 2) { // go to game menu screen

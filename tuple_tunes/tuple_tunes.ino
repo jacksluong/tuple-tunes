@@ -29,6 +29,10 @@ char USERNAME[] = "jkluong";
 int game_id;
 char game_code[5];
 
+char SERVER[] = "http://608dev-2.net";
+char IN_GAME_ADDRESS[] = "sandbox/sc/team59/server/logic.py";
+char START_GAME_ADDRESS[] = "sandbox/sc/team59/server/init.py";
+
 const uint16_t OUT_BUFFER_SIZE = 2000;
 char response[OUT_BUFFER_SIZE];
 

@@ -24,14 +24,17 @@ uint8_t AUDIO_PWM = 1;
 // HTTP
 char NETWORK[] = "MIT";
 char PASSWORD[] = "";
-char USERNAME[] = "jkluong";
+char USERNAME[] = "Irene";
 
 int game_id;
 char game_code[5];
+char measure_response[200];
+char player_in_turn[50];
 
-char SERVER[] = "http://608dev-2.net";
-char IN_GAME_ADDRESS[] = "sandbox/sc/team59/server/logic.py";
-char START_GAME_ADDRESS[] = "sandbox/sc/team59/server/init.py";
+
+char SERVER[] = "608dev-2.net";
+char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py?";
+char START_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py?";
 
 const uint16_t OUT_BUFFER_SIZE = 2000;
 char response[OUT_BUFFER_SIZE];
@@ -69,7 +72,7 @@ const char* TEMPO_LABELS[] = {"Slow", "Mid", "Fast"};
 const uint8_t TEMPO_SPEEDS[] = {60, 96, 144};
 const char* NOTE_DURATIONS[] = {"1/16", "1/8", "1/4", "1/2", "1"};
 const char SYMBOLS[] = {'b', ' ', '#'};
-const int MEASURE_COUNT = 2;
+const int MEASURE_COUNT = 3;
 const uint8_t SCALE_STEPS[] = {0, 2, 2, 1, 2, 2, 2, 1}; // half steps that we need per scale
 const char* NOTES_FLAT[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
 const char* NOTES_SHARP[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
@@ -193,7 +196,7 @@ void setup() {
   for (int i = 1; i < NOTE_COUNT; i++) {
     note_freqs[i] = MULT*note_freqs[i-1];
   }
-  
+
   // Draw first screen
   back_to_landing();
 }

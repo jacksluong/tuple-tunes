@@ -282,6 +282,9 @@ void update_state(int bv, int js) {
         Serial.printf("Note index inserted %d", curr_note_index);
         //Serial.println(curr_notes_array);
       }
+      if (menu_state == 3) {
+        submit_measure();
+      }
       update_in_game();
     } else if (bv == 2) { // go to game menu screen
         tft.fillScreen(TFT_BLACK);

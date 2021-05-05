@@ -401,7 +401,7 @@ void process_in_game(int bv, int js) {
     }
   } else {
     if (millis() - time_since_last_ping > PING_INTERVAL) {
-      fetch_game_state();
+      fetch_game_state(6); // TODO: hardcoded 6
       Serial.println("time since last ping updated");
     }
   }

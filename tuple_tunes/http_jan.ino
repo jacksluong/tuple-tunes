@@ -1,6 +1,5 @@
-void fetch_game_state() {
+void fetch_game_state(int game_id) {
   char query[100]; //for body
-  game_id = 6;
   sprintf(query, "username=%s&game_id=%d&measure=%d", USERNAME, game_id, current_measure);
   Serial.println("making fetch");
   make_get_request(SERVER, IN_GAME_ADDRESS, query, response, false);

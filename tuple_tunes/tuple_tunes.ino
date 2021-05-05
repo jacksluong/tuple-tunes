@@ -31,10 +31,6 @@ char game_code[5];
 char measure_response[200];
 char player_in_turn[50];
 
-<<<<<<< HEAD
-=======
-
->>>>>>> ea249acc5a8d2e2f81ec7343938a42540dbaa0a3
 char SERVER[] = "608dev-2.net";
 char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py?";
 char START_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py?";

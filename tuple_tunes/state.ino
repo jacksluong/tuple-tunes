@@ -348,16 +348,12 @@ void update_state(int bv, int js) {
           //curr_notes_array[temp_note_state] = curr_note_index;
           curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
           temp_note_state = temp_note_state + 1;
-<<<<<<< HEAD
-          
-=======
-    
+
           int i;
           for (i = 0; i < pow(2, selected_duration); i = i + 1) {
             curr_notes_array[temp_note_state] = 37;
             temp_note_state = temp_note_state + 1;
           }
->>>>>>> ea249acc5a8d2e2f81ec7343938a42540dbaa0a3
         }
       } else if (menu_state == 3) {
           tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor

@@ -122,34 +122,34 @@ uint8_t char_append(char* buff, char c, uint16_t buff_size) {
    Return value:
       void (none)
 */
-void async_fetch(char* host, char* request, char* response, uint16_t response_size, uint16_t response_timeout, uint8_t serial) {
-  memset(response, 0, response_size);
-  if (client.connected()) { // while we remain connected, read out data coming back
-    bool process = false;
-    client.readBytesUntil('\n', response, response_size);
-    if (serial) Serial.println(response);
-    if (strcmp(response, "\r") == 0) process = true;
-    else memset(response, 0, response_size);
-    if (millis() - count > response_timeout) break;
-  } else {
-    if (millis() - time_since_last_ping > PING_INTERVAL) {
-      if (client.connect(host, 80)) {
-        if (serial) Serial.print(request);
-        client.print(request);
-        memset(response, 0, response_size);
-        uint32_t count = millis();
-        while (client.available()) { // read out remaining text (body of response)
-          char_append(response, client.read(), OUT_BUFFER_SIZE);
-        }
-        if (serial) Serial.println(response);
-        client.stop();
-        if (serial) Serial.println("-----------");
-      } else {
-        if (serial) Serial.printf("Connection to %s failed\n", host);
-        client.stop();
-      }
-    }
-  }
+//void async_fetch(char* host, char* request, char* response, uint16_t response_size, uint16_t response_timeout, uint8_t serial) {
+//  memset(response, 0, response_size);
+//  if (client.connected()) { // while we remain connected, read out data coming back
+//    bool process = false;
+//    client.readBytesUntil('\n', response, response_size);
+//    if (serial) Serial.println(response);
+//    if (strcmp(response, "\r") == 0) process = true;
+//    else memset(response, 0, response_size);
+//    if (millis() - count > response_timeout) break;
+//  } else {
+//    if (millis() - time_since_last_ping > PING_INTERVAL) {
+//      if (client.connect(host, 80)) {
+//        if (serial) Serial.print(request);
+//        client.print(request);
+//        memset(response, 0, response_size);
+//        uint32_t count = millis();
+//        while (client.available()) { // read out remaining text (body of response)
+//          char_append(response, client.read(), OUT_BUFFER_SIZE);
+//        }
+//        if (serial) Serial.println(response);
+//        client.stop();
+//        if (serial) Serial.println("-----------");
+//      } else {
+//        if (serial) Serial.printf("Connection to %s failed\n", host);
+//        client.stop();
+//      }
+//    }
+//  }
   /*
   if (client.connect(host, 80)) {
     if (serial) Serial.print(request);
@@ -176,7 +176,7 @@ void async_fetch(char* host, char* request, char* response, uint16_t response_si
     client.stop();
   }
   */
-}
+//}
 void do_http_request(char* host, char* request, char* response, uint16_t response_size, uint16_t response_timeout, uint8_t serial) {
   WiFiClient client; //instantiate a client object
   if (client.connect(host, 80)) { //try to connect to host on port 80

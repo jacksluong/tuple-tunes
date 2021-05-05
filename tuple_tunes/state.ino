@@ -148,13 +148,13 @@ void update_state(int bv, int js) {
     if (!is_locked && js) { // scrolling up and down the menu
       tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK);
       if (js == 1) { // up
-        menu_state = (menu_state + 3) % 4;
+        menu_state = (menu_state + 4) % 5;
       } else if (js == 3) { // down
-        menu_state = (menu_state + 1) % 4;
+        menu_state = (menu_state + 1) % 5;
       }
     } else if (is_locked && js) { // scrolling through note and duration selection
       if (menu_state == 0) { // note and sharp/flat/neutral selection
-        tft.fillRect(133, 20, 20, 15, TFT_BLACK); // clear note
+        tft.fillRect(133, 20, 15, 15, TFT_BLACK); // clear note
         tft.fillRect(8 + 26.5 * (note_state % 4), 28 + 25 * (int(note_state / 4)), 15, 15, TFT_BLACK); // clear grid cell
         if (js == 2) { // right
           if (curr_note_index + SCALE_STEPS[(step_index + 1) % 8] <= 35) {
@@ -302,11 +302,18 @@ void update_state(int bv, int js) {
           }
 
       } else if (menu_state == 1) { // duration selection (joystick left and right)
-        tft.fillRect(125, 40, 25, 15, TFT_BLACK); // clear duration
+        tft.fillRect(122, 40, 25, 15, TFT_BLACK); // clear duration
         if (js == 2) { // right
           selected_duration = (selected_duration + 1) % 5;
         } else if (js == 4) { // left
           selected_duration = (selected_duration + 4) % 5;
+        }
+      } else if (menu_state == 4) {
+        tft.fillRect(119, 100, 27, 15, TFT_BLACK); // clear note
+        if (js == 2) { // right
+          current_measure = (current_measure + 1) % MEASURE_COUNT;
+        } else if (js == 4) { // left
+          current_measure = (current_measure + MEASURE_COUNT - 1) % MEASURE_COUNT;
         }
       }
     }
@@ -357,7 +364,6 @@ void update_state(int bv, int js) {
         }
       } else if (menu_state == 3) {
           tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
-          
           note_state = 0;
           current_measure += 1;
           menu_state = 0;

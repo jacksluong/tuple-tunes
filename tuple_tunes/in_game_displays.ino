@@ -36,14 +36,16 @@ void display_in_game() {
   } else if (current_note[1] == ' ') {
     selected_symbol = 2;
   }
-  tft.setCursor(125, 40, 1);
-  tft.println(NOTE_DURATIONS[selected_duration]); // note duration
-  tft.drawTriangle(117,41,112,43,117,45, TFT_WHITE);
+  tft.drawTriangle(115,21,110,23,115,25, TFT_WHITE); // arrows for note selection
+  tft.drawTriangle(151,21,156,23,151,25, TFT_WHITE);
+  tft.drawTriangle(115,41,110,43,115,45, TFT_WHITE); // arrows for duration selection
   tft.drawTriangle(151,41,156,43,151,45, TFT_WHITE);
   tft.setCursor(112, 60, 1); // add a note
   tft.println("Add Note");
   tft.setCursor(118, 80, 1); // submit measure
   tft.println("Submit");
+  tft.drawTriangle(115,101,110,103,115,105, TFT_WHITE); // arrows for measure selection
+  tft.drawTriangle(151,101,156,103,151,105, TFT_WHITE);
 
   for (int i = 0; i < 3; i++) { // ellipses
     tft.fillCircle(4 * i + 146, 119, 1, TFT_WHITE);
@@ -78,8 +80,20 @@ void display_in_game() {
 void update_in_game() {
   tft.setCursor(132, 20, 1); 
   tft.println(current_note); // print current selected note
-  tft.setCursor(125, 40, 1);
+  if (selected_duration == 0) { // 1/16
+    tft.setCursor(122, 40, 1); 
+  } else if (selected_duration == 4) { // 1
+    tft.setCursor(133, 40, 1); 
+  } else {
+    tft.setCursor(127, 40, 1);
+  }
   tft.println(NOTE_DURATIONS[selected_duration]); // print current selected note duration
+  if (current_measure < 10) { // scroll through measures
+    tft.setCursor(122, 100, 1);
+  } else {
+    tft.setCursor(119, 100, 1); 
+  }
+  tft.printf("m. %d", current_measure);
   
   // grid cursor
   if (note_state < 16) {

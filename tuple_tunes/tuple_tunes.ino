@@ -26,18 +26,14 @@ char NETWORK[] = "MIT";
 char PASSWORD[] = "";
 char USERNAME[] = "Irene";
 
-int game_id;
+uint16_t game_id;
 char game_code[5];
 char measure_response[200];
 char player_in_turn[50];
 
-<<<<<<< HEAD
-=======
-
->>>>>>> ea249acc5a8d2e2f81ec7343938a42540dbaa0a3
 char SERVER[] = "608dev-2.net";
-char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py?";
-char START_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py?";
+char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py";
+char START_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py";
 
 const uint16_t OUT_BUFFER_SIZE = 2000;
 char response[OUT_BUFFER_SIZE];
@@ -77,7 +73,7 @@ const char* TEMPO_LABELS[] = {"Slow", "Mid", "Fast"};
 const uint8_t TEMPO_SPEEDS[] = {60, 96, 144};
 const char* NOTE_DURATIONS[] = {"1/16", "1/8", "1/4", "1/2", "1"};
 const char SYMBOLS[] = {'b', ' ', '#'};
-const int MEASURE_COUNT = 3;
+const int MEASURE_COUNT = 16;
 const uint8_t SCALE_STEPS[] = {0, 2, 2, 1, 2, 2, 2, 1}; // half steps that we need per scale
 const char* NOTES_FLAT[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
 const char* NOTES_SHARP[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
@@ -95,11 +91,10 @@ int selected_key = 0; // iterates through NOTES_FLAT in start game
 int selected_tempo = 0;
 char room_num[4];
 
-
-
 // Game state variables
 int player_count = 0;
-int measures[MEASURE_COUNT][16];
+bool in_turn = false;
+uint8_t measures[MEASURE_COUNT][16];
 int current_measure = 0;
 int selected_note = 0;
 int curr_note_index = 0;

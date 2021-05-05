@@ -32,9 +32,8 @@ const char API_KEY[] = "AIzaSyCwyynsePu7xijUYTOgR7NdVqxH2FAG9DQ"; // for googlea
 /////////////
 
 const int RESPONSE_TIMEOUT = 6000;
-//const uint16_t IN_BUFFER_SIZE = 2000;
-const uint16_t JSON_BODY_SIZE = 3000;
-//char request[IN_BUFFER_SIZE];
+const int PING_INTERVAL = 6000;
+uint32_t time_since_last_ping = millis();
 
 //////////////////
 // My functions //
@@ -124,16 +123,16 @@ uint8_t char_append(char* buff, char c, uint16_t buff_size) {
       void (none)
 */
 void do_http_request(char* host, char* request, char* response, uint16_t response_size, uint16_t response_timeout, uint8_t serial) {
-  WiFiClient client; //instantiate a client object
-  if (client.connect(host, 80)) { //try to connect to host on port 80
-    if (serial) Serial.print(request);//Can do one-line if statements in C without curly braces
+  WiFiClient client;
+  if (client.connect(host, 80)) {
+    if (serial) Serial.print(request);
     client.print(request);
-    memset(response, 0, response_size); //Null out (0 is the value of the null terminator '\0') entire buffer
+    memset(response, 0, response_size); 
     uint32_t count = millis();
-    while (client.connected()) { //while we remain connected read out data coming back
+    while (client.connected()) { 
       client.readBytesUntil('\n', response, response_size);
       if (serial) Serial.println(response);
-      if (strcmp(response, "\r") == 0) { //found a blank line!
+      if (strcmp(response, "\r") == 0) { 
         break;
       }
       memset(response, 0, response_size);
@@ -141,7 +140,7 @@ void do_http_request(char* host, char* request, char* response, uint16_t respons
     }
     memset(response, 0, response_size);
     count = millis();
-    while (client.available()) { //read out remaining text (body of response)
+    while (client.available()) {
       char_append(response, client.read(), OUT_BUFFER_SIZE);
     }
     if (serial) Serial.println(response);
@@ -167,18 +166,17 @@ void do_http_request(char* host, char* request, char* response, uint16_t respons
       void (none)
 */
 void do_https_request(char* host, char* request, char* response, uint16_t response_size, uint16_t response_timeout, uint8_t serial) {
-  WiFiClientSecure client; //global WiFiClient Secure object
-  client.setCACert(CA_CERT); //set cert for https
-  if (client.connect(host, 443)) { //try to connect to host on port 443
-    if (serial) Serial.print(request);//Can do one-line if statements in C without curly braces
+  WiFiClientSecure client;
+  client.setCACert(CA_CERT); // set cert for https
+  if (client.connect(host, 443)) { 
+    if (serial) Serial.print(request);
     client.print(request);
-    response[0] = '\0';
-    //memset(response, 0, response_size); //Null out (0 is the value of the null terminator '\0') entire buffer
+    memset(response, 0, response_size); 
     uint32_t count = millis();
-    while (client.connected()) { //while we remain connected read out data coming back
+    while (client.connected()) { 
       client.readBytesUntil('\n', response, response_size);
       if (serial) Serial.println(response);
-      if (strcmp(response, "\r") == 0) { //found a blank line!
+      if (strcmp(response, "\r") == 0) { 
         break;
       }
       memset(response, 0, response_size);
@@ -186,7 +184,7 @@ void do_https_request(char* host, char* request, char* response, uint16_t respon
     }
     memset(response, 0, response_size);
     count = millis();
-    while (client.available()) { //read out remaining text (body of response)
+    while (client.available()) { 
       char_append(response, client.read(), OUT_BUFFER_SIZE);
     }
     if (serial) Serial.println(response);

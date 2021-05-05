@@ -37,7 +37,7 @@ def create_game(host, key, tempo):
         #the new game code is going to be the most recent one + 1
         most_recent = c.execute('''SELECT game_code FROM games ORDER BY time DESC;''').fetchone()
         if most_recent:
-            game_code = (most_recent[0] + 1) % 100
+            game_code = (most_recent[0] + 1) % 1000
 
         c.execute('''INSERT INTO games VALUES (?,?,?,?,?,?,?,?);''', (game_code, host, key, tempo, 'start', 0, 0, datetime.datetime.now()))
 

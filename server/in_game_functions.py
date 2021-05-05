@@ -17,34 +17,21 @@ def fetch(game_id, username, last_updated_measure):
             return ping_status
 
         #check for status of the game
-        game_status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id,)).fetchone()
+        # game_code int, host text, key text, tempo text, game_status text, time timestamp, turn int, measure int
+        game_status, current_measure, turn = c.execute('''SELECT game_status, measure, turn FROM games WHERE rowid = 
+                                                          ?;''', (game_id,)).fetchone()
 
-        #game has ended
-        if game_status[0] == 'ended':
-            song = get_song(game_id)
-            return f"1&{song}"
+        # get song from player's last measure and onwards
+        song = get_song(game_id, last_updated_measure)
 
-        #if currently in game: 
-        elif game_status[0] == 'in_game':
+        # figure out who's turn it should be
+        players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
 
-            #check if we need to update the number of measures
-            current_measure, turn = c.execute('''SELECT measure, turn FROM games WHERE rowid = ?;''', (game_id, )).fetchone()
+        # username of player in turn
+        in_turn = players[turn % len(players)][0]
 
-            if last_updated_measure == current_measure:
-                #up to date!
-                return "2"
-            
-            #get song created so far
-            song = get_song(game_id)
-
-            #figure out who's turn it should be
-            players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
-
-            #username of player in turn
-            in_turn = players[turn % len(players)][0]
-
-            # return f"Player in turn: {in_turn} \n Current Song: \n {song}"
-            return f"3&{in_turn}&{current_measure}&{song}"
+        # return f"Player in turn: {in_turn} \n Current Song: \n {song}"
+        return f"{in_turn}&{current_measure}&{song} "
 
 
 
@@ -58,18 +45,17 @@ def play_turn(game_id, username, measure):
         if ping_status == "0":
             return ping_status
 
-        last_measure, turn = c.execute('''SELECT measure, turn FROM games WHERE rowid = ?;''',(game_id,)).fetchone()
+        measure, turn = c.execute('''SELECT measure, turn FROM games WHERE rowid = ?;''',(game_id,)).fetchone()
+        # measure is the (0-indexed) index of the measure that we are submitting rn)
         
         c.execute('''CREATE TABLE IF NOT EXISTS measures(game_id int, username text, measure_number int, n1 int, n2 int, n3 int, n4 int, n5 int, n6 int, n7 int, n8 int, n9 int, n10 int, n11 int, n12 int, n13 int, n14 int, n15 int, n16 int);''')
 
-        c.execute('''INSERT INTO measures VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);''',(game_id,username, last_measure+1, measure[0],measure[1],measure[2],measure[3],measure[4],measure[5],measure[6],measure[7],measure[8],measure[9],measure[10],measure[11],measure[12],measure[13],measure[14],measure[15]))
+        c.execute('''INSERT INTO measures VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);''',(game_id,username, measure, measure[0],measure[1],measure[2],measure[3],measure[4],measure[5],measure[6],measure[7],measure[8],measure[9],measure[10],measure[11],measure[12],measure[13],measure[14],measure[15]))
 
-        new_measure = last_measure + 1
-        turn = turn + 1
-        c.execute('''UPDATE games SET turn = ?, measure = ? WHERE rowid = ?;''', (turn, new_measure, game_id))
+        c.execute('''UPDATE games SET turn = ?, measure = ? WHERE rowid = ?;''', (turn + 1, measure + 1, game_id))
 
         #once we hit the limit of measures, END THE GAME
-        if new_measure == MAX_MEASURES:
+        if measure + 1 == MAX_MEASURES:
             c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ("ended", game_id))
 
         #SUCCESSFUL!
@@ -91,34 +77,18 @@ def update_last_ping(game_id, username):
         return "1"
 
 
-def get_song(game_id):
+def get_song(game_id, start_measure=0):
     """
     Given a game id, return the song created so far
     """
     with sqlite3.connect(moosic_db) as c:
-        song_info = c.execute('''SELECT * FROM measures WHERE game_id = ? ORDER BY measure_number ASC;''', (game_id,)).fetchall()
+        song_info = c.execute('''SELECT * FROM measures WHERE game_id = ? AND measure_number >= ? 
+        ORDER BY measure_number ASC;''', (game_id, start_measure)).fetchall()
 
         #create song string
         song_list = []
         for measure in song_info:
-            song_list.append(','.join(str(int_val) for int_val in measure[3:19]))
+            song_list.append(','.join(str(int_val) for int_val in measure[3:]))
         song = " ".join(song_list)
 
         return song
-
-#hard coded stuff: all the major minor scales
-#TODO: set up frequencies with each note
-key_scale_notes = {
-    "C Major": ["C", "D", "E", "F", "G", "A", "B", "C"],
-    "G Major": ["G", "A", "B", "C", "D", "E", "F#", "G"],
-    "D Major": ["D", "E", "F#", "G", "A", "B", "C#", "D"],
-    "A Major": ["A", "B", "C#", "D", "E", "F#", "G#", "A"],
-    "E Major": ["E", "F#", "G#", "A", "B", "C#", "D#", "E"],
-    "B Major": ["B", "C#", "D#", "E", "F#", "G#", "A#", "B"],
-    "F# Major": ["F#", "G#", "A#", "B", "C#", "D#", "F", "F"],
-    "Db Major": ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C", "Db"],
-    "Eb Major": ["Eb", "F", "G", "Ab", "Bb", "C", "D", "Eb"],
-    "Bb Major": ["Bb", "C", "D", "Eb", "F", "G", "A", "Bb"],
-    "F Major": ["F", "G", "A", "Bb", "C", "D", "E", "F"],
-}
-

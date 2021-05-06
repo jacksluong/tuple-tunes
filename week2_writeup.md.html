@@ -1,0 +1,993 @@
+    <meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
+
+    **6.08 Final Project Week 1 Writeup**
+
+**Team 59:** Irene Huang, Si Liang (Brandon) Lei, Jacky Luong, Janette (Jan) Park, Joyce Yuan
+
+Meeting time: 4:30 - 5:00 PM Thursday
+
+# Video Demo
+
+![Video demonstration front end single player measure input](link here)
+
+![Video demonstration of http requests](link here)
+
+# Goal 1: Complete functionality to select a note and connect data from ESP to the server side via POST / GET requests
+
+The http.ino file contains all of HTTP requests:
+* submit_measure() to submit a measure to the server, which sends a POST request with parameters of the game_id, ‘new_measure’, the user who submitted the measure, and a string of 16 integers separated by a space.
+* create_game_http() makes a POST request to init.py, and retrieves back the game code and game ID that will later be used to get other players to join.
+* join_game_http() makes a POST request to init.py and receives the game ID of the game with the specified code. If unsuccessful, nothing happens on the ESP side.
+* fetch_game_state() makes a GET request to logic.py and receives the name whose turn it is, the current newest measure in the game, and the measures that the current player still needs to be fully updated/synced with the game state.
+* ping() makes a POST request to logic.py with the game ID and username so the server knows to update the last time it heard from this user (information to be used later that will determine if a player has timed out/disconnected).
+
+
+
+# Goal 2:  Output sound on speaker
+
+The audio.ino file now has a function to play an inputted measure (expressed as an integer array of length 16) and a function to play an inputted song (expressed as a 2D array of MEASURE_COUNT number of measure arrays), given the game’s tempo. In the game menu, if “play measure” is selected, it will play the most recent / current measure. If “play song” is selected, it will play the entire song thus far. More details regarding sound that was not a part of this milestone is in below under “additional progress” and “challenges”. In the game page, while the user is scrolling through the notes to choose the next note, the buzzer plays each note for the user’s reference. The permitted notes range from C3 to B5, which is 36 notes.
+
+# Goal 3: Complete internal representation of notes (flesh out ideas and code):
+
+Currently, the representation of the notes are now fleshed out and in state. Notes are represented by integers 0 through 37, representing notes C3 to B5, and 36 representing rest, 37 representing hold. 
+
+The first note and permanent offset is the selected key. The notes of the correct major scale are correctly displayed on screen through modding the internal representation of the notes.
+
+We keep track of scale steps in a way such that every movement left and right on the joystick will reach the next note on the major scale we chose (using the array [0, 2, 2, 1, 2, 2, 2, 1] for scale steps). We keep track of sharps and flats through another variable name, adjustment, which will apply a shift of -2, -1, 0, 1, or 2 to the note index before adding it to the measure. 
+
+Notes also account for edge cases of shifting past our notes we can play, which are only C3 to B5. 
+
+[Notes to the internal representation here](https://docs.google.com/document/d/1VYwCYNnxafChDDgw8vDYik9komqVKzfOJZl6qg0fbE4/edit?usp=sharing)(https://docs.google.com/document/d/1VYwCYNnxafChDDgw8vDYik9komqVKzfOJZl6qg0fbE4/edit?usp=sharing) 
+
+
+# Goal 4: Complete frontend for player in turn display, ability to select note and duration on ESP
+
+We finished implementing player in turn display, where the player can query through the notes, choose adjustment on sharps and flats, choose duration, and see their note submission rendered on the screen.
+
+The left side of the screen displays the grid of notes, while the right side displays the controls which the user has while it is their turn. The blinking cursor on the left indicates when a user is changing something for this note (the note itself, the symbol, or duration). Clicking the button then turns off the blinking, indicating that the note has been selected. For note selection, scrolling left and right using the joystick changes the displayed note while also playing the note so the user can hear as they select which note they would like to add. Scrolling up and down changes the selected symbol. For the duration selection, scrolling left and right using the joystick changes the duration for the current note. (Once again, we use the button to lock into and out of the selection changes.) Adding a note automatically updates the grid of notes on the left so that the cursor is at the correct next note location. Clicking submit submits this measure to the server and increments the measure which the current user is at. The last option in the right side menu is to select through the measures, which we can do by locking into and out of the selection choices and using the joystick to scroll left and right again. (More details on this below for Goal 5.)
+
+At any point, if we long press the button, we get to the game menu screen. Selecting “Resume” takes us back to the measure we were adding notes to, while play song and play measure are displayed to play back the song and measures the user creates. Mute allows the user to turn on and off the sound as they wish, and Leave Game takes the user back to the landing page.
+
+
+
+# Goal 5: Make significant progress on feature to show previous measures on frontend
+
+Currently the right side in-game menu allows the user to scroll through the game measures, and the in-game display of notes grid with the controls is correctly displayed. The HTTPs requests for posting and getting measures is also functional, so significant progress has been made on this feature. At any given point, every player in a game will have all the notes/measures in the current song saved into their ESP. The next step would be to tie it together the displaying of the previous measures with the in-game notes grid, which we have the code prepared for (since this involves the same idea as loading the notes in the current measure that the user is updating, each time the user goes to the game menu info page and returns back through “Resume”).
+
+
+# Goal 6: Function for end a game on backend
+
+On the backend server side, there is a hardcoded value for the max number of measures allowed in a game (currently hardcorded to 3). Whenever the game reaches a state where the number of measures equals this hardcoded value, the game_state changes to “ended”. Throughout the game, each client makes periodic get requests to request the current state of the game. If the first value in the return output is “1”, the game has ended, and the completed song is returned alongside it. Linked below is all the information regarding the get/post API endpoints on the server side.
+
+Also changed up and documented the http request returns from the server to make parsing easier.
+
+[SERVER API DOCS](https://docs.google.com/document/d/15eAmXMx41icB9jbAE7fg6Bt-zdgw0Sc90vEQy5C5Tew/edit): https://docs.google.com/document/d/15eAmXMx41icB9jbAE7fg6Bt-zdgw0Sc90vEQy5C5Tew/edit
+
+
+
+# Additional progress:
+We implemented an option for muting or unmuting the game, which can be toggled by holding the button in the pre-game pages or selecting the sound on / off option in the game menu. This would turn off the sound instantaneously, even if it’s muted while a song is playing (the song would stop playing and would not continue playing if unmuted again). The screen also updates immediately in the mute / unmute options: if the system is muted, the screen shows the option “Unmute”, vise versa.
+# Challenges:
+We attempted to generate a sine wave or triangle wave into the buzzer to have a nicer tone than the square wave’s electronic tone. We were unable to get the DAC to function properly, as we were unable to find the correct library or documentation for the DACs. We then considered creating a function from scratch to write out a triangle wave to pin 26. However, we realized our highest frequency is around 987.777 Hz, which has a period of 1000 / 987.77 ~  1 millisecond. Since the ESP runs on milliseconds, the period seems too small to code an analog wave. For now, we decided to stick with the electronic noise, but might consider looking into DACs again once our MVP is complete. 
+
+# Next Steps:
+
+Our goals for next week are to have our minimum viable product ready:
+* Create a new Music Maker game
+* Show the generated game code
+* Show multiple people joining the game room together
+* Show everyone taking turns completing  measure, and being able to hear what was queried by everyone
+* Correct displays based on the game state (whose turn it is) 
+* Incorporate pulse width modulation for LCD. 
+* Adjust state machine so that there is an option to change a previously inputted note when doing note selection; then, update in database accordingly
+* Show a previous measure or the entire song being played at any point during the game
+
+
+Appendix Code:
+
+tuple_tunes.ino - contains the loop and all global variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#include <SPI.h>
+    #include <TFT_eSPI.h>
+    #include <mpu6050_esp32.h>
+    #include <WiFiClientSecure.h>
+    #include <WiFiClient.h>
+    #include <BMP280_DEV.h>
+    #include <ArduinoJson.h>
+    #include <driver/dac.h>
+    #include "Button.h"
+    #include "Joystick.h"
+    
+    /////////////
+    // Globals //
+    /////////////
+    
+    // Pins for buttons, LCD, AUDIO CONTROL, joystick
+    int BUTTON_PINS[] = {32};
+    uint8_t AUDIO_TRANSDUCER = 26;
+    //dac_channel_t AUDIO_TRANSDUCER = 26;
+    const int JOYSTICK_LR = 35;
+    const int JOYSTICK_UD = 34;
+    uint8_t AUDIO_PWM = 1;
+    
+    // HTTP
+    char NETWORK[] = "MIT";
+    char PASSWORD[] = "";
+    char USERNAME[] = "Irene";
+    
+    uint16_t game_id;
+    char game_code[5];
+    char measure_response[200];
+    char player_in_turn[50];
+    
+    char SERVER[] = "608dev-2.net";
+    char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py";
+    char START_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py";
+    
+    const uint16_t OUT_BUFFER_SIZE = 2000;
+    char response[OUT_BUFFER_SIZE];
+    const uint16_t IN_BUFFER_SIZE = 2000;
+    char request[IN_BUFFER_SIZE];
+    uint32_t time_since_last_ping = millis();
+    
+    // LED
+    const uint8_t red = 0;
+    const uint8_t green = 13;
+    const uint8_t blue = 15;
+    
+    // Display
+    TFT_eSPI tft = TFT_eSPI();
+    const int SCREEN_WIDTH = 160;
+    const int SCREEN_HEIGHT = 128;
+    
+    // Input
+    Button button(BUTTON_PINS[0]);
+    Joystick joystick(JOYSTICK_LR, JOYSTICK_UD);
+    
+    // Audio output (see lab05b)
+    const int NOTE_COUNT = 36;
+    double note_freqs[NOTE_COUNT];
+    double MULT = 1.059463094359; //12th root of 2 (precalculated) for note generation
+    double C3 = 130.81; //C3 130.81 Hz  for note generation
+    
+    // State / Control
+    int state = 0;
+    int menu_state = 0;
+    int8_t game_code_input[] = {-10, -10, -10};
+    char input_cursor = 0;
+    bool is_locked = false;
+    uint16_t last_button_click = millis();
+    
+    // Game constants
+    const char* TEMPO_LABELS[] = {"Slow", "Mid", "Fast"};
+    const uint8_t TEMPO_SPEEDS[] = {60, 96, 144};
+    const char* NOTE_DURATIONS[] = {"1/16", "1/8", "1/4", "1/2", "1"};
+    const char SYMBOLS[] = {'b', ' ', '#'};
+    const int MEASURE_COUNT = 16;
+    const uint8_t SCALE_STEPS[] = {0, 2, 2, 1, 2, 2, 2, 1}; // half steps that we need per scale
+    const char* NOTES_FLAT[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
+    const char* NOTES_SHARP[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
+    
+    // Playback
+    int note_index = 0; // current note being played in measure
+    int measure_index = 0; // current measure being played in song
+    bool playing_measure = false;
+    bool playing_song = false;
+    bool sound_on = true;
+    
+    // Game state options
+    bool is_flat_key = false;
+    int selected_key = 0; // iterates through NOTES_FLAT in start game
+    int selected_tempo = 0;
+    char room_num[4];
+    
+    // Game state variables
+    int player_count = 0;
+    bool in_turn = false;
+    uint8_t measures[MEASURE_COUNT][16];
+    int current_measure = 0;
+    int selected_note = 0;
+    int curr_note_index = 0;
+    int adjustment = 0;
+    char current_note[5] = "\0";
+    int curr_notes_array[16]; //use note state to get index, temporary until we implement measures
+    int selected_duration = 0; // selected duration index for current note
+    int selected_symbol = 0; // selected symbol index for current note
+    int step_index = 0; // selected jump index for determining next note in key
+    int note_state = 0;
+    
+    // Tests
+    int test1[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
+    int test2[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37};
+    int test_song[2][16] = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37}};
+    
+    /////////////////////////////////
+    // Convenient helper functions //
+    /////////////////////////////////
+    
+    /*
+     * Sets the color of the LED given RGB input values.
+     */
+    void set_led_color(int r, int g, int b) {
+      ledcWrite(red, r);
+      ledcWrite(green, g);
+      ledcWrite(blue, b);
+    }
+    
+    ////////////////////
+    // Setup and loop //
+    ////////////////////
+    
+    void setup() {
+      Serial.begin(115200);
+      Serial.println("\n*********\nGreetings and salutations!\n*********\n");
+    
+      // Set up screen
+      tft.init();
+      tft.setRotation(1); // set display in landscape
+      tft.fillScreen(TFT_BLACK);
+      tft.setTextColor(TFT_RED);
+      tft.setTextSize(2);
+      tft.setCursor(15, 50);
+      tft.println("Loading...");
+    
+      // Set up button(s)
+      delay(100);
+      for (int pin : BUTTON_PINS) pinMode(pin, INPUT_PULLUP);
+    
+      // Set up joystick
+      pinMode(JOYSTICK_LR, INPUT);
+      pinMode(JOYSTICK_UD, INPUT);
+      analogReadResolution(10);
+    
+      // Set up LED
+      ledcSetup(red, 50, 8);
+      ledcSetup(green, 80, 8);
+      ledcSetup(blue, 80, 8);
+      
+      ledcAttachPin(14, red); 
+      ledcAttachPin(27, green);
+      ledcAttachPin(12, blue);
+    
+      set_led_color(0, 0, 255);
+    
+      //set up AUDIO_PWM which we will control in this lab for music:
+      pinMode(AUDIO_TRANSDUCER, OUTPUT);
+      //dac_output_enable(DAC_CHANNEL_2);
+      //dac_output_voltage(DAC_CHANNEL_2, 200);
+      ledcSetup(AUDIO_PWM, 0, 12);//12 bits of PWM precision
+      ledcWrite(AUDIO_PWM, 80); //0 is a 0% duty cycle for the NFET
+      stop_sound();
+      ledcAttachPin(AUDIO_TRANSDUCER, AUDIO_PWM);
+    
+      // Connect to WiFi
+      WiFi.begin(NETWORK, PASSWORD);
+    
+      uint8_t count = 0;
+      Serial.print("Attempting to connect to ");
+      Serial.println(NETWORK);
+      while (WiFi.status() != WL_CONNECTED && count < 12) {
+        delay(500);
+        Serial.print(".");
+        count++;
+      }
+      while (!WiFi.isConnected()) {
+        delay(1000);
+        Serial.printf("Connecting... (%s)\n", WiFi.status());
+      }
+      Serial.println("CONNECTED!");
+      Serial.printf("%d:%d:%d:%d (%s) (%s)\n", WiFi.localIP()[3], WiFi.localIP()[2],
+                    WiFi.localIP()[1], WiFi.localIP()[0],
+                    WiFi.macAddress().c_str() , WiFi.SSID().c_str());
+      delay(500);
+      
+      // Compute note frequencies
+      note_freqs[0] = C3;
+      for (int i = 1; i < NOTE_COUNT; i++) {
+        note_freqs[i] = MULT*note_freqs[i-1];
+      }
+      
+      // Draw first screen
+      back_to_landing();
+    }
+    
+    void loop() {
+      if (playing_measure && sound_on)  play_measure(curr_notes_array, note_state);
+      if (playing_song && sound_on) play_song(test_song);
+      int bv = button.read();
+      int js = joystick.read();
+        
+      if (bv) last_button_click = millis();
+      if (is_locked) draw_cursor();
+      
+      update_state(bv, js);
+      //stop_sound();
+      // separating that huge chunk of nested ifs to a separate file so
+      // when we handle continuous fetching, it doesn't get mixed in with it all here
+    }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+http requests - pre game and in game http requests and parse
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+///////////////////////
+// Pre-game requests //
+///////////////////////
+
+/*
+ * Makes a POST request to ask the server for the code and ID of a new game.
+ */
+void create_game_http() {
+  char body[100];
+  sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, TEMPO_SPEEDS[selected_tempo]);
+  Serial.println(body);
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);  
+
+  strcpy(game_code, strtok(response, "&"));
+  game_id = atoi(strtok(NULL, "&"));
+
+  Serial.printf("created game with game_id %d, game_code %s\n", game_id, game_code);
+}
+
+/*
+ * Makes a POST request to join a game with the specified game code
+ * (from join-game page) and returns whether or not it was successful.
+ * Saves appropriate data (game_id, room_num) if successful.
+ */
+bool join_game_http() {
+  int offset = 0;
+  char body[100];
+  sprintf(body, "type=join&username=%s&game_code=%d%d%d", USERNAME, game_code_input[0], game_code_input[1], game_code_input[2]);
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+
+  char code = strtok(response, "&")[0];
+  if (code == '3') {
+    game_id = atoi(strtok(NULL, "&"));
+    room_num[0] = '\0';
+    sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
+    Serial.printf("joined game %s\n", room_num);
+    return true;
+  } else {
+    // TODO: 0: no room found, 1: room limit reached, 2: game in progress or ended
+    Serial.printf("failed to join room for error code %c\n", code);
+    return false;
+  }
+}
+
+/*
+ * Makes a POST request to start the current game. Only accessible 
+ * by the host who created the game.
+ */
+void start_game_http() {
+  int offset = 0;
+  char body[50];
+  sprintf(body, "type=start&game_id=%d", game_id);
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+}
+
+//////////////////////
+// In-game requests //
+//////////////////////
+
+void fetch_game_state(int game_id) {
+  char query[100]; //for body
+  sprintf(query, "username=%s&game_id=%d&measure=%d", USERNAME, game_id, current_measure);
+  Serial.println("making fetch");
+  make_get_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+
+  Serial.println("response:");
+  Serial.println(response);
+
+  // format of response: "{in_turn}&{current_measure}&{song}"
+  char* p = strtok(response, "&"); // name of current user's turn
+
+  Serial.printf("p is %s\n", p);
+  Serial.printf("comparison: %d\n", strcmp(p, USERNAME));
+  in_turn = !strcmp(p, USERNAME); // if matched, strcmp returns 0, which is equivalent to false
+
+  Serial.print("in_turn: ");
+  Serial.println(in_turn);
+  
+  p = strtok(NULL, "&"); // index of next measure to be submitted
+  Serial.printf("current measure: {%s}\n", p);
+  if (atoi(p) > current_measure) { // we are now a measure behind
+    p = strtok(NULL, "&"); // all measures string
+    
+    char* separator;
+    char* measure;
+    while ((separator = strchr(p, ' '))) {
+      measure = p;
+      p = separator + 1;
+      separator[0] = '\0';
+      Serial.printf("measure is %s\n", measure);
+
+      note_state = 0;
+      for (char* note = strtok(measure, ","); note; note = strtok(NULL, ",")) {
+        uint8_t n = atoi(note);
+        measures[current_measure][note_state] = n;
+        Serial.printf("note %s turns into num %d (saved as %d)\n", note, atoi(note), measures[current_measure][note_state]);
+        note_state++;
+      }
+
+      if (note_state == 16) current_measure++;
+    }
+
+    
+    Serial.println("finished parsing fetched data, measures is now:");
+    for (int i = 0; i <= current_measure; i++) {
+      for (int j = 0; j < 16; j++)
+        Serial.printf("%d ", measures[i][j]);
+      Serial.println();
+    }
+  } else {
+    Serial.println("no updates needed");
+  }
+  time_since_last_ping = millis();
+}
+
+/*
+ * Submits the current measure to the current game on the server via a
+ * POST request and fills any empty inputs with rests.
+ */
+void submit_measure() {
+  char string_of_notes[50];
+  uint8_t notes_offset = 0;
+  
+  for (int i = 0; i < note_state; i++) {
+    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
+  }
+  for (int i = note_state; i < 16; i++) {
+    notes_offset += sprintf(string_of_notes + notes_offset, "36 ");
+  }
+
+  char query[100]; //for body
+  sprintf(query, "type=new_measure&username=%s&game_id=%d&measure=%s", USERNAME, game_id, string_of_notes);
+  make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+}
+
+/*
+ * Tells the server we're still connected via a POST request.
+ */
+void ping() {
+  char query[100]; //for body
+  sprintf(query, "username=%s&game_id=%d", USERNAME, game_id);
+  make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+
+  time_since_last_ping = millis();
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+state.ino - our state machine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void back_to_landing() {
+    menu_state = 0;
+    state = 0;
+    display_landing();
+    update_landing();
+  }
+  
+  void reset_game() {
+    // Playback variables
+    note_index = 0;
+    measure_index = 0;
+    playing_measure = false;
+    playing_song = false;
+  
+    // Game state variables
+    player_count = 0;
+    current_measure = 0;
+    curr_note_index = selected_key;
+    current_note[0] = '\0';
+    selected_key = 0;
+    selected_note = curr_note_index % 12;
+    selected_duration = 0;
+    selected_symbol = 0;
+    step_index = 0;
+    note_state = 0;
+  
+    // Other variables
+    menu_state = 0;
+    input_cursor = 0;
+    state = 4;
+    is_locked = true;
+  }
+  
+  void update_state(int bv, int js) {
+    if (state == 0) {
+      process_landing_state(bv, js);
+    } else if (state == 1) {
+      process_start_game(bv, js);
+    } else if (state == 2) {
+      process_join_game(bv, js);
+    } else if (state == 3) {
+  
+    } else if (state == 4) {
+      process_in_game(bv, js);
+    } else if (state == 5) {
+      process_game_menu(bv, js);
+    }
+  }
+  
+  ////////////////////// landing //////////////////////
+  
+  void process_landing_state(int bv, int js) {
+    // joystick input
+    if (js == 1) { // up
+      menu_state = (menu_state + 2) % 3;
+      update_landing();
+    } else if (js == 3) { // down
+      menu_state = (menu_state + 1) % 3;
+      update_landing();
+    }
+  
+    // joystick input
+    if (bv == 1) {
+      if (menu_state == 0) { // start
+        state = 1;
+        display_start_game();
+      } else if (menu_state == 1) { // join
+        game_code_input[0] = -10; // equivalent to 0 mod 10
+        game_code_input[1] = -10;
+        game_code_input[2] = -10;
+        input_cursor = 0;
+        is_locked = true;
+        menu_state = 0;
+        state = 2;
+        display_join_game();
+      } else { // gallery
+        state = 3;
+        display_gallery();
+      }
+      menu_state = 0;
+    } else if (bv == 2) {
+      sound_on = !sound_on;
+      update_landing();
+    }
+  }
+  
+  ////////////////////// start game //////////////////////
+  
+  void process_start_game(int bv, int js) {
+    if (millis() - last_played > 300) stop_sound();
+  
+    // joystick input
+    if (!is_locked && js == 1) { // up
+      menu_state = (menu_state + 3) % 4;
+    } else if (!is_locked && js == 3) { // down
+      menu_state = (menu_state + 1) % 4;
+    } else if (is_locked && js == 2) { // right
+      if (menu_state == 0) {
+        // selected key is index of the selected key, should not changed after locked
+        selected_key = (selected_key + 1) % 12;
+        play_note(selected_key);
+      }
+      else selected_tempo = (selected_tempo + 1) % 3;
+    } else if (is_locked && js == 4) { // left
+      if (menu_state == 0) {
+        selected_key = (selected_key + 11) % 12;
+        play_note(selected_key);
+      }
+      else selected_tempo = (selected_tempo + 2) % 3;
+    }
+    update_start_game(js);
+  
+    // button input
+    if (bv == 1) {
+      if (menu_state == 0 || menu_state == 1) { // inputs
+        is_locked = !is_locked;
+        if (!is_locked) stop_sound();
+        else if (menu_state == 0) play_note(selected_key);
+        update_start_game(1);
+      } else if (menu_state == 2) { // start
+        create_game_http();
+        reset_game();
+        in_turn = true;
+        display_in_game();
+      } else  { // back
+        back_to_landing();
+      }
+    } else if (bv == 2) {
+      sound_on = !sound_on;
+      update_start_game(6);
+    }
+  }
+  
+  ////////////////////// join game //////////////////////
+  
+  void process_join_game(int bv, int js) {
+    if (js == 1 || js == 3) {
+      if (is_locked) {
+        game_code_input[input_cursor] = (game_code_input[input_cursor] + (js == 1 ? 11 : 19)) % 10;
+      } else {
+        menu_state = (menu_state + (js == 1 ? 2 : 1)) % 3;
+      }
+    } else if (is_locked && js) {
+      input_cursor = (input_cursor + (js == 2 ? 1 : 2)) % 3;
+    }
+    update_join_game(js);
+  
+    if (bv == 1) {
+      if (menu_state == 0) { // input
+        if (!is_locked) is_locked = true;
+        else if (game_code_input[0] >= 0 && // three numbers specified
+                 game_code_input[1] >= 0 &&
+                 game_code_input[2] >= 0) is_locked = false;
+        update_join_game(1);
+      } else if (menu_state == 1) { // join
+        if (join_game_http()) {
+          reset_game();
+          in_turn = false;
+          display_in_game();
+        }
+      } else { // back
+        back_to_landing();
+      }
+    } else if (bv == 2) {
+      sound_on = !sound_on;
+      update_join_game(6);
+    }
+  }
+  
+  ////////////////////// in-game //////////////////////
+  
+  void process_in_game(int bv, int js) {
+    if (millis() - last_played > 300) stop_sound();
+    if (!is_locked && js) { // scrolling up and down the menu
+      tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK);
+      if (js == 1) { // up
+        menu_state = (menu_state + 4) % 5;
+      } else if (js == 3) { // down
+        menu_state = (menu_state + 1) % 5;
+      }
+    } else if (is_locked && js) { // scrolling through note and duration selection
+      if (menu_state == 0) { // note and sharp/flat/neutral selection
+        tft.fillRect(133, 20, 15, 15, TFT_BLACK); // clear note
+        tft.fillRect(8 + 26.5 * (note_state % 4), 28 + 25 * (int(note_state / 4)), 15, 15, TFT_BLACK); // clear grid cell
+        if (js == 2) { // right
+          if (curr_note_index + SCALE_STEPS[(step_index + 1) % 8] <= 35) {
+            step_index = (step_index + 1) % 8;
+            curr_note_index = curr_note_index + SCALE_STEPS[step_index];
+            selected_note = curr_note_index % 12;
+          }
+  
+          play_note(curr_note_index);
+          Serial.printf("Current note index updated %d \n", curr_note_index);
+  
+        } else if (js == 4) { // left
+  
+          if (curr_note_index - SCALE_STEPS[step_index] >= 0) { // TODO
+            curr_note_index = curr_note_index - SCALE_STEPS[step_index];
+            step_index = (step_index + 7) % 8; //same as subtracting 1
+            selected_note = curr_note_index % 12;
+          }
+  
+          play_note(curr_note_index);
+          Serial.printf("Current note index updated %d \n", curr_note_index);
+        }
+  
+        //current note is what we will be displaying
+        current_note[0] = '\0';
+  
+        //this is our case for representing rests
+        if (step_index == 7) {
+          stop_sound();
+          strcat(current_note, "R");
+          Serial.println("Current note is rest");
+        } else if (is_flat_key) {
+          strcat(current_note, NOTES_FLAT[selected_note]);
+          Serial.printf("Current note is %s \n", current_note);
+        } else {
+          strcat(current_note, NOTES_SHARP[selected_note]);
+          Serial.printf("Current note is %s \n", current_note);
+        }
+  
+        if (js == 2 || js == 4) { // update current selected symbol if note has changed
+          if (current_note[1] == '#') {
+            selected_symbol = 2;
+          } else if (current_note[1] == 'b') {
+            selected_symbol = 0;
+          } else if (current_note[1] == ' ' || current_note[1] == '\0') {
+            selected_symbol = 1;
+          }
+          adjustment = 0; //we need to reset adjustment each time
+        }
+  
+        // changing sharp/flat/neutral
+        if (js == 1) { // up
+  
+          /*
+            /////////////////////////////
+            // edge cases //////////////
+            ////////////////////////////
+            if (curr_note_index == 0){ //edge case for Cb
+            if (selected_symbol == 2){
+              adjustment = adjustment - 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1) {
+              adjustment = adjustment + 1;
+              selected_symbol == 2;
+            } else {
+              Serial.println("we should not be rendering Cb");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+            }
+  
+            else if (curr_note_index == 35){ //B
+            if (selected_symbol == 0){
+              adjustment = adjustment + 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1){
+              adjustment = adjustment - 1;
+              selected_symbol = 0;
+            } else {
+              Serial.println("we should not be rendering B#");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+            }
+  
+            ///////////////////////////////////
+          */
+  
+          //this is for all other notes
+          //later on, we will add adjustment to note index
+          if (selected_symbol == 2) {
+            if (curr_note_index + adjustment - 2 < 0) {
+              //do nothing if the next change would bring us below 0
+            } else {
+              adjustment = adjustment - 2;
+              selected_symbol = (selected_symbol + 1) % 3;
+            }
+          } else {
+            if (curr_note_index + adjustment + 1 > 35) {
+              //do nothing if next change brings us above 35
+            } else {
+              adjustment = adjustment + 1;
+              selected_symbol = (selected_symbol + 1) % 3;
+            }
+          }
+          play_note(curr_note_index + adjustment);
+          current_note[1] = SYMBOLS[selected_symbol];
+  
+          Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+  
+        }
+  
+        else if (js == 3) { // down
+  
+          /*
+            /////////////////////////////
+            // edge cases //////////////
+            ////////////////////////////
+            if (curr_note_index == 0){ //edge case for Cb
+            if (selected_symbol == 2){
+              adjustment = adjustment - 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1) {
+              adjustment = adjustment + 1;
+              selected_symbol == 2;
+            } else {
+              Serial.println("we should not be rendering Cb");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+            }
+  
+            else if (curr_note_index == 35){
+            if (selected_symbol == 0){
+              adjustment = adjustment + 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1){
+              adjustment = adjustment - 1;
+              selected_symbol = 0;
+            } else {
+              Serial.println("we should not be rendering B#");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+            }
+  
+            ///////////////////////////////////
+          */
+  
+          if (selected_symbol == 0) {
+            if (curr_note_index + adjustment + 2 > 35) {
+              //do nothing if the next change would bring us below 0
+            } else {
+              adjustment = adjustment + 2;
+              selected_symbol = (selected_symbol + 2) % 3;
+            }
+  
+          } else {
+            if (curr_note_index + adjustment - 1 < 0) {
+              //do nothing if next change brings us above 35
+            } else {
+              adjustment = adjustment - 1;
+              selected_symbol = (selected_symbol + 2) % 3;
+            }
+          }
+          play_note(curr_note_index + adjustment);
+          current_note[1] = SYMBOLS[selected_symbol];
+          Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+        }
+      }
+  
+      else if (menu_state == 1) { // duration selection (joystick left and right)
+        tft.fillRect(122, 40, 25, 15, TFT_BLACK); // clear duration
+        if (js == 2) { // right
+          selected_duration = (selected_duration + 1) % 5;
+        } else if (js == 4) { // left
+          selected_duration = (selected_duration + 4) % 5;
+        }
+      } else if (menu_state == 4) {
+        tft.fillRect(119, 100, 27, 15, TFT_BLACK); // clear note
+        if (js == 2) { // right
+          current_measure = (current_measure + 1) % MEASURE_COUNT;
+        } else if (js == 4) { // left
+          current_measure = (current_measure + MEASURE_COUNT - 1) % MEASURE_COUNT;
+        }
+      }
+    }
+    update_in_game();
+    if (in_turn) {
+      if (bv == 1) {
+        if (!is_locked && menu_state != 2) {
+          is_locked = true;
+        } else {
+          is_locked = false;
+        }
+        // state changes
+        if (menu_state == 0) {
+          play_note(curr_note_index);
+        }
+        if (menu_state == 2) { // add a note
+          int curr_x = 2 + 26.5 * (note_state % 4);
+          int curr_y = 29 + 25 * (int(note_state / 4));
+          tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
+          tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
+  
+          int temp_note_state = note_state;
+          Serial.printf("Added is %d", note_state + pow(2, selected_duration));
+          if ((note_state >= 16)) {
+            note_state = 16;  // to update grid cursor position for next note
+            menu_state = 3;
+          } else {
+            note_state += pow(2, selected_duration);
+            is_locked = false;
+            menu_state = 0;
+  
+            //adding the note to the notes array
+            if (current_note[0] == 'R') {
+              curr_note_index = 36;
+            } else {
+              //curr_note_index = curr_note_index + adjustment;
+            }
+  
+            //curr_notes_array[temp_note_state] = curr_note_index;
+            curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
+            temp_note_state = temp_note_state + 1;
+  
+            int i;
+            for (i = 0; i < pow(2, selected_duration); i = i + 1) {
+              curr_notes_array[temp_note_state] = 37;
+              temp_note_state = temp_note_state + 1;
+            }
+  
+            //debugging
+            for (int i = 0; i < temp_note_state; i = i + 1) {
+              Serial.printf("current note array at index %d is %d", i, curr_notes_array[i]);
+            }
+            Serial.println("done");
+            //debugging
+  
+            if ((note_state >= 16)) {
+              note_state = 16;  // to update grid cursor position for next note
+              menu_state = 3;
+            }
+          }
+        } else if (menu_state == 3) {
+          submit_measure();
+          tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
+          note_state = 0;
+          current_measure += 1;
+          menu_state = 0;
+          display_in_game();
+        }
+        update_in_game();
+      } else if (bv == 2) { // go to game menu screen
+        tft.fillScreen(TFT_BLACK);
+        state = 5;
+        menu_state = 0;
+        is_locked = false;
+        display_game_menu();
+      }
+    }
+    if (millis() - time_since_last_ping > PING_INTERVAL) {
+      if (in_turn) ping(); 
+      else fetch_game_state(game_id);
+    }
+  }
+  
+  ////////////////////// game-menu //////////////////////
+  
+  void process_game_menu(int bv, int js) {
+    if (js == 1) { // up
+      menu_state = (menu_state + 4) % 5;
+      update_game_menu();
+    } else if (js == 3) { // down
+      menu_state = (menu_state + 1) % 5;
+      update_game_menu();
+    }
+    if (bv) {
+      update_game_menu();
+      if (menu_state == 0) { // resume game
+        state = 4;
+        display_in_game();
+      } else if (menu_state == 1) {
+        if (playing_song) stop_sound();
+        playing_song = ! playing_song;
+      } else if (menu_state == 2) {
+        if (playing_measure) stop_sound();
+        playing_measure = ! playing_measure;
+      } else if (menu_state == 3) {
+        sound_on = !sound_on;
+        playing_song = false;
+        playing_measure = false;
+        stop_sound();
+        update_game_menu();
+      } else if (menu_state == 4) { // leave game
+        reset_game();
+        back_to_landing();
+      }
+    }
+  }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+audio.ino - contains play note, play measure, and other functions related to send ()
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/////////////
+//  Audio  //
+/////////////
+
+void play_measure(int measure_input[16], int num_notes) {
+    double note_period = 15000.0/(TEMPO_SPEEDS[selected_tempo]); // change ig?
+    if (note_index < num_notes) {
+      selected_note = measure_input[note_index];
+      if (millis() - last_played > note_period){
+        if (selected_note == NOTE_COUNT) {
+          stop_sound();
+        }
+        else if (selected_note < NOTE_COUNT) {
+          play_note(selected_note);
+        }
+        last_played = millis();
+        note_index = note_index + 1;
+      }
+    }
+    if (note_index == num_notes){
+      if (millis() - last_played > note_period) {
+        stop_sound();
+        playing_measure = false;
+        note_index = 0;
+        if (playing_song) {
+          measure_index = measure_index + 1;
+        }
+      }
+    }
+    
+  }
+  
+  void play_song(int song_input[2][16]){
+    if (measure_index < MEASURE_COUNT) {
+      if (song_input[measure_index][0] > -1) play_measure(song_input[measure_index], 16);
+      else {
+        playing_song = false;
+        measure_index = 0;
+      }
+    }
+    if (measure_index == MEASURE_COUNT) {
+      measure_index = 0;
+      stop_sound();
+      playing_song = false;
+    }
+  }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+<style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
+<!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>

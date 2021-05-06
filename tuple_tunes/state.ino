@@ -363,7 +363,7 @@ void process_in_game(int bv, int js) {
   
         int temp_note_state = note_state;
         Serial.printf("Added is %d", note_state + pow(2, selected_duration));
-        if ((note_state + pow(2, selected_duration) >= 16) || (note_state >= 16)) {
+        if ((note_state >= 16)) {
           note_state = 16;  // to update grid cursor position for next note
           menu_state = 3;
         } else {
@@ -386,6 +386,11 @@ void process_in_game(int bv, int js) {
           for (i = 0; i < pow(2, selected_duration); i = i + 1) {
             curr_notes_array[temp_note_state] = 37;
             temp_note_state = temp_note_state + 1;
+          }
+
+          if ((note_state >= 16)) {
+            note_state = 16;  // to update grid cursor position for next note
+            menu_state = 3;
           }
         }
       } else if (menu_state == 3) {

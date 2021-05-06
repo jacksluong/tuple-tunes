@@ -21,6 +21,9 @@ def fetch(game_id, username, last_updated_measure):
         game_status, current_measure, turn = c.execute('''SELECT game_status, measure, turn FROM games WHERE rowid = 
                                                           ?;''', (game_id,)).fetchone()
 
+        if game_status == "ended":
+            return 'game ended'
+
         # get song from player's last measure and onwards
         song = get_song(game_id, last_updated_measure)
 
@@ -45,17 +48,20 @@ def play_turn(game_id, username, measure):
         if ping_status == "0":
             return ping_status
 
-        measure, turn = c.execute('''SELECT measure, turn FROM games WHERE rowid = ?;''',(game_id,)).fetchone()
+        measure_num, turn = c.execute('''SELECT measure, turn FROM games WHERE rowid = ?;''',(game_id,)).fetchone()
         # measure is the (0-indexed) index of the measure that we are submitting rn)
+
+        if measure_num >= MAX_MEASURES:
+            return '0'
         
         c.execute('''CREATE TABLE IF NOT EXISTS measures(game_id int, username text, measure_number int, n1 int, n2 int, n3 int, n4 int, n5 int, n6 int, n7 int, n8 int, n9 int, n10 int, n11 int, n12 int, n13 int, n14 int, n15 int, n16 int);''')
 
-        c.execute('''INSERT INTO measures VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);''',(game_id,username, measure, measure[0],measure[1],measure[2],measure[3],measure[4],measure[5],measure[6],measure[7],measure[8],measure[9],measure[10],measure[11],measure[12],measure[13],measure[14],measure[15]))
+        c.execute('''INSERT INTO measures VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);''',(game_id,username, measure_num, measure[0],measure[1],measure[2],measure[3],measure[4],measure[5],measure[6],measure[7],measure[8],measure[9],measure[10],measure[11],measure[12],measure[13],measure[14],measure[15]))
 
-        c.execute('''UPDATE games SET turn = ?, measure = ? WHERE rowid = ?;''', (turn + 1, measure + 1, game_id))
+        c.execute('''UPDATE games SET turn = ?, measure = ? WHERE rowid = ?;''', (turn + 1, measure_num + 1, game_id))
 
         #once we hit the limit of measures, END THE GAME
-        if measure + 1 == MAX_MEASURES:
+        if measure_num + 1 == MAX_MEASURES:
             c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ("ended", game_id))
 
         #SUCCESSFUL!

@@ -118,7 +118,7 @@ void process_start_game(int bv, int js) {
       else if (menu_state == 0) play_note(selected_key);
       update_start_game(1);
     } else if (menu_state == 2) { // start
-      for (int i = 0; i < 3; i++) room_num[i] = '0'; // TODO: hardcoded room number
+      create_game_http();
       reset_game();
       in_turn = true;
       display_in_game();
@@ -153,11 +153,11 @@ void process_join_game(int bv, int js) {
                game_code_input[2] >= 0) is_locked = false;
       update_join_game(1);
     } else if (menu_state == 1) { // join
-      room_num[0] = '\0';
-      sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
-      reset_game();
-      in_turn = false;
-      display_in_game();
+      if (join_game_http()) {
+         reset_game();
+         in_turn = false;
+         display_in_game();
+       }
     } else { // back
       back_to_landing();
     }

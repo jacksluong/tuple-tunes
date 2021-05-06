@@ -1,34 +1,39 @@
-void create_game_http(){
-  int offset = 0;
+void create_game_http() {
   char body[100];
-  body[0] = '\0';
-//  offset += sprintf(request, "type=create&username%s&key=%d&tempo=%d", USERNAME, selected_key, TEMPO_SPEEDS[selected_tempo]);
-  offset += sprintf(body, "type=create&username=%s&key=%d&tempo=%d", "Joyce", 13, 120);
+  sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, TEMPO_SPEEDS[selected_tempo]);
   Serial.println(body);
   make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);  
 
-  strcpy(game_code, strtok(response, "&")); // type=create
-  char * p = strtok(NULL, "&"); // username%s
-  game_id = atoi(p);
+  strcpy(game_code, strtok(response, "&"));
+  game_id = atoi(strtok(NULL, "&"));
 
-  Serial.println(game_id);
-  Serial.println(game_code);
-  
+  Serial.printf("created game with game_id %d, game_code %s\n", game_id, game_code);
 }
 
-void join_game_http(){
+bool join_game_http() {
   int offset = 0;
   char body[100];
-  body[0] = '\0';
-  sprintf(body, "type=join&username&%s&game_code=%s", USERNAME, "009");
+  sprintf(body, "type=join&username=%s&game_code=%d%d%d", USERNAME, game_code_input[0], game_code_input[1], game_code_input[2]);
   make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+
+  char code = strtok(response, "&")[0];
+  if (code == '3') {
+    game_id = atoi(strtok(NULL, "&"));
+    room_num[0] = '\0';
+    sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
+    Serial.printf("joined game %s\n", room_num);
+    return true;
+  } else {
+    // TODO: 0: no room found, 1: room limit reached, 2: game in progress or ended
+    Serial.printf("failed to join room for error code %c\n", code);
+    return false;
+  }
 }
 
-void start_game_http(){
+void start_game_http() {
   int offset = 0;
-  char body[100];
-  body[0] = '\0';
-  sprintf(body, "type=start&game_id=%d", USERNAME, game_id);
+  char body[50];
+  sprintf(body, "type=start&game_id=%d", game_id);
   make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
 }
 

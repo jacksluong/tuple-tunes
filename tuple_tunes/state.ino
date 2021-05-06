@@ -40,9 +40,9 @@ void update_state(int bv, int js) {
     process_join_game(bv, js);
   } else if (state == 3) {
 
-  } else if (state == 4) {      ////////////////////// in-game //////////////////////
+  } else if (state == 4) {
     process_in_game(bv, js);
-  } else if (state == 5) {      ////////////////////// game menu //////////////////////
+  } else if (state == 5) {
     process_game_menu(bv, js);
   }
 }
@@ -50,6 +50,7 @@ void update_state(int bv, int js) {
 ////////////////////// landing //////////////////////
 
 void process_landing_state(int bv, int js) {
+  // joystick input
   if (js == 1) { // up
     menu_state = (menu_state + 2) % 3;
     update_landing();
@@ -58,6 +59,7 @@ void process_landing_state(int bv, int js) {
     update_landing();
   }
 
+  // joystick input
   if (bv == 1) {
     if (menu_state == 0) { // start
       state = 1;
@@ -86,6 +88,8 @@ void process_landing_state(int bv, int js) {
 
 void process_start_game(int bv, int js) {
   if (millis() - last_played > 300) stop_sound();
+
+  // joystick input
   if (!is_locked && js == 1) { // up
     menu_state = (menu_state + 3) % 4;
   } else if (!is_locked && js == 3) { // down
@@ -106,6 +110,7 @@ void process_start_game(int bv, int js) {
   }
   update_start_game(js);
 
+  // button input
   if (bv == 1) {
     if (menu_state == 0 || menu_state == 1) { // inputs
       is_locked = !is_locked;
@@ -113,7 +118,7 @@ void process_start_game(int bv, int js) {
       else if (menu_state == 0) play_note(selected_key);
       update_start_game(1);
     } else if (menu_state == 2) { // start
-      for (int i = 0; i < 3; i++) room_num[i] = '0'; // TODO: hardcoded room number
+      create_game_http();
       reset_game();
       in_turn = true;
       display_in_game();
@@ -148,11 +153,11 @@ void process_join_game(int bv, int js) {
                game_code_input[2] >= 0) is_locked = false;
       update_join_game(1);
     } else if (menu_state == 1) { // join
-      room_num[0] = '\0';
-      sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
-      reset_game();
-      in_turn = false;
-      display_in_game();
+      if (join_game_http()) {
+        reset_game();
+        in_turn = false;
+        display_in_game();
+      }
     } else { // back
       back_to_landing();
     }
@@ -379,7 +384,7 @@ void process_in_game(int bv, int js) {
 
         int temp_note_state = note_state;
         Serial.printf("Added is %d", note_state + pow(2, selected_duration));
-        if ((note_state + pow(2, selected_duration) >= 16) || (note_state >= 16)) {
+        if ((note_state >= 16)) {
           note_state = 16;  // to update grid cursor position for next note
           menu_state = 3;
         } else {
@@ -404,10 +409,17 @@ void process_in_game(int bv, int js) {
             temp_note_state = temp_note_state + 1;
           }
 
+          //debugging
           for (int i = 0; i < temp_note_state; i = i + 1) {
             Serial.printf("current note array at index %d is %d", i, curr_notes_array[i]);
           }
           Serial.println("done");
+          //debugging
+
+          if ((note_state >= 16)) {
+            note_state = 16;  // to update grid cursor position for next note
+            menu_state = 3;
+          }
         }
       } else if (menu_state == 3) {
         submit_measure();

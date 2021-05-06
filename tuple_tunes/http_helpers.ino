@@ -33,7 +33,6 @@ const char API_KEY[] = "AIzaSyCwyynsePu7xijUYTOgR7NdVqxH2FAG9DQ"; // for googlea
 
 const int RESPONSE_TIMEOUT = 6000;
 const int PING_INTERVAL = 6000;
-uint32_t time_since_last_ping = millis();
 
 //////////////////
 // My functions //

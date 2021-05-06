@@ -39,6 +39,7 @@ const uint16_t OUT_BUFFER_SIZE = 2000;
 char response[OUT_BUFFER_SIZE];
 const uint16_t IN_BUFFER_SIZE = 2000;
 char request[IN_BUFFER_SIZE];
+uint32_t time_since_last_ping = millis();
 
 // LED
 const uint8_t red = 0;

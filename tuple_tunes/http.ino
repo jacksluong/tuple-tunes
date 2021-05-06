@@ -138,7 +138,7 @@ void submit_measure() {
  */
 void ping() {
   char query[100]; //for body
-  sprintf(query, "username=%s&game_id=%d", USERNAME, game_id, string_of_notes);
+  sprintf(query, "username=%s&game_id=%d", USERNAME, game_id);
   make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
 
   time_since_last_ping = millis();

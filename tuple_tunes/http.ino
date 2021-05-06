@@ -1,3 +1,62 @@
+///////////////////////
+// Pre-game requests //
+///////////////////////
+
+/*
+ * Makes a POST request to ask the server for the code and ID of a new game.
+ */
+void create_game_http() {
+  char body[100];
+  sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, TEMPO_SPEEDS[selected_tempo]);
+  Serial.println(body);
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);  
+
+  strcpy(game_code, strtok(response, "&"));
+  game_id = atoi(strtok(NULL, "&"));
+
+  Serial.printf("created game with game_id %d, game_code %s\n", game_id, game_code);
+}
+
+/*
+ * Makes a POST request to join a game with the specified game code
+ * (from join-game page) and returns whether or not it was successful.
+ * Saves appropriate data (game_id, room_num) if successful.
+ */
+bool join_game_http() {
+  int offset = 0;
+  char body[100];
+  sprintf(body, "type=join&username=%s&game_code=%d%d%d", USERNAME, game_code_input[0], game_code_input[1], game_code_input[2]);
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+
+  char code = strtok(response, "&")[0];
+  if (code == '3') {
+    game_id = atoi(strtok(NULL, "&"));
+    room_num[0] = '\0';
+    sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
+    Serial.printf("joined game %s\n", room_num);
+    return true;
+  } else {
+    // TODO: 0: no room found, 1: room limit reached, 2: game in progress or ended
+    Serial.printf("failed to join room for error code %c\n", code);
+    return false;
+  }
+}
+
+/*
+ * Makes a POST request to start the current game. Only accessible 
+ * by the host who created the game.
+ */
+void start_game_http() {
+  int offset = 0;
+  char body[50];
+  sprintf(body, "type=start&game_id=%d", game_id);
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+}
+
+//////////////////////
+// In-game requests //
+//////////////////////
+
 void fetch_game_state(int game_id) {
   char query[100]; //for body
   sprintf(query, "username=%s&game_id=%d&measure=%d", USERNAME, game_id, current_measure);
@@ -54,11 +113,14 @@ void fetch_game_state(int game_id) {
   time_since_last_ping = millis();
 }
 
+/*
+ * Submits the current measure to the current game on the server via a
+ * POST request and fills any empty inputs with rests.
+ */
 void submit_measure() {
   char string_of_notes[50];
   uint8_t notes_offset = 0;
   
-//  game_id = 6;
   for (int i = 0; i < note_state; i++) {
     notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
   }
@@ -66,7 +128,18 @@ void submit_measure() {
     notes_offset += sprintf(string_of_notes + notes_offset, "36 ");
   }
 
-  char query[200]; //for body
+  char query[100]; //for body
   sprintf(query, "type=new_measure&username=%s&game_id=%d&measure=%s", USERNAME, game_id, string_of_notes);
   make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+}
+
+/*
+ * Tells the server we're still connected via a POST request.
+ */
+void ping() {
+  char query[100]; //for body
+  sprintf(query, "username=%s&game_id=%d", USERNAME, game_id, string_of_notes);
+  make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+
+  time_since_last_ping = millis();
 }

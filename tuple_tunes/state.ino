@@ -409,11 +409,10 @@ void process_in_game(int bv, int js) {
       is_locked = false;
       display_game_menu();
     }
-  } else {
-    if (millis() - time_since_last_ping > PING_INTERVAL) {
-      fetch_game_state(6); // TODO: hardcoded 6
-      Serial.println("time since last ping updated");
-    }
+  }
+  if (millis() - time_since_last_ping > PING_INTERVAL) {
+    if (in_turn) ping(); 
+    else fetch_game_state(game_id);
   }
 }
 

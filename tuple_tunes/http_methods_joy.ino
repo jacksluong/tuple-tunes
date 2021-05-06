@@ -7,8 +7,7 @@ void create_game_http() {
   strcpy(game_code, strtok(response, "&"));
   game_id = atoi(strtok(NULL, "&"));
 
-  Serial.println(game_id);
-  Serial.println(game_code);
+  Serial.printf("created game with game_id %d, game_code %s\n", game_id, game_code);
 }
 
 bool join_game_http() {

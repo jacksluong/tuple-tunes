@@ -40,9 +40,9 @@ void update_state(int bv, int js) {
     process_join_game(bv, js);
   } else if (state == 3) {
 
-  } else if (state == 4) {
+  } else if (state == 4) {      ////////////////////// in-game //////////////////////
     process_in_game(bv, js);
-  } else if (state == 5) {
+  } else if (state == 5) {      ////////////////////// game menu //////////////////////
     process_game_menu(bv, js);
   }
 }
@@ -118,7 +118,7 @@ void process_start_game(int bv, int js) {
       else if (menu_state == 0) play_note(selected_key);
       update_start_game(1);
     } else if (menu_state == 2) { // start
-      create_game_http();
+      for (int i = 0; i < 3; i++) room_num[i] = '0'; // TODO: hardcoded room number
       reset_game();
       in_turn = true;
       display_in_game();
@@ -153,11 +153,11 @@ void process_join_game(int bv, int js) {
                game_code_input[2] >= 0) is_locked = false;
       update_join_game(1);
     } else if (menu_state == 1) { // join
-      if (join_game_http()) {
-        reset_game();
-        in_turn = false;
-        display_in_game();
-      }
+      room_num[0] = '\0';
+      sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
+      reset_game();
+      in_turn = false;
+      display_in_game();
     } else { // back
       back_to_landing();
     }
@@ -180,7 +180,7 @@ void process_in_game(int bv, int js) {
     }
   } else if (is_locked && js) { // scrolling through note and duration selection
     if (menu_state == 0) { // note and sharp/flat/neutral selection
-      tft.fillRect(133, 20, 15, 15, TFT_BLACK); // clear note
+      tft.fillRect(130, 20, 15, 15, TFT_BLACK); // clear note
       tft.fillRect(8 + 26.5 * (note_state % 4), 28 + 25 * (int(note_state / 4)), 15, 15, TFT_BLACK); // clear grid cell
       if (js == 2) { // right
         if (curr_note_index + SCALE_STEPS[(step_index + 1) % 8] <= 35) {
@@ -356,7 +356,7 @@ void process_in_game(int bv, int js) {
         selected_duration = (selected_duration + 4) % 5;
       }
     } else if (menu_state == 4) {
-      tft.fillRect(119, 100, 27, 15, TFT_BLACK); // clear note
+      tft.fillRect(119, 100, 30, 15, TFT_BLACK); // clear measure
       if (js == 2) { // right
         current_measure = (current_measure + 1) % MEASURE_COUNT;
       } else if (js == 4) { // left
@@ -389,7 +389,6 @@ void process_in_game(int bv, int js) {
           menu_state = 3;
         } else {
           note_state += pow(2, selected_duration);
-          is_locked = false;
           menu_state = 0;
 
           //adding the note to the notes array
@@ -405,6 +404,10 @@ void process_in_game(int bv, int js) {
 
           int i;
           for (i = 0; i < pow(2, selected_duration); i = i + 1) {
+            if (i != pow(2, selected_duration) - 1) {
+              tft.setCursor(10 + 26.5 * (temp_note_state % 4), 28 + 25*(int(temp_note_state/4)), 1);
+              tft.println("~");
+            }
             curr_notes_array[temp_note_state] = 37;
             temp_note_state = temp_note_state + 1;
           }
@@ -419,6 +422,9 @@ void process_in_game(int bv, int js) {
           if ((note_state >= 16)) {
             note_state = 16;  // to update grid cursor position for next note
             menu_state = 3;
+            is_locked = false;
+          } else {
+            is_locked = true;
           }
         }
       } else if (menu_state == 3) {
@@ -474,6 +480,7 @@ void process_game_menu(int bv, int js) {
     } else if (menu_state == 4) { // leave game
       reset_game();
       back_to_landing();
+      is_locked = false;
     }
   }
 }

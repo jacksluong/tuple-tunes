@@ -32,13 +32,13 @@ void reset_game() {
 }
 
 void update_state(int bv, int js) {
-  if (state == 0) {             
+  if (state == 0) {
     process_landing_state(bv, js);
-  } else if (state == 1) {      
+  } else if (state == 1) {
     process_start_game(bv, js);
-  } else if (state == 2) { 
+  } else if (state == 2) {
     process_join_game(bv, js);
-  } else if (state == 3) {      
+  } else if (state == 3) {
 
   } else if (state == 4) {
     process_in_game(bv, js);
@@ -188,7 +188,7 @@ void process_in_game(int bv, int js) {
           curr_note_index = curr_note_index + SCALE_STEPS[step_index];
           selected_note = curr_note_index % 12;
         }
-        
+
         play_note(curr_note_index);
         Serial.printf("Current note index updated %d \n", curr_note_index);
 
@@ -199,7 +199,7 @@ void process_in_game(int bv, int js) {
           step_index = (step_index + 7) % 8; //same as subtracting 1
           selected_note = curr_note_index % 12;
         }
-        
+
         play_note(curr_note_index);
         Serial.printf("Current note index updated %d \n", curr_note_index);
       }
@@ -214,10 +214,10 @@ void process_in_game(int bv, int js) {
         Serial.println("Current note is rest");
       } else if (is_flat_key) {
         strcat(current_note, NOTES_FLAT[selected_note]);
-        Serial.printf("Current note is %s", current_note);
+        Serial.printf("Current note is %s \n", current_note);
       } else {
         strcat(current_note, NOTES_SHARP[selected_note]);
-        Serial.printf("Current note is %s", current_note);
+        Serial.printf("Current note is %s \n", current_note);
       }
 
       if (js == 2 || js == 4) { // update current selected symbol if note has changed
@@ -234,10 +234,11 @@ void process_in_game(int bv, int js) {
       // changing sharp/flat/neutral
       if (js == 1) { // up
 
-        /////////////////////////////
-        // edge cases //////////////
-        ////////////////////////////
-        if (curr_note_index == 0){ //edge case for Cb
+        /*
+          /////////////////////////////
+          // edge cases //////////////
+          ////////////////////////////
+          if (curr_note_index == 0){ //edge case for Cb
           if (selected_symbol == 2){
             adjustment = adjustment - 1;
             selected_symbol = 1;
@@ -247,10 +248,10 @@ void process_in_game(int bv, int js) {
           } else {
             Serial.println("we should not be rendering Cb");
           }
-          current_note[1] = SYMBOLS[selected_symbol];            
-        }
+          current_note[1] = SYMBOLS[selected_symbol];
+          }
 
-        else if (curr_note_index == 35){ //B
+          else if (curr_note_index == 35){ //B
           if (selected_symbol == 0){
             adjustment = adjustment + 1;
             selected_symbol = 1;
@@ -261,31 +262,42 @@ void process_in_game(int bv, int js) {
             Serial.println("we should not be rendering B#");
           }
           current_note[1] = SYMBOLS[selected_symbol];
-        }
+          }
 
-        ///////////////////////////////////
+          ///////////////////////////////////
+        */
 
-        else { //this is for all other notes
-           //later on, we will add adjustment to note index
-          if (selected_symbol == 2) {
+        //this is for all other notes
+        //later on, we will add adjustment to note index
+        if (selected_symbol == 2) {
+          if (curr_note_index + adjustment - 2 < 0) {
+            //do nothing if the next change would bring us below 0
+          } else {
             adjustment = adjustment - 2;
+            selected_symbol = (selected_symbol + 1) % 3;
+          }
+        } else {
+          if (curr_note_index + adjustment + 1 > 35) {
+            //do nothing if next change brings us above 35
           } else {
             adjustment = adjustment + 1;
+            selected_symbol = (selected_symbol + 1) % 3;
           }
-          play_note(curr_note_index + adjustment);
-          selected_symbol = (selected_symbol + 1) % 3;
-          current_note[1] = SYMBOLS[selected_symbol];
-
-          Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
-          
         }
+        play_note(curr_note_index + adjustment);
+        current_note[1] = SYMBOLS[selected_symbol];
 
-      } else if (js == 3) { // down
+        Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
 
-        /////////////////////////////
-        // edge cases //////////////
-        ////////////////////////////
-        if (curr_note_index == 0){ //edge case for Cb
+      }
+
+      else if (js == 3) { // down
+
+        /*
+          /////////////////////////////
+          // edge cases //////////////
+          ////////////////////////////
+          if (curr_note_index == 0){ //edge case for Cb
           if (selected_symbol == 2){
             adjustment = adjustment - 1;
             selected_symbol = 1;
@@ -295,10 +307,10 @@ void process_in_game(int bv, int js) {
           } else {
             Serial.println("we should not be rendering Cb");
           }
-          current_note[1] = SYMBOLS[selected_symbol];            
-        }
+          current_note[1] = SYMBOLS[selected_symbol];
+          }
 
-        else if (curr_note_index == 35){
+          else if (curr_note_index == 35){
           if (selected_symbol == 0){
             adjustment = adjustment + 1;
             selected_symbol = 1;
@@ -309,25 +321,34 @@ void process_in_game(int bv, int js) {
             Serial.println("we should not be rendering B#");
           }
           current_note[1] = SYMBOLS[selected_symbol];
-        }
+          }
 
-        ///////////////////////////////////
+          ///////////////////////////////////
+        */
 
-
-        else {
-            if (selected_symbol == 0) {
-              adjustment = adjustment + 2;
-            } else {
-              adjustment = adjustment - 1;
-            }
-            play_note(curr_note_index + adjustment);
+        if (selected_symbol == 0) {
+          if (curr_note_index + adjustment + 2 > 35) {
+            //do nothing if the next change would bring us below 0
+          } else {
+            adjustment = adjustment + 2;
             selected_symbol = (selected_symbol + 2) % 3;
-            current_note[1] = SYMBOLS[selected_symbol];
-            Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+          }
+
+        } else {
+          if (curr_note_index + adjustment - 1 < 0) {
+            //do nothing if next change brings us above 35
+          } else {
+            adjustment = adjustment - 1;
+            selected_symbol = (selected_symbol + 2) % 3;
           }
         }
+        play_note(curr_note_index + adjustment);
+        current_note[1] = SYMBOLS[selected_symbol];
+        Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+      }
+    }
 
-    } else if (menu_state == 1) { // duration selection (joystick left and right)
+    else if (menu_state == 1) { // duration selection (joystick left and right)
       tft.fillRect(122, 40, 25, 15, TFT_BLACK); // clear duration
       if (js == 2) { // right
         selected_duration = (selected_duration + 1) % 5;
@@ -360,7 +381,7 @@ void process_in_game(int bv, int js) {
         int curr_y = 29 + 25 * (int(note_state / 4));
         tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
         tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
-  
+
         int temp_note_state = note_state;
         Serial.printf("Added is %d", note_state + pow(2, selected_duration));
         if ((note_state >= 16)) {
@@ -370,23 +391,30 @@ void process_in_game(int bv, int js) {
           note_state += pow(2, selected_duration);
           is_locked = false;
           menu_state = 0;
-    
+
           //adding the note to the notes array
           if (current_note[0] == 'R') {
             curr_note_index = 36;
           } else {
             //curr_note_index = curr_note_index + adjustment;
           }
-    
+
           //curr_notes_array[temp_note_state] = curr_note_index;
           curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
           temp_note_state = temp_note_state + 1;
-  
+
           int i;
           for (i = 0; i < pow(2, selected_duration); i = i + 1) {
             curr_notes_array[temp_note_state] = 37;
             temp_note_state = temp_note_state + 1;
           }
+
+          //debugging
+          for (int i = 0; i < temp_note_state; i = i + 1) {
+            Serial.printf("current note array at index %d is %d", i, curr_notes_array[i]);
+          }
+          Serial.println("done");
+          //debugging
 
           if ((note_state >= 16)) {
             note_state = 16;  // to update grid cursor position for next note

@@ -31,6 +31,9 @@ char game_code[5];
 char measure_response[200];
 char player_in_turn[50];
 
+bool is_host = false; \\determining if you are the host / made the create_game request
+bool in_turn = false; \\determining if player in turn
+
 char SERVER[] = "608dev-2.net";
 char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py";
 char START_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py";

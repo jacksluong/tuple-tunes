@@ -6,13 +6,8 @@
 
 Meeting time: 4:30 - 5:00 PM Thursday
 
-# Video Demo
-
-![Video demonstration front end single player measure input](link here)
-
-![Video demonstration of http requests](link here)
-
 # Goal 1: Complete functionality to select a note and connect data from ESP to the server side via POST / GET requests
+![Video with GET and POST request](https://www.youtube.com/watch?v=R7J59D4zMc8&feature=youtu.be)
 
 The http.ino file contains all of HTTP requests:
 * submit_measure() to submit a measure to the server, which sends a POST request with parameters of the game_id, ‘new_measure’, the user who submitted the measure, and a string of 16 integers separated by a space.
@@ -24,10 +19,13 @@ The http.ino file contains all of HTTP requests:
 
 
 # Goal 2:  Output sound on speaker
+![Output sound, as demonstrated in this video](https://www.youtube.com/watch?v=3gj7XBkEds0)
 
 The audio.ino file now has a function to play an inputted measure (expressed as an integer array of length 16) and a function to play an inputted song (expressed as a 2D array of MEASURE_COUNT number of measure arrays), given the game’s tempo. In the game menu, if “play measure” is selected, it will play the most recent / current measure. If “play song” is selected, it will play the entire song thus far. More details regarding sound that was not a part of this milestone is in below under “additional progress” and “challenges”. In the game page, while the user is scrolling through the notes to choose the next note, the buzzer plays each note for the user’s reference. The permitted notes range from C3 to B5, which is 36 notes.
 
+
 # Goal 3: Complete internal representation of notes (flesh out ideas and code):
+![Internal representation of notes](https://youtu.be/adUoVIuHj0A)
 
 Currently, the representation of the notes are now fleshed out and in state. Notes are represented by integers 0 through 37, representing notes C3 to B5, and 36 representing rest, 37 representing hold. 
 
@@ -41,6 +39,7 @@ Notes also account for edge cases of shifting past our notes we can play, which 
 
 
 # Goal 4: Complete frontend for player in turn display, ability to select note and duration on ESP
+![ESP Front End Video](https://www.youtube.com/watch?v=3gj7XBkEds0)
 
 We finished implementing player in turn display, where the player can query through the notes, choose adjustment on sharps and flats, choose duration, and see their note submission rendered on the screen.
 
@@ -51,11 +50,15 @@ At any point, if we long press the button, we get to the game menu screen. Selec
 
 
 # Goal 5: Make significant progress on feature to show previous measures on frontend
+![Video with GET and POST request]()
+
 
 Currently the right side in-game menu allows the user to scroll through the game measures, and the in-game display of notes grid with the controls is correctly displayed. The HTTPs requests for posting and getting measures is also functional, so significant progress has been made on this feature. At any given point, every player in a game will have all the notes/measures in the current song saved into their ESP. The next step would be to tie it together the displaying of the previous measures with the in-game notes grid, which we have the code prepared for (since this involves the same idea as loading the notes in the current measure that the user is updating, each time the user goes to the game menu info page and returns back through “Resume”).
 
 
 # Goal 6: Function for end a game on backend
+![Ending a game](https://www.youtube.com/watch?v=WEo6JjID1OE)
+
 
 On the backend server side, there is a hardcoded value for the max number of measures allowed in a game (currently hardcorded to 3). Whenever the game reaches a state where the number of measures equals this hardcoded value, the game_state changes to “ended”. Throughout the game, each client makes periodic get requests to request the current state of the game. If the first value in the return output is “1”, the game has ended, and the completed song is returned alongside it. Linked below is all the information regarding the get/post API endpoints on the server side.
 
@@ -84,6 +87,8 @@ Our goals for next week are to have our minimum viable product ready:
 
 
 Appendix Code:
+
+[Link to all code](https://drive.google.com/file/d/1VFJbzVeBstNzfcMUwXzMkfcfj-msg1Ke/view?usp=sharing)
 
 tuple_tunes.ino - contains the loop and all global variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

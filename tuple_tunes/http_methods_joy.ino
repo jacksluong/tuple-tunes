@@ -1,14 +1,11 @@
-void start_game_http(){
+void create_game_http(){
   int offset = 0;
-  //char 
   char body[100];
   body[0] = '\0';
 //  offset += sprintf(request, "type=create&username%s&key=%d&tempo=%d", USERNAME, selected_key, TEMPO_SPEEDS[selected_tempo]);
   offset += sprintf(body, "type=create&username=%s&key=%d&tempo=%d", "Joyce", 13, 120);
   Serial.println(body);
-  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
-
-  
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);  
 
   strcpy(game_code, strtok(response, "&")); // type=create
   char * p = strtok(NULL, "&"); // username%s
@@ -17,6 +14,22 @@ void start_game_http(){
   Serial.println(game_id);
   Serial.println(game_code);
   
+}
+
+void join_game_http(){
+  int offset = 0;
+  char body[100];
+  body[0] = '\0';
+  sprintf(body, "type=join&username&%s&game_code=%s", USERNAME, "009");
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+}
+
+void start_game_http(){
+  int offset = 0;
+  char body[100];
+  body[0] = '\0';
+  sprintf(body, "type=start&game_id=%d", USERNAME, game_id);
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
 }
 
 //void make_get_request(char* server, char* address, char* params, char* output, bool https) {

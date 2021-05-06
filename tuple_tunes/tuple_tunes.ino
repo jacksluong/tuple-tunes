@@ -198,7 +198,7 @@ void setup() {
   }
 
   //testing
-  //start_game_http();
+  create_game_http();
   
   // Draw first screen
   back_to_landing();

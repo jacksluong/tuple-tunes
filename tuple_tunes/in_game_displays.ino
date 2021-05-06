@@ -12,7 +12,7 @@ void display_in_game() {
   
   // Left side grid
   tft.setCursor(5, 6, 1);
-  tft.println("<measure 4/4>");
+  tft.printf("<measure %d/%d>", current_measure, MEASURE_COUNT);
 
   for (int i = 0; i < 4; i++) {
     tft.drawRect(0, 25 * i + 19, 107, 25, TFT_WHITE);
@@ -21,6 +21,7 @@ void display_in_game() {
   tft.drawLine(26.5, 19, 26.5, 118, rgb_to_565(GRAY));
   tft.drawLine(53, 19, 53, 118, rgb_to_565(GRAY));
   tft.drawLine(79.5, 19, 79.5, 118, rgb_to_565(GRAY));
+  selected_note = selected_key;
   
   // Right side info
   current_note[0] = '\0'; // get first starting note in this key
@@ -55,20 +56,19 @@ void display_in_game() {
 //    tft.setCursor(8 + 26.5 * (i % 4), 28 + 25*(int(i/4)), 1);
 //    tft.printf(measures[current_measure][i]);
 //  }
-  int last_i;
   for (int i = 0; i < note_state; i++) {
       tft.setCursor(8 + 26.5 * (i % 4), 28 + 25*(int(i/4)), 1);
       int note_i = curr_notes_array[i] % 12;
-      if (curr_notes_array[i] != 37) {
-        last_i = note_i;        
+      if (curr_notes_array[i] == 36) {
+        tft.println("R");
+      } else if (curr_notes_array[i] == 37) {                
+        tft.println("~");
       } else {
-        note_i = last_i;
-      }
-       
-      if (is_flat_key) {
-        tft.println(NOTES_FLAT[note_i]);
-      } else {
-        tft.println(NOTES_SHARP[note_i]);
+        if (is_flat_key) {
+          tft.println(NOTES_FLAT[note_i]);
+        } else {
+          tft.println(NOTES_SHARP[note_i]);
+        }
       }
   }
   if (note_state < 16) {

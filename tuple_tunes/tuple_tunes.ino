@@ -212,7 +212,7 @@ void loop() {
   int js = joystick.read();
     
   if (bv) last_button_click = millis();
-  if (is_locked) draw_cursor();
+  if (is_locked && note_state < 16) draw_cursor();
   
   update_state(bv, js);
   //stop_sound();

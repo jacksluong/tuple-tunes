@@ -26,13 +26,10 @@ char NETWORK[] = "MIT";
 char PASSWORD[] = "";
 char USERNAME[] = "Irene";
 
-uint16_t game_id;
+uint16_t game_id = 89;
 char game_code[5];
 char measure_response[200];
 char player_in_turn[50];
-
-bool is_host = false; \\determining if you are the host / made the create_game request
-bool in_turn = false; \\determining if player in turn
 
 char SERVER[] = "608dev-2.net";
 char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py";
@@ -43,6 +40,13 @@ char response[OUT_BUFFER_SIZE];
 const uint16_t IN_BUFFER_SIZE = 2000;
 char request[IN_BUFFER_SIZE];
 uint32_t time_since_last_ping = millis();
+
+//waiting room stuffz
+uint32_t wait_room_timer = millis();
+const uint16_t WAIT_ROOM_UPDATE = 7000; //waiting room updates every 2 seconds
+char player_list[200];
+bool is_host = false; //determining if you are the host / made the create_game request
+int num_players = 0;
 
 // LED
 const uint8_t red = 0;
@@ -109,6 +113,7 @@ int selected_duration = 0; // selected duration index for current note
 int selected_symbol = 0; // selected symbol index for current note
 int step_index = 0; // selected jump index for determining next note in key
 int note_state = 0;
+
 
 // Tests
 int test1[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
@@ -202,7 +207,7 @@ void setup() {
   }
 
   //testing
-  create_game_http();
+  //get_game_status();
   
   // Draw first screen
   back_to_landing();

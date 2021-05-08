@@ -12,9 +12,15 @@ void create_game_http() {
   make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);  
 
   strcpy(game_code, strtok(response, "&"));
-  game_id = atoi(strtok(NULL, "&"));
 
-  Serial.printf("created game with game_id %d, game_code %s\n", game_id, game_code);
+  if (game_code == "-1"){
+    Serial.printf("invalid post, please post username, selected key, and tempo");
+  } else{
+    game_id = atoi(strtok(NULL, "&"));
+    Serial.printf("created game with game_id %d, game_code %s\n", game_id, game_code);
+    is_host = true;
+    in_turn = true; //host will start intern
+  }
 }
 
 /*
@@ -51,7 +57,45 @@ void start_game_http() {
   char body[50];
   sprintf(body, "type=start&game_id=%d", game_id);
   make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+
+  char code = strtok(response, "&")[0];
+
+  if (code == '1'){
+    num_players = atoi(strtok(NULL, "&"));
+  }
+  else if (code =='0' || code == '-'){
+    Serial.printf("Game not found, invalid game_id: %d \n", game_id);
+  } else if (code == '2'){
+    Serial.println("Game has already started");
+  } else if (code == '3'){
+    Serial.println("Game has already ended");
+  } else{
+    Serial.println("something went wrong");
+  }
 }
+
+/*
+ * Makes a GET request to get current game status. 
+ * Used to show all players in waiting room
+ */
+
+ void get_game_status(){
+  int offset = 0;
+  char query[50];
+  sprintf(query, "game_id=%d", game_id);
+  make_get_request(SERVER, START_GAME_ADDRESS, query, response, false);
+
+  char code = strtok(response, "&")[0];
+  if (code == '1'){ //game in waiting room, response ”1&{num_players}&{player_names}”
+    num_players = atoi(strtok(NULL, "&"));
+    strcpy(player_list, strtok(NULL, "&"));
+    
+  }  else { //TODO: process how to parse other types of statements 
+    Serial.printf("Something went wrong; game_id: %d, response code: %c \n", game_id, code);
+  }
+
+  
+ }
 
 //////////////////////
 // In-game requests //

@@ -44,6 +44,8 @@ void update_state(int bv, int js) {
     process_in_game(bv, js);
   } else if (state == 5) {      ////////////////////// game menu //////////////////////
     process_game_menu(bv, js);
+  } else if (state == 24) {  //////////////////////waiting room///////////////////////
+    process_waiting_room(bv, js);
   }
 }
 
@@ -122,6 +124,16 @@ void process_start_game(int bv, int js) {
       reset_game();
       in_turn = true;
       display_in_game();
+
+      //Joyce's testing
+      state = 24;
+      tft.fillScreen(TFT_PINK);
+      //make get game status request
+      get_game_status();
+      Serial.println("Host joining waiting room");
+      Serial.println(player_list);
+      wait_room_timer = millis();
+
     } else  { // back
       back_to_landing();
     }
@@ -154,10 +166,19 @@ void process_join_game(int bv, int js) {
       update_join_game(1);
     } else if (menu_state == 1) { // join
       if (join_game_http()) {
-         reset_game();
-         in_turn = false;
-         display_in_game();
-       }
+        reset_game();
+        in_turn = false;
+        display_in_game();
+
+        //Joyce's testing
+        state = 24;
+        tft.fillScreen(TFT_PINK);
+        //make get game status request
+        get_game_status();
+        Serial.println("Player joining waiting room");
+        Serial.println(player_list);
+        wait_room_timer = millis();
+      }
     } else { // back
       back_to_landing();
     }
@@ -166,6 +187,7 @@ void process_join_game(int bv, int js) {
     update_join_game(6);
   }
 }
+
 
 ////////////////////// in-game //////////////////////
 
@@ -405,7 +427,7 @@ void process_in_game(int bv, int js) {
           int i;
           for (i = 0; i < pow(2, selected_duration); i = i + 1) {
             if (i != pow(2, selected_duration) - 1) {
-              tft.setCursor(10 + 26.5 * (temp_note_state % 4), 28 + 25*(int(temp_note_state/4)), 1);
+              tft.setCursor(10 + 26.5 * (temp_note_state % 4), 28 + 25 * (int(temp_note_state / 4)), 1);
               tft.println("~");
             }
             curr_notes_array[temp_note_state] = 37;
@@ -445,7 +467,7 @@ void process_in_game(int bv, int js) {
     }
   }
   if (millis() - time_since_last_ping > PING_INTERVAL) {
-    if (in_turn) ping(); 
+    if (in_turn) ping();
     else fetch_game_state(game_id);
   }
 }
@@ -482,5 +504,21 @@ void process_game_menu(int bv, int js) {
       back_to_landing();
       is_locked = false;
     }
+  }
+}
+
+///////////////////////waiting room//////////////////
+void process_waiting_room(int bv, int js) {
+  if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
+    if (is_host) {
+      //render smth different if is host or smth
+      Serial.println("You are the host ma'am");
+    } else {
+      Serial.println("You are not the host :P");
+    }
+    get_game_status();
+    Serial.printf("Num players: %d \n", num_players);
+    Serial.println(player_list);
+    wait_room_timer = millis();
   }
 }

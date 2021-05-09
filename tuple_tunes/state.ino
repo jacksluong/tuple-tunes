@@ -6,7 +6,7 @@ void back_to_landing() {
 }
 
 void reset_game() {
-  // Playback variables
+  // Playback variablesw
   note_index = 0;
   measure_index = 0;
   playing_measure = false;
@@ -29,6 +29,7 @@ void reset_game() {
   input_cursor = 0;
   state = 4;
   is_locked = true;
+  tft.setTextSize(1);
 }
 
 void update_state(int bv, int js) {
@@ -121,19 +122,15 @@ void process_start_game(int bv, int js) {
       update_start_game(1);
     } else if (menu_state == 2) { // start
       create_game_http();
-      reset_game();
       in_turn = true;
-      display_in_game();
-
-      //Joyce's testing
+      //take to waiting room
       state = 24;
-      tft.fillScreen(TFT_PINK);
       //make get game status request
       get_game_status();
       Serial.println("Host joining waiting room");
       Serial.println(player_list);
       wait_room_timer = millis();
-
+      tft.fillScreen(TFT_BLACK);
     } else  { // back
       back_to_landing();
     }
@@ -166,18 +163,16 @@ void process_join_game(int bv, int js) {
       update_join_game(1);
     } else if (menu_state == 1) { // join
       if (join_game_http()) {
-        reset_game();
         in_turn = false;
-        display_in_game();
-
-        //Joyce's testing
+        is_host = false;
+        //take to waiting room
         state = 24;
-        tft.fillScreen(TFT_PINK);
         //make get game status request
         get_game_status();
         Serial.println("Player joining waiting room");
         Serial.println(player_list);
         wait_room_timer = millis();
+        tft.fillScreen(TFT_BLACK);
       }
     } else { // back
       back_to_landing();
@@ -501,22 +496,56 @@ void process_game_menu(int bv, int js) {
       update_game_menu();
     } else if (menu_state == 4) { // leave game
       reset_game();
-      back_to_landing();
       is_locked = false;
+      back_to_landing();
     }
   }
 }
 
 ///////////////////////waiting room//////////////////
 void process_waiting_room(int bv, int js) {
-  if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
-    if (is_host) {
-      //render smth different if is host or smth
-      Serial.println("You are the host ma'am");
-    } else {
-      Serial.println("You are not the host :P");
+  if (game_state == 2) { // if game has started, change to in game display
+    reset_game();
+    display_in_game();
+  }
+  
+  tft.setCursor(0, 13, 2);
+  tft.println("Waiting Room");
+  tft.setCursor(8, 40, 1);
+  tft.printf("Username: %s", USERNAME);
+  tft.setCursor(8, 53, 1);
+  tft.printf("Room #: %s", room_num);
+  if (is_host) {
+    tft.setCursor(8, 66, 1);
+    tft.println("You are the host!");
+//    tft.setCursor(8, 79, 1);
+//    tft.printf("Click to start game.");
+    tft.setCursor(8, 100, 1);
+    tft.printf("Number of Players: %d", num_players);
+    tft.setCursor(8, 115, 1);
+    tft.println("Start"); // only the host can start game
+    set_cursor_pos(0, 116);
+    draw_cursor();
+    if (bv == 1) { // short press means start game, directly take to in game display
+      start_game_http();
+      game_state == 2;
+      reset_game();
+      display_in_game();
     }
+  } else {
+//    tft.println("You are not the host :P");
+    
+    tft.setCursor(8, 66, 1);
+    tft.println("Waiting for host to start");
+    tft.setCursor(8, 100, 1);
+    tft.printf("Number of Players: %d", num_players);
+//    Serial.println("You are not the host :P");
+  }
+  
+  if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
     get_game_status();
+    tft.setCursor(8, 100, 1);
+    tft.printf("Number of Players: %d", num_players);
     Serial.printf("Num players: %d \n", num_players);
     Serial.println(player_list);
     wait_room_timer = millis();

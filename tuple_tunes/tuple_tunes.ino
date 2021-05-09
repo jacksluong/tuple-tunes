@@ -47,6 +47,7 @@ const uint16_t WAIT_ROOM_UPDATE = 7000; //waiting room updates every 2 seconds
 char player_list[200];
 bool is_host = false; //determining if you are the host / made the create_game request
 int num_players = 0;
+int game_state = 0; // consistent with return numbers of get game status
 
 // LED
 const uint8_t red = 0;

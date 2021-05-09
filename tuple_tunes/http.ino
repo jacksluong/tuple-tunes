@@ -12,10 +12,12 @@ void create_game_http() {
   make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);  
 
   strcpy(game_code, strtok(response, "&"));
+  room_num[0] = '\0';
+  strcat(room_num, game_code);
 
   if (game_code == "-1"){
     Serial.printf("invalid post, please post username, selected key, and tempo");
-  } else{
+  } else {
     game_id = atoi(strtok(NULL, "&"));
     Serial.printf("created game with game_id %d, game_code %s\n", game_id, game_code);
     is_host = true;
@@ -89,12 +91,16 @@ void start_game_http() {
   if (code == '1'){ //game in waiting room, response ”1&{num_players}&{player_names}”
     num_players = atoi(strtok(NULL, "&"));
     strcpy(player_list, strtok(NULL, "&"));
-    
-  }  else { //TODO: process how to parse other types of statements 
+    game_state = 1;
+  } else if (code == '2') {
+    Serial.printf("Game id %d, game code %c is in progress", game_id, code);
+    game_state = 2;
+  } else if (code == '3') {
+    Serial.printf("Game id %d, game code %c has ended", game_id, code);
+    game_state = 3;
+  } else { //TODO: process how to parse other types of statements 
     Serial.printf("Something went wrong; game_id: %d, response code: %c \n", game_id, code);
   }
-
-  
  }
 
 //////////////////////

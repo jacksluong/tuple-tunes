@@ -125,6 +125,10 @@ void fetch_game_state(int game_id) {
 
   Serial.print("in_turn: ");
   Serial.println(in_turn);
+
+  // Turns on LED based on in turn: red for in turn, green for off turn.
+  if (in_turn) set_led_color(255, 0, 0);
+  else set_led_color(0, 255, 0);
   
   p = strtok(NULL, "&"); // index of next measure to be submitted
   Serial.printf("current measure: {%s}\n", p);
@@ -150,7 +154,6 @@ void fetch_game_state(int game_id) {
       if (note_state == 16) current_measure++;
     }
 
-    
     Serial.println("finished parsing fetched data, measures is now:");
     for (int i = 0; i <= current_measure; i++) {
       for (int j = 0; j < 16; j++)
@@ -172,7 +175,8 @@ void submit_measure() {
   uint8_t notes_offset = 0;
   
   for (int i = 0; i < note_state; i++) {
-    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
+//    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
+    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", measures[current_measure][i]);
   }
   for (int i = note_state; i < 16; i++) {
     notes_offset += sprintf(string_of_notes + notes_offset, "36 ");
@@ -188,7 +192,8 @@ void submit_measure() {
  */
 void ping() {
   char query[100]; //for body
-  sprintf(query, "username=%s&game_id=%d", USERNAME, game_id);
+  sprintf(query, "type=ping&username=%s&game_id=%d", USERNAME, game_id);
+  Serial.println("Ping:");
   make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
 
   time_since_last_ping = millis();

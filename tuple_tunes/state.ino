@@ -121,6 +121,7 @@ void process_start_game(int bv, int js) {
       else if (menu_state == 0) play_note(selected_key);
       update_start_game(1);
     } else if (menu_state == 2) { // start
+      //loading_page();
       create_game_http();
       in_turn = true;
       //take to waiting room
@@ -162,6 +163,7 @@ void process_join_game(int bv, int js) {
                game_code_input[2] >= 0) is_locked = false;
       update_join_game(1);
     } else if (menu_state == 1) { // join
+      //loading_page();
       if (join_game_http()) {
         in_turn = false;
         is_host = false;
@@ -375,9 +377,15 @@ void process_in_game(int bv, int js) {
     } else if (menu_state == 4) {
       tft.fillRect(119, 100, 30, 15, TFT_BLACK); // clear measure
       if (js == 2) { // right
-        current_measure = (current_measure + 1) % MEASURE_COUNT;
+        Serial.printf("Selected measure: %d", selected_measure);
+        selected_measure = (selected_measure + 1) % (current_measure + 1);
+        is_locked = true;
+        display_in_game();
       } else if (js == 4) { // left
-        current_measure = (current_measure + MEASURE_COUNT - 1) % MEASURE_COUNT;
+        Serial.printf("Selected measure: %d", selected_measure);
+        selected_measure = (selected_measure + current_measure) % (current_measure + 1);
+        is_locked = true;
+        display_in_game();
       }
     }
   }
@@ -416,7 +424,8 @@ void process_in_game(int bv, int js) {
           }
 
           //curr_notes_array[temp_note_state] = curr_note_index;
-          curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
+//          curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
+          measures[current_measure][temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
           temp_note_state = temp_note_state + 1;
 
           int i;
@@ -425,13 +434,15 @@ void process_in_game(int bv, int js) {
               tft.setCursor(10 + 26.5 * (temp_note_state % 4), 28 + 25 * (int(temp_note_state / 4)), 1);
               tft.println("~");
             }
-            curr_notes_array[temp_note_state] = 37;
+//            curr_notes_array[temp_note_state] = 37;
+            measures[current_measure][temp_note_state] = 37;
             temp_note_state = temp_note_state + 1;
           }
 
           //debugging
           for (int i = 0; i < temp_note_state; i = i + 1) {
-            Serial.printf("current note array at index %d is %d", i, curr_notes_array[i]);
+//            Serial.printf("current note array at index %d is %d", i, curr_notes_array[i]);
+            Serial.printf("current note array at index %d is %d", i, measures[current_measure][i]);
           }
           Serial.println("done");
           //debugging
@@ -449,6 +460,7 @@ void process_in_game(int bv, int js) {
         tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
         note_state = 0;
         current_measure += 1;
+        selected_measure = current_measure;
         menu_state = 0;
         display_in_game();
       }
@@ -460,7 +472,7 @@ void process_in_game(int bv, int js) {
       is_locked = false;
       display_game_menu();
     }
-  }
+  } 
   if (millis() - time_since_last_ping > PING_INTERVAL) {
     if (in_turn) ping();
     else fetch_game_state(game_id);
@@ -470,6 +482,8 @@ void process_in_game(int bv, int js) {
 ////////////////////// game-menu //////////////////////
 
 void process_game_menu(int bv, int js) {
+//  if (in_turn) set_led_color(255, 0, 0);
+//  else set_led_color(0, 255, 0);
   if (js == 1) { // up
     menu_state = (menu_state + 4) % 5;
     update_game_menu();

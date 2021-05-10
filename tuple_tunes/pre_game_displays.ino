@@ -11,6 +11,7 @@ uint8_t DARK_CYAN[] = {50, 162, 168};
 /////////////
 
 void display_landing() {
+  set_led_color(0, 0, 255);
   tft.fillScreen(TFT_BLACK);
   fade_in_text(" Tuple\n Tunes", 0, 13, CYAN, 1000, 3);
   

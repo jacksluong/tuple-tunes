@@ -190,7 +190,7 @@ void display_game_menu() {
   tft.setCursor(88, 60, 1);
   tft.printf(" Tempo:%s\r\n", TEMPO_LABELS[selected_tempo]);
   tft.setCursor(88, 80, 1);
-  tft.printf(" #Players:%d\r\n", player_count);
+  tft.printf(" #Players:%d\r\n", num_players);
   tft.setCursor(88, 100, 1);
   if (sound_on) {
     tft.println(" Sound On");

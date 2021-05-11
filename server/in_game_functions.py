@@ -3,7 +3,7 @@ import sqlite3
 import datetime
 
 moosic_db = '/var/jail/home/team59/moosic1.db'
-MAX_MEASURES = 3
+MAX_MEASURES = 5
 
 def fetch(game_id, username, last_updated_measure):
     '''given the game id, username, and last updated measure of fetching player,

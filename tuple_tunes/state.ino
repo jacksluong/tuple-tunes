@@ -391,87 +391,88 @@ void process_in_game(int bv, int js) {
       }
     }
 
-    if (in_turn) {
-      if (bv == 1) {
-        if (!is_locked && menu_state != 2) {
-          is_locked = true;
-        } else {
-          is_locked = false;
-        }
-        // state changes
-        if (menu_state == 0) {
-          play_note(curr_note_index);
-        }
-        if (menu_state == 2) { // add a note
-          int curr_x = 2 + 26.5 * (note_state % 4);
-          int curr_y = 29 + 25 * (int(note_state / 4));
-          tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
+    if (bv == 1) {
+      if (menu_state < 4) return;
+      
+      if (!is_locked && menu_state != 2) {
+        is_locked = true;
+      } else {
+        is_locked = false;
+      }
+      // state changes
+      if (menu_state == 0) {
+        play_note(curr_note_index);
+      }
+      if (menu_state == 2) { // add a note
+        int curr_x = 2 + 26.5 * (note_state % 4);
+        int curr_y = 29 + 25 * (int(note_state / 4));
+        tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
 
-          int temp_note_state = note_state;
-          Serial.printf("Added is %d", note_state + pow(2, selected_duration));
+        int temp_note_state = note_state;
+        Serial.printf("Added is %d", note_state + pow(2, selected_duration));
+        if ((note_state >= 16)) {
+          note_state = 16;  // to update grid cursor position for next note
+          menu_state = 3;
+        } else {
+          note_state += pow(2, selected_duration);
+          menu_state = 0;
+
+          //adding the note to the notes array
+          if (current_note[0] == 'R') {
+            curr_note_index = 36;
+          } else {
+            //curr_note_index = curr_note_index + adjustment;
+          }
+
+          //curr_notes_array[temp_note_state] = curr_note_index;
+          //          curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
+          measures[current_measure][temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
+          temp_note_state = temp_note_state + 1;
+
+          int i;
+          for (i = 0; i < pow(2, selected_duration); i = i + 1) {
+            if (i != pow(2, selected_duration) - 1) {
+              tft.setCursor(10 + 26.5 * (temp_note_state % 4), 28 + 25 * (int(temp_note_state / 4)), 1);
+              tft.println("~");
+            }
+            //            curr_notes_array[temp_note_state] = 37;
+            measures[current_measure][temp_note_state] = 37;
+            temp_note_state = temp_note_state + 1;
+          }
+
           if ((note_state >= 16)) {
             note_state = 16;  // to update grid cursor position for next note
             menu_state = 3;
+            is_locked = false;
           } else {
-            note_state += pow(2, selected_duration);
-            menu_state = 0;
-
-            //adding the note to the notes array
-            if (current_note[0] == 'R') {
-              curr_note_index = 36;
-            } else {
-              //curr_note_index = curr_note_index + adjustment;
-            }
-
-            //curr_notes_array[temp_note_state] = curr_note_index;
-            //          curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
-            measures[current_measure][temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
-            temp_note_state = temp_note_state + 1;
-
-            int i;
-            for (i = 0; i < pow(2, selected_duration); i = i + 1) {
-              if (i != pow(2, selected_duration) - 1) {
-                tft.setCursor(10 + 26.5 * (temp_note_state % 4), 28 + 25 * (int(temp_note_state / 4)), 1);
-                tft.println("~");
-              }
-              //            curr_notes_array[temp_note_state] = 37;
-              measures[current_measure][temp_note_state] = 37;
-              temp_note_state = temp_note_state + 1;
-            }
-
-            if ((note_state >= 16)) {
-              note_state = 16;  // to update grid cursor position for next note
-              menu_state = 3;
-              is_locked = false;
-            } else {
-              is_locked = true;
-            }
+            is_locked = true;
           }
-        } else if (menu_state == 3) {
-          if (note_state < 16) {
-            while (note_state < 16) {
-              measures[current_measure][note_state] = 36;
-              note_state += 1;
-            }
-          }
-          submit_measure();
-          tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
-          note_state = 0;
-          current_measure += 1;
-          selected_measure = current_measure;
-          menu_state = 0;
-          display_in_game();
-          in_turn = false;
-          set_led_color(255, 0, 0);
         }
-      } else if (bv == 2) { // go to game menu screen
-        tft.fillScreen(TFT_BLACK);
-        state = 5;
+      } else if (menu_state == 3) {
+        if (note_state < 16) {
+          while (note_state < 16) {
+            measures[current_measure][note_state] = 36;
+            note_state += 1;
+          }
+        }
+        submit_measure();
+        tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
+        note_state = 0;
+        current_measure += 1;
+        selected_measure = current_measure;
         menu_state = 0;
-        is_locked = false;
-        display_game_menu();
+        display_in_game();
+        in_turn = false;
+        set_led_color(255, 0, 0);
       }
+    } else if (bv == 2) { // go to game menu screen
+      tft.fillScreen(TFT_BLACK);
+      state = 5;
+      menu_state = 0;
+      is_locked = false;
+      display_game_menu();
     }
+    
     if (millis() - time_since_last_ping > PING_INTERVAL) {
       if (in_turn) ping();
       else fetch_game_state(game_id);

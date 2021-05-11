@@ -172,6 +172,8 @@ void fetch_game_state(int game_id) {
         Serial.printf("%d ", measures[i][j]);
       Serial.println();
     }
+
+    update_in_game(0);
   } else {
     Serial.println("no updates needed");
   }

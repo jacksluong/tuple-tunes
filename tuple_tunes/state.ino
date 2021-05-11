@@ -586,7 +586,7 @@ void process_waiting_room(int bv, int js) {
   }
   
   if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
-    tft.fillRect(8, 100, 15, 15, TFT_BLACK);
+    tft.fillRect(8, 95, 160, 20, TFT_BLACK);
     get_game_status();
     tft.setCursor(8, 100, 1);
     tft.printf("Number of Players: %d", num_players);

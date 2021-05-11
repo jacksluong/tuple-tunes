@@ -476,6 +476,8 @@ void process_in_game(int bv, int js) {
           selected_measure = current_measure;
           menu_state = 0;
           display_in_game();
+          in_turn = false;
+          set_led_color(0,255,0);
         }
         update_in_game();
       } else if (bv == 2) { // go to game menu screen

@@ -173,7 +173,7 @@ void process_join_game(int bv, int js) {
         is_host = false;
         
         state = 3;
-        num_players = 1;
+        num_players = 2;
         Serial.println("Player joining waiting room");
         Serial.println(player_list);
         wait_room_timer = millis();
@@ -392,7 +392,7 @@ void process_in_game(int bv, int js) {
     }
 
     if (bv == 1) {
-      if (menu_state < 4) return;
+      if (!in_turn && menu_state < 4) return;
       
       if (!is_locked && menu_state != 2) {
         is_locked = true;

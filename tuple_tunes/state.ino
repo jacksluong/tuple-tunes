@@ -549,48 +549,48 @@ void process_waiting_room(int bv, int js) {
     reset_game();
     state = 2;
     display_in_game();
-  }
-  
-  tft.setCursor(0, 13, 2);
-  tft.println("Waiting Room");
-  tft.setCursor(8, 40, 1);
-  tft.printf("Username: %s", USERNAME);
-  tft.setCursor(8, 53, 1);
-  tft.printf("Room #: %s", room_num);
-  if (is_host) {
-    tft.setCursor(8, 66, 1);
-    tft.println("You are the host!");
-//    tft.setCursor(8, 79, 1);
-//    tft.printf("Click to start game.");
-    tft.setCursor(8, 100, 1);
-    tft.printf("Number of Players: %d", num_players);
-    tft.setCursor(8, 115, 1);
-    tft.println("Start"); // only the host can start game
-    set_cursor_pos(0, 116);
-    draw_cursor();
-    if (bv == 1) { // short press means start game, directly take to in game display
-      start_game_http();
-      state = 2;
-      reset_game();
-      display_in_game();
-    }
   } else {
-//    tft.println("You are not the host :P");
+    tft.setCursor(0, 13, 2);
+    tft.println("Waiting Room");
+    tft.setCursor(8, 40, 1);
+    tft.printf("Username: %s", USERNAME);
+    tft.setCursor(8, 53, 1);
+    tft.printf("Room #: %s", room_num);
+    if (is_host) {
+      tft.setCursor(8, 66, 1);
+      tft.println("You are the host!");
+  //    tft.setCursor(8, 79, 1);
+  //    tft.printf("Click to start game.");
+      tft.setCursor(8, 100, 1);
+      tft.printf("Number of Players: %d", num_players);
+      tft.setCursor(8, 115, 1);
+      tft.println("Start"); // only the host can start game
+      set_cursor_pos(0, 116);
+      draw_cursor();
+      if (bv == 1) { // short press means start game, directly take to in game display
+        start_game_http();
+        state = 2;
+        reset_game();
+        display_in_game();
+      }
+    } else {
+  //    tft.println("You are not the host :P");
+      
+      tft.setCursor(8, 66, 1);
+      tft.println("Waiting for host to start");
+      tft.setCursor(8, 100, 1);
+      tft.printf("Number of Players: %d", num_players);
+  //    Serial.println("You are not the host :P");
+    }
     
-    tft.setCursor(8, 66, 1);
-    tft.println("Waiting for host to start");
-    tft.setCursor(8, 100, 1);
-    tft.printf("Number of Players: %d", num_players);
-//    Serial.println("You are not the host :P");
-  }
-  
-  if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
-    tft.fillRect(8, 95, 160, 20, TFT_BLACK);
-    get_game_status();
-    tft.setCursor(8, 100, 1);
-    tft.printf("Number of Players: %d", num_players);
-    Serial.printf("Num players: %d \n", num_players);
-    Serial.println(player_list);
-    wait_room_timer = millis();
+    if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
+      tft.fillRect(8, 95, 160, 20, TFT_BLACK);
+      get_game_status();
+      tft.setCursor(8, 100, 1);
+      tft.printf("Number of Players: %d", num_players);
+      Serial.printf("Num players: %d \n", num_players);
+      Serial.println(player_list);
+      wait_room_timer = millis();
+    }
   }
 }

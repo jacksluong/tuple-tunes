@@ -130,8 +130,7 @@ void fetch_game_state(int game_id) {
   Serial.println(in_turn);
 
   // Turns on LED based on in turn: red for in turn, green for off turn.
-  if (in_turn) set_led_color(255, 0, 0);
-  else set_led_color(0, 255, 0);
+  if (in_turn) set_led_color(0, 255, 0);
   
   p = strtok(NULL, "&"); // index of next measure to be submitted
   Serial.printf("current measure: {%s}\n", p);

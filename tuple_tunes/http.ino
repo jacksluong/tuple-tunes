@@ -162,12 +162,18 @@ void fetch_game_state(int game_id) {
         Serial.printf("note %s turns into num %d (saved as %d)\n", note, atoi(note), measures[current_measure][note_state]);
         note_state++;
       }
-
-      if (note_state == 16) current_measure++;
+      
+      if (note_state == 16) {
+        if (selected_measure == current_measure) selected_measure++;
+        current_measure++;
+        note_state = 0;
+        update_in_game();
+      }
+      
     }
 
     Serial.println("finished parsing fetched data, measures is now:");
-    for (int i = 0; i <= current_measure; i++) {
+    for (int i = 0; i < MEASURE_COUNT; i++) {
       for (int j = 0; j < 16; j++)
         Serial.printf("%d ", measures[i][j]);
       Serial.println();

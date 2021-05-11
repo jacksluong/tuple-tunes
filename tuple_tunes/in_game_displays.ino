@@ -13,7 +13,24 @@ void display_in_game() {
   
   // Left side grid
   tft.setCursor(5, 6, 1);
-  tft.printf("<measure %d/%d>", current_measure, MEASURE_COUNT);
+  tft.printf("<measure %d/%d>", selected_measure, MEASURE_COUNT);
+  tft.fillRect(0, 0, 106, 128, TFT_BLACK);
+  tft.fillRect(106, 0, 80, 128, rgb_to_565(DARK_GRAY));
+
+  // Left side
+  display_grid(selected_measure);
+
+  // Right side
+  strcpy(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[curr_note_index % 12]);
+  // update starting index for selected symbol based on the note from this key
+  if (current_note[1] == '#') selected_symbol = 0;
+  else if (current_note[1] == 'b') selected_symbol = 1;
+  else if (current_note[1] == ' ') selected_symbol = 2;
+
+  tft.setCursor(112, 60, 1); // add a note
+  tft.println("Add Note");
+  tft.setCursor(118, 80, 1); // submit measure
+  tft.println("Submit");
 
   for (int i = 0; i < 4; i++) {
     tft.drawRect(0, 25 * i + 19, 107, 25, TFT_WHITE);
@@ -129,12 +146,33 @@ void update_in_game() {
   // right side input cursor
   tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_WHITE);
 
-  // include the next note on the grid
-  if (is_locked && menu_state == 0) {
-    tft.setCursor(8 + 26.5 * (note_state % 4), 28 + 25*(int(note_state/4)), 1);
-    tft.printf(current_note);
-  }
+//   // include the next note on the grid
+//   if (is_locked && menu_state == 0) {
+//     tft.setCursor(8 + 26.5 * (note_state % 4), 28 + 25*(int(note_state/4)), 1);
+//     tft.printf(current_note);
+//   }
 
+  // Update selected note
+  if (is_locked && menu_state == 0) draw_note(note_state, curr_note_index + adjustment);
+
+  Serial.printf("Current measure: %d, Selected measure: %d, note_state : %d\n", current_measure, selected_measure, note_state);
+}
+
+void display_grid(int measure_i) {
+  tft.fillRect(4, 5, 13, 75, TFT_BLACK);
+  tft.setCursor(5, 6, 1);
+  tft.printf("<measure %d/%d>", selected_measure + 1, MEASURE_COUNT);
+  for (int i = 0; i < (measure_i == current_measure ? note_state : 16); i++)
+    draw_note(i, measures[measure_i][i]);
+  if (measure_i == current_measure) draw_note(note_state, curr_note_index + adjustment);
+}
+
+void draw_note(int note_i, int note_num) {
+  tft.fillRect(3 + 25 * (note_i % 4), 22 + 25 * (note_i / 4), 19, 19, TFT_BLACK);
+  tft.setCursor(10 + 25 * (note_i % 4), 28 + 25 * (note_i / 4), 1);
+  if (note_num == 37) tft.println("~");
+  else if (note_num == 36) tft.println("R");
+  else tft.println((is_flat_key ? NOTES_FLAT : NOTES_SHARP)[note_num % 12]);
 }
 
 ///////////////

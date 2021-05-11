@@ -39,6 +39,8 @@ bool join_game_http() {
   char code = strtok(response, "&")[0];
   if (code == '3') {
     game_id = atoi(strtok(NULL, "&"));
+    selected_key = atoi(strtok(NULL, "&"));
+    selected_tempo = atoi(strtok(NULL, "&"));
     room_num[0] = '\0';
     sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
     Serial.printf("joined game %s\n", room_num);

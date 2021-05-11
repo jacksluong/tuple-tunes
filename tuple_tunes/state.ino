@@ -547,7 +547,7 @@ void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clear
 void process_waiting_room(int bv, int js) {
   if (game_state == 2) { // if game has started, change to in game display
     reset_game();
-    state = 2;
+    state = 4;
     display_in_game();
   } else {
     tft.setCursor(0, 13, 2);
@@ -569,7 +569,7 @@ void process_waiting_room(int bv, int js) {
       draw_cursor();
       if (bv == 1) { // short press means start game, directly take to in game display
         start_game_http();
-        state = 2;
+        state = 4;
         reset_game();
         display_in_game();
       }
@@ -584,8 +584,8 @@ void process_waiting_room(int bv, int js) {
     }
     
     if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
-      tft.fillRect(8, 95, 160, 20, TFT_BLACK);
       get_game_status();
+      tft.fillRect(8, 95, 110, 20, TFT_BLACK);
       tft.setCursor(8, 100, 1);
       tft.printf("Number of Players: %d", num_players);
       Serial.printf("Num players: %d \n", num_players);

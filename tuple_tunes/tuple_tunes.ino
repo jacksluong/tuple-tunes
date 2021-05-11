@@ -26,7 +26,7 @@ char NETWORK[] = "MIT";
 char PASSWORD[] = "";
 char USERNAME[] = "Jan";
 
-uint16_t game_id = 89;
+uint16_t game_id;
 char game_code[5];
 char measure_response[200];
 char player_in_turn[50];

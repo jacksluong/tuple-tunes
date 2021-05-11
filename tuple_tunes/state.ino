@@ -477,7 +477,7 @@ void process_in_game(int bv, int js) {
           menu_state = 0;
           display_in_game();
           in_turn = false;
-          set_led_color(0,255,0);
+          set_led_color(255,0,0);
         }
         update_in_game();
       } else if (bv == 2) { // go to game menu screen
@@ -498,8 +498,6 @@ void process_in_game(int bv, int js) {
 ////////////////////// game-menu //////////////////////
 
 void process_game_menu(int bv, int js) {
-//  if (in_turn) set_led_color(255, 0, 0);
-//  else set_led_color(0, 255, 0);
   if (js == 1) { // up
     menu_state = (menu_state + 4) % 5;
     update_game_menu();
@@ -550,6 +548,14 @@ void process_waiting_room(int bv, int js) {
   if (game_state == 2) { // if game has started, change to in game display
     reset_game();
     state = 4;
+    if (is_host) {
+      in_turn = true;
+      set_led_color(0,255,0);
+    }
+    else {
+      in_turn = false;
+      set_led_color(255,0,0);
+    }
     display_in_game();
   } else {
     tft.setCursor(0, 13, 2);
@@ -587,7 +593,7 @@ void process_waiting_room(int bv, int js) {
     
     if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
       get_game_status();
-      tft.fillRect(8, 95, 110, 20, TFT_BLACK);
+      tft.fillRect(8, 95, 100, 20, TFT_BLACK);
       tft.setCursor(8, 100, 1);
       tft.printf("Number of Players: %d", num_players);
       Serial.printf("Num players: %d \n", num_players);

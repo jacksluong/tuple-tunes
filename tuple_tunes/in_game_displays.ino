@@ -99,8 +99,6 @@ void display_in_game() {
       is_locked = true;
     }
   }
-//  if (in_turn) set_led_color(255, 0, 0);
-//  else set_led_color(0, 255, 0);
   update_in_game();
 }
 
@@ -137,10 +135,6 @@ void update_in_game() {
     tft.printf(current_note);
   }
 
-  // LED light
-  // TODO: put it somewhere better so it's only called when in turn changes
-  if (in_turn) set_led_color(255, 0, 0);
-  else set_led_color(0, 255, 0);
 }
 
 ///////////////
@@ -198,8 +192,6 @@ void display_game_menu() {
     tft.println(" Sound off");
   }
 
-  if (in_turn) set_led_color(255, 0, 0);
-  else set_led_color(0, 255, 0);
   update_game_menu();
 }
 

@@ -6,7 +6,7 @@ void back_to_landing() {
 }
 
 void reset_game() {
-  // Playback variablesw
+  // Playback variables
   note_index = 0;
   measure_index = 0;
   playing_measure = false;
@@ -17,7 +17,6 @@ void reset_game() {
   current_measure = 0;
   curr_note_index = selected_key;
   current_note[0] = '\0';
-  //selected_key = 0;
   selected_note = curr_note_index % 12;
   selected_duration = 0;
   selected_symbol = 0;
@@ -31,6 +30,14 @@ void reset_game() {
   state = 4;
   is_locked = true;
   tft.setTextSize(1);
+
+  if (is_host) {
+    in_turn = true;
+    set_led_color(0, 255, 0);
+  } else {
+    in_turn = false;
+    set_led_color(255, 0, 0);
+  }
 }
 
 void update_state(int bv, int js) {
@@ -41,15 +48,13 @@ void update_state(int bv, int js) {
   } else if (state == 2) {
     process_join_game(bv, js);
   } else if (state == 3) {
-
-  } else if (state == 4) {      ////////////////////// in-game //////////////////////
-    process_in_game(bv, js);
-  } else if (state == 5) {      ////////////////////// game menu //////////////////////
-    process_game_menu(bv, js);
-  } else if (state == 6) {      ////////////////////// end game //////////////////////
-    process_end_game(bv, js);
-  } else if (state == 24) {  //////////////////////waiting room///////////////////////
     process_waiting_room(bv, js);
+  } else if (state == 4) {
+    process_in_game(bv, js);
+  } else if (state == 5) {
+    process_game_menu(bv, js);
+  } else if (state == 6) {
+    process_end_game(bv, js);
   }
 }
 
@@ -124,23 +129,20 @@ void process_start_game(int bv, int js) {
       else if (menu_state == 0) play_note(selected_key);
       update_start_game(1);
     } else if (menu_state == 2) { // start
-      //loading_page();
       create_game_http();
-      in_turn = true;
-      //take to waiting room
-      state = 24;
-      //make get game status request
-      get_game_status();
+      is_host = true;
+
+      state = 3;
       Serial.println("Host joining waiting room");
       Serial.println(player_list);
       wait_room_timer = millis();
-      tft.fillScreen(TFT_BLACK);
+      display_waiting_room();
     } else  { // back
       back_to_landing();
     }
   } else if (bv == 2) {
     sound_on = !sound_on;
-    update_start_game(6);
+    update_start_game(6); // TODO: toggle sound indicator
   }
 }
 
@@ -166,18 +168,14 @@ void process_join_game(int bv, int js) {
                game_code_input[2] >= 0) is_locked = false;
       update_join_game(1);
     } else if (menu_state == 1) { // join
-      //loading_page();
       if (join_game_http()) {
-        in_turn = false;
         is_host = false;
-        //take to waiting room
-        state = 24;
-        //make get game status request
-        get_game_status();
+        
+        state = 3;
         Serial.println("Player joining waiting room");
         Serial.println(player_list);
         wait_room_timer = millis();
-        tft.fillScreen(TFT_BLACK);
+        display_waiting_room();
       }
     } else { // back
       back_to_landing();
@@ -188,7 +186,6 @@ void process_join_game(int bv, int js) {
   }
 }
 
-
 ////////////////////// in-game //////////////////////
 
 void process_in_game(int bv, int js) {
@@ -198,7 +195,6 @@ void process_in_game(int bv, int js) {
   } else {
     if (millis() - last_played > 300) stop_sound();
     if (!is_locked && js) { // scrolling up and down the menu
-      tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK);
       if (js == 1) { // up
         menu_state = (menu_state + 4) % 5;
       } else if (js == 3) { // down
@@ -206,8 +202,6 @@ void process_in_game(int bv, int js) {
       }
     } else if (is_locked && js) { // scrolling through note and duration selection
       if (menu_state == 0) { // note and sharp/flat/neutral selection
-        tft.fillRect(130, 20, 15, 15, TFT_BLACK); // clear note
-        tft.fillRect(8 + 26.5 * (note_state % 4), 28 + 25 * (int(note_state / 4)), 15, 15, TFT_BLACK); // clear grid cell
         if (js == 2) { // right
           if (curr_note_index + SCALE_STEPS[(step_index + 1) % 8] <= 35) {
             step_index = (step_index + 1) % 8;
@@ -375,14 +369,12 @@ void process_in_game(int bv, int js) {
       }
 
       else if (menu_state == 1) { // duration selection (joystick left and right)
-        tft.fillRect(122, 40, 25, 15, TFT_BLACK); // clear duration
         if (js == 2) { // right
           selected_duration = (selected_duration + 1) % 5;
         } else if (js == 4) { // left
           selected_duration = (selected_duration + 4) % 5;
         }
       } else if (menu_state == 4) {
-        tft.fillRect(119, 100, 30, 15, TFT_BLACK); // clear measure
         if (js == 2) { // right
           Serial.printf("Selected measure: %d", selected_measure);
           selected_measure = (selected_measure + 1) % (current_measure + 1);
@@ -396,7 +388,7 @@ void process_in_game(int bv, int js) {
         }
       }
     }
-    update_in_game();
+
     if (in_turn) {
       if (bv == 1) {
         if (!is_locked && menu_state != 2) {
@@ -412,7 +404,6 @@ void process_in_game(int bv, int js) {
           int curr_x = 2 + 26.5 * (note_state % 4);
           int curr_y = 29 + 25 * (int(note_state / 4));
           tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
-          tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
 
           int temp_note_state = note_state;
           Serial.printf("Added is %d", note_state + pow(2, selected_duration));
@@ -446,14 +437,6 @@ void process_in_game(int bv, int js) {
               temp_note_state = temp_note_state + 1;
             }
 
-            //debugging
-            for (int i = 0; i < temp_note_state; i = i + 1) {
-              //            Serial.printf("current note array at index %d is %d", i, curr_notes_array[i]);
-              Serial.printf("current note array at index %d is %d", i, measures[current_measure][i]);
-            }
-            Serial.println("done");
-            //debugging
-
             if ((note_state >= 16)) {
               note_state = 16;  // to update grid cursor position for next note
               menu_state = 3;
@@ -479,7 +462,6 @@ void process_in_game(int bv, int js) {
           in_turn = false;
           set_led_color(255, 0, 0);
         }
-        update_in_game();
       } else if (bv == 2) { // go to game menu screen
         tft.fillScreen(TFT_BLACK);
         state = 5;
@@ -493,9 +475,11 @@ void process_in_game(int bv, int js) {
       else fetch_game_state(game_id);
     }
   }
+  
+  if (bv || js) update_in_game(js);
 }
 
-////////////////////// game-menu //////////////////////
+////////////////////// game menu //////////////////////
 
 void process_game_menu(int bv, int js) {
   if (js == 1) { // up
@@ -523,89 +507,34 @@ void process_game_menu(int bv, int js) {
       stop_sound();
       update_game_menu();
     } else if (menu_state == 4) { // leave game
-      //reset_game();
       is_locked = false;
       back_to_landing();
     }
   }
 }
 
-///////////////////////end game//////////////////
+////////////////////// end game //////////////////////
+
 void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clearing all measures
   tft.setCursor(8, 13, 1);
   tft.println("Game ended");
   tft.setCursor(8, 28, 1);
   tft.println("Return to landing page");
   if (bv == 1) {
-    //reset_game();
     is_locked = false;
     back_to_landing();
   }
 }
 
-///////////////////////waiting room//////////////////
+////////////////////// waiting room //////////////////////
+
 void process_waiting_room(int bv, int js) {
-  if (game_state == 2) { // if game has started, change to in game display
-    //reset_game();
-    curr_note_index = selected_key;
-    current_note[0] = '\0';
-    selected_note = curr_note_index % 12;
+  if (game_state == 2) { // game started
     state = 4;
-    if (is_host) {
-      in_turn = true;
-      set_led_color(0, 255, 0);
-    }
-    else {
-      in_turn = false;
-      set_led_color(255, 0, 0);
-    }
+    reset_game();
     display_in_game();
   } else {
-    tft.setCursor(0, 13, 2);
-    tft.println("Waiting Room");
-    tft.setCursor(8, 40, 1);
-    tft.printf("Username: %s", USERNAME);
-    tft.setCursor(8, 53, 1);
-    tft.printf("Room #: %s", room_num);
-    if (is_host) {
-      tft.setCursor(8, 66, 1);
-      tft.println("You are the host!");
-      //    tft.setCursor(8, 79, 1);
-      //    tft.printf("Click to start game.");
-      tft.setCursor(8, 100, 1);
-      tft.printf("Number of Players: %d", num_players);
-      tft.setCursor(8, 115, 1);
-      tft.println("Start"); // only the host can start game
-      set_cursor_pos(0, 116);
-      draw_cursor();
-      if (bv == 1) { // short press means start game, directly take to in game display
-        start_game_http();
-        
-        curr_note_index = selected_key;
-        current_note[0] = '\0';
-        selected_note = curr_note_index % 12;
-        
-        state = 4;
-        if (is_host) {
-          in_turn = true;
-          set_led_color(0, 255, 0);
-        }
-        else {
-          in_turn = false;
-          set_led_color(255, 0, 0);
-        }
-        //reset_game();
-        display_in_game();
-      }
-    } else {
-      //    tft.println("You are not the host :P");
-
-      tft.setCursor(8, 66, 1);
-      tft.println("Waiting for host to start");
-      tft.setCursor(8, 100, 1);
-      tft.printf("Number of Players: %d", num_players);
-      //    Serial.println("You are not the host :P");
-    }
+    if (bv == 1) start_game_http();
 
     if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
       get_game_status();

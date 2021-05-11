@@ -48,13 +48,6 @@ void display_start_game() {
   selected_tempo = 1;
   fade_in_text(" Start\n Game", 0, 13, CYAN, 1000, 2);
 
-//  char key_text[20];
-//  strcpy (key_text, "  Key: ");
-//  strcat(key_text, NOTES_FLAT[selected_key]);
-//  char tempo_text[20];
-//  strcpy(tempo_text, "Tempo: ");
-//  strcat(tempo_text, TEMPO_LABELS[selected_tempo]);
-
   // Menu options
   fade_in_text("  Key: C", 86, 47, DARK_CYAN, 200, 1);
   fade_in_text("Tempo: Mid", 86, 64, DARK_CYAN, 200, 1);
@@ -167,19 +160,51 @@ void update_join_game(int js) {
     set_cursor_pos(100, 110);
   }
   draw_cursor();
+}
+
+//////////////////
+// Waiting Room //
+//////////////////
+
+void display_waiting_room() {
+  tft.fillScreen(TFT_BLACK);
   
+  tft.setCursor(0, 13, 2);
+  tft.println("Waiting Room");
+  tft.setCursor(8, 40, 1);
+  tft.printf("Username: %s", USERNAME);
+  tft.setCursor(8, 53, 1);
+  tft.printf("Room #: %s", room_num);
+  if (is_host) {
+    tft.setCursor(8, 66, 1);
+    tft.println("You are the host!");
+    //    tft.setCursor(8, 79, 1);
+    //    tft.printf("Click to start game.");
+    tft.setCursor(8, 100, 1);
+    tft.printf("Number of Players: %d", num_players);
+    tft.setCursor(8, 115, 1);
+    tft.println("Start");
+    set_cursor_pos(0, 116);
+    draw_cursor();
+  } else {
+    tft.setCursor(8, 66, 1);
+    tft.println("Waiting for host to start");
+    tft.setCursor(8, 100, 1);
+    tft.printf("Number of Players: %d", num_players);
+  }
 }
 
 /////////////
 // Gallery //
 /////////////
+
 void display_gallery() {
   tft.fillScreen(TFT_BLACK);
   fade_in_text(" Gallery", 0, 13, CYAN, 1000, 2);
 
-  update_gallery();
+  update_gallery(0);
 }
 
-void update_gallery() {
+void update_gallery(int js) {
   
 }

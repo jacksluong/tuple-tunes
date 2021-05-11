@@ -203,9 +203,6 @@ void setup() {
   for (int i = 1; i < NOTE_COUNT; i++) {
     note_freqs[i] = MULT*note_freqs[i-1];
   }
-
-  //testing
-  //get_game_status();
   
   // Draw first screen
   back_to_landing();

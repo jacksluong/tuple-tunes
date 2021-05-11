@@ -6,7 +6,7 @@
    Makes a POST request to ask the server for the code and ID of a new game.
 */
 void create_game_http() {
-  reset_game();
+
   char body[100];
   sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, TEMPO_SPEEDS[selected_tempo]);
   Serial.println(body);
@@ -21,8 +21,6 @@ void create_game_http() {
   } else {
     game_id = atoi(strtok(NULL, "&"));
     Serial.printf("created game with game_id %d, game_code %s\n", game_id, game_code);
-    is_host = true;
-    in_turn = true; //host will start intern
   }
 }
 
@@ -32,7 +30,6 @@ void create_game_http() {
    Saves appropriate data (game_id, room_num) if successful.
 */
 bool join_game_http() {
-  reset_game();
   int offset = 0;
   char body[100];
   sprintf(body, "type=join&username=%s&game_code=%d%d%d", USERNAME, game_code_input[0], game_code_input[1], game_code_input[2]);
@@ -66,7 +63,7 @@ bool join_game_http() {
    Makes a POST request to start the current game. Only accessible
    by the host who created the game.
 */
-void start_game_http() {
+bool start_game_http() {
   int offset = 0;
   char body[50];
   sprintf(body, "type=start&game_id=%d", game_id);
@@ -76,9 +73,8 @@ void start_game_http() {
 
   if (code == '1') {
     Serial.printf("Starting game id %d \n", game_id);
-    //num_players = atoi(strtok(NULL, "&"));
-  }
-  else if (code == '0' || code == '-') {
+    return true;
+  } else if (code == '0' || code == '-') {
     Serial.printf("Game not found, invalid game_id: %d \n", game_id);
   } else if (code == '2') {
     Serial.println("Game has already started");
@@ -87,6 +83,7 @@ void start_game_http() {
   } else {
     Serial.println("something went wrong");
   }
+  return false;
 }
 
 /*
@@ -167,7 +164,6 @@ void fetch_game_state(int game_id) {
         if (selected_measure == current_measure) selected_measure++;
         current_measure++;
         note_state = 0;
-        update_in_game();
       }
       
     }

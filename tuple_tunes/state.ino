@@ -547,6 +547,7 @@ void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clear
 void process_waiting_room(int bv, int js) {
   if (game_state == 2) { // if game has started, change to in game display
     reset_game();
+    tft.fillScreen(TFT_BLACK);
     display_in_game();
   }
   
@@ -571,6 +572,7 @@ void process_waiting_room(int bv, int js) {
       start_game_http();
       game_state == 2;
       reset_game();
+      tft.fillScreen(TFT_BLACK);
       display_in_game();
     }
   } else {
@@ -584,6 +586,7 @@ void process_waiting_room(int bv, int js) {
   }
   
   if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
+    tft.fillRect(8, 100, 15, 15, TFT_BLACK);
     get_game_status();
     tft.setCursor(8, 100, 1);
     tft.printf("Number of Players: %d", num_players);

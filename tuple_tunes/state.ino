@@ -578,6 +578,14 @@ void process_waiting_room(int bv, int js) {
       if (bv == 1) { // short press means start game, directly take to in game display
         start_game_http();
         state = 4;
+        if (is_host) {
+          in_turn = true;
+          set_led_color(0,255,0);
+        }
+        else {
+          in_turn = false;
+          set_led_color(255,0,0);
+        }
         reset_game();
         display_in_game();
       }

@@ -94,9 +94,11 @@ def join_game(username, game_code):
                 # insert player into database
                 c.execute('''INSERT INTO players VALUES (?,?,?,?);''',
                           (game_id, username, datetime.datetime.now(), datetime.datetime.now()))
+                
+                key, tempo = c.execute('''SELECT key, tempo FROM games WHERE game_code = ?;''', (game_code,)).fetchone()
 
                 # successful!
-                return f"3&{game_id}"
+                return f"3&{game_id}&{key}&{tempo}"
 
             else:
                 # room capacity hit

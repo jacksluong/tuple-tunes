@@ -53,6 +53,7 @@ bool join_game_http() {
     room_num[0] = '\0';
     sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
     Serial.printf("joined game %s\n", room_num);
+    
     return true;
   } else {
     // TODO: 0: no room found, 1: room limit reached, 2: game in progress or ended

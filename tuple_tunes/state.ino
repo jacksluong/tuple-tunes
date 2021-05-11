@@ -547,6 +547,9 @@ void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clear
 void process_waiting_room(int bv, int js) {
   if (game_state == 2) { // if game has started, change to in game display
     //reset_game();
+    curr_note_index = selected_key;
+    current_note[0] = '\0';
+    selected_note = curr_note_index % 12;
     state = 4;
     if (is_host) {
       in_turn = true;
@@ -577,6 +580,11 @@ void process_waiting_room(int bv, int js) {
       draw_cursor();
       if (bv == 1) { // short press means start game, directly take to in game display
         start_game_http();
+        
+        curr_note_index = selected_key;
+        current_note[0] = '\0';
+        selected_note = curr_note_index % 12;
+        
         state = 4;
         if (is_host) {
           in_turn = true;

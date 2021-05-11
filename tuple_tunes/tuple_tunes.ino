@@ -24,7 +24,7 @@ uint8_t AUDIO_PWM = 1;
 // HTTP
 char NETWORK[] = "MIT";
 char PASSWORD[] = "";
-char USERNAME[] = "JanP";
+char USERNAME[] = "asdf";
 
 uint16_t game_id;
 char game_code[5];
@@ -46,7 +46,7 @@ uint32_t wait_room_timer = millis();
 const uint16_t WAIT_ROOM_UPDATE = 7000; //waiting room updates every 2 seconds
 char player_list[200];
 bool is_host = false; //determining if you are the host / made the create_game request
-int num_players = 0;
+int num_players = 1;
 int game_state = 0; // consistent with return numbers of get game status
 
 // LED

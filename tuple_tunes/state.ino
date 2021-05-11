@@ -85,7 +85,7 @@ void process_landing_state(int bv, int js) {
       state = 2;
       display_join_game();
     } else { // gallery
-      state = 3;
+      state = 7;
       display_gallery();
     }
     menu_state = 0;
@@ -133,6 +133,7 @@ void process_start_game(int bv, int js) {
       is_host = true;
 
       state = 3;
+      num_players = 1;
       Serial.println("Host joining waiting room");
       Serial.println(player_list);
       wait_room_timer = millis();
@@ -172,6 +173,7 @@ void process_join_game(int bv, int js) {
         is_host = false;
         
         state = 3;
+        num_players = 1;
         Serial.println("Player joining waiting room");
         Serial.println(player_list);
         wait_room_timer = millis();

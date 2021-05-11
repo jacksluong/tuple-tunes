@@ -90,7 +90,7 @@ def leave_game(game_id, username):
         if pop_index < turn_index:
             c.execute('''UPDATE games SET turn = ? WHERE rowid = ?''', (turn_index - 1, game_id))
 
-        #delete p
+        #delete player from players database
         c.execute('''DELETE FROM players WHERE username = ? ''', (username, ))
 
 

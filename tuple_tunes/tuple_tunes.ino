@@ -209,9 +209,11 @@ void setup() {
 }
 
 void loop() {
+  int num_notes_in_selected = 16;
   if (playing_measure && sound_on)  {
     //Serial.printf("Play measure - num notes: %d\n", note_state); // debugging
-    play_measure(measures[selected_measure], note_state);
+    if (selected_measure == current_measure) num_notes_in_selected = note_state;
+    play_measure(measures[selected_measure], num_notes_in_selected);
   }
   if (playing_song && sound_on) play_song(measures, current_measure, note_state);
   int bv = button.read();

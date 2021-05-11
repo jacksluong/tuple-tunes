@@ -83,18 +83,6 @@ void start_game_http() {
   int offset = 0;
   char query[50];
   sprintf(query, "game_id=%d", game_id);
-  make_get_request(SERVER, START_GAME_ADDRESS, query, response, false);
-
-  char code = strtok(response, "&")[0];
-  if (code == '1'){ //game in waiting room, response ”1&{num_players}&{player_names}”
-    num_players = atoi(strtok(NULL, "&"));
-    strcpy(player_list, strtok(NULL, "&"));
-    
-  }  else { //TODO: process how to parse other types of statements 
-    Serial.printf("Something went wrong; game_id: %d, response code: %c \n", game_id, code);
-  }
-
-  
  }
 
 //////////////////////

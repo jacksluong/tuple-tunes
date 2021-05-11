@@ -65,10 +65,6 @@ void update_in_game() {
   // Update selected note
   if (is_locked && menu_state == 0) draw_note(note_state, curr_note_index + adjustment);
 
-  // LED light
-  // TODO: put it somewhere better so it's only called when in turn changes
-  if (in_turn) set_led_color(255, 0, 0);
-  else set_led_color(0, 255, 0);
 }
 
 void display_grid(int measure_i) {
@@ -143,8 +139,6 @@ void display_game_menu() {
     tft.println(" Sound off");
   }
 
-  if (in_turn) set_led_color(255, 0, 0);
-  else set_led_color(0, 255, 0);
   update_game_menu();
 }
 

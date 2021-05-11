@@ -476,6 +476,8 @@ void process_in_game(int bv, int js) {
           selected_measure = current_measure;
           menu_state = 0;
           display_in_game();
+          in_turn = false;
+          set_led_color(255,0,0);
         }
         update_in_game();
       } else if (bv == 2) { // go to game menu screen
@@ -496,8 +498,6 @@ void process_in_game(int bv, int js) {
 ////////////////////// game-menu //////////////////////
 
 void process_game_menu(int bv, int js) {
-//  if (in_turn) set_led_color(255, 0, 0);
-//  else set_led_color(0, 255, 0);
   if (js == 1) { // up
     menu_state = (menu_state + 4) % 5;
     update_game_menu();
@@ -547,48 +547,66 @@ void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clear
 void process_waiting_room(int bv, int js) {
   if (game_state == 2) { // if game has started, change to in game display
     reset_game();
-    display_in_game();
-  }
-  
-  tft.setCursor(0, 13, 2);
-  tft.println("Waiting Room");
-  tft.setCursor(8, 40, 1);
-  tft.printf("Username: %s", USERNAME);
-  tft.setCursor(8, 53, 1);
-  tft.printf("Room #: %s", room_num);
-  if (is_host) {
-    tft.setCursor(8, 66, 1);
-    tft.println("You are the host!");
-//    tft.setCursor(8, 79, 1);
-//    tft.printf("Click to start game.");
-    tft.setCursor(8, 100, 1);
-    tft.printf("Number of Players: %d", num_players);
-    tft.setCursor(8, 115, 1);
-    tft.println("Start"); // only the host can start game
-    set_cursor_pos(0, 116);
-    draw_cursor();
-    if (bv == 1) { // short press means start game, directly take to in game display
-      start_game_http();
-      game_state == 2;
-      reset_game();
-      display_in_game();
+    state = 4;
+    if (is_host) {
+      in_turn = true;
+      set_led_color(0,255,0);
     }
+    else {
+      in_turn = false;
+      set_led_color(255,0,0);
+    }
+    display_in_game();
   } else {
-//    tft.println("You are not the host :P");
+    tft.setCursor(0, 13, 2);
+    tft.println("Waiting Room");
+    tft.setCursor(8, 40, 1);
+    tft.printf("Username: %s", USERNAME);
+    tft.setCursor(8, 53, 1);
+    tft.printf("Room #: %s", room_num);
+    if (is_host) {
+      tft.setCursor(8, 66, 1);
+      tft.println("You are the host!");
+  //    tft.setCursor(8, 79, 1);
+  //    tft.printf("Click to start game.");
+      tft.setCursor(8, 100, 1);
+      tft.printf("Number of Players: %d", num_players);
+      tft.setCursor(8, 115, 1);
+      tft.println("Start"); // only the host can start game
+      set_cursor_pos(0, 116);
+      draw_cursor();
+      if (bv == 1) { // short press means start game, directly take to in game display
+        start_game_http();
+        state = 4;
+        if (is_host) {
+          in_turn = true;
+          set_led_color(0,255,0);
+        }
+        else {
+          in_turn = false;
+          set_led_color(255,0,0);
+        }
+        reset_game();
+        display_in_game();
+      }
+    } else {
+  //    tft.println("You are not the host :P");
+      
+      tft.setCursor(8, 66, 1);
+      tft.println("Waiting for host to start");
+      tft.setCursor(8, 100, 1);
+      tft.printf("Number of Players: %d", num_players);
+  //    Serial.println("You are not the host :P");
+    }
     
-    tft.setCursor(8, 66, 1);
-    tft.println("Waiting for host to start");
-    tft.setCursor(8, 100, 1);
-    tft.printf("Number of Players: %d", num_players);
-//    Serial.println("You are not the host :P");
-  }
-  
-  if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
-    get_game_status();
-    tft.setCursor(8, 100, 1);
-    tft.printf("Number of Players: %d", num_players);
-    Serial.printf("Num players: %d \n", num_players);
-    Serial.println(player_list);
-    wait_room_timer = millis();
+    if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
+      get_game_status();
+      tft.fillRect(105, 95, 10, 20, TFT_BLACK);
+      tft.setCursor(8, 100, 1);
+      tft.printf("Number of Players: %d", num_players);
+      Serial.printf("Num players: %d \n", num_players);
+      Serial.println(player_list);
+      wait_room_timer = millis();
+    }
   }
 }

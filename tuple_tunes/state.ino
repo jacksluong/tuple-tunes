@@ -547,7 +547,7 @@ void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clear
 void process_waiting_room(int bv, int js) {
   if (game_state == 2) { // if game has started, change to in game display
     reset_game();
-    tft.fillScreen(TFT_BLACK);
+    state = 2;
     display_in_game();
   }
   
@@ -570,9 +570,8 @@ void process_waiting_room(int bv, int js) {
     draw_cursor();
     if (bv == 1) { // short press means start game, directly take to in game display
       start_game_http();
-      game_state == 2;
+      state = 2;
       reset_game();
-      tft.fillScreen(TFT_BLACK);
       display_in_game();
     }
   } else {

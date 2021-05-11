@@ -63,7 +63,8 @@ void start_game_http() {
   char code = strtok(response, "&")[0];
 
   if (code == '1'){
-    num_players = atoi(strtok(NULL, "&"));
+    Serial.printf("Starting game id %d \n", game_id);
+    //num_players = atoi(strtok(NULL, "&"));
   }
   else if (code =='0' || code == '-'){
     Serial.printf("Game not found, invalid game_id: %d \n", game_id);

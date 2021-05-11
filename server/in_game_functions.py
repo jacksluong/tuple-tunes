@@ -72,9 +72,27 @@ def leave_game(game_id, username):
     Allow a user to leave a game, update game state accordinally
     """
     with sqlite3.connect(moosic_db) as c:
+
+        #get the current turn in the game (not modded yet)
+        turn = c.execute('''SELECT turn FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
+
+        #get player_names
+        players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
+        player_names = [player[0] for player in players]
+
+        #find the index of the player to be popped
+        pop_index = player_names.index(username)
+
+        #index of current turn
+        turn_index = turn % len(players)
+
+        #only update turn if pop_index is less than turn_index
+        if pop_index < turn_index:
+            c.execute('''UPDATE games SET turn = ? WHERE rowid = ?''', (turn_index - 1, game_id))
+
+        #delete p
         c.execute('''DELETE FROM players WHERE username = ? ''', (username, ))
 
-        #TODO: make sure doing so, won't affect current turn
 
 def monitor_disconnect(game_id, username):
     """

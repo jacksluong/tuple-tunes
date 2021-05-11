@@ -508,6 +508,7 @@ void process_game_menu(int bv, int js) {
       update_game_menu();
     } else if (menu_state == 4) { // leave game
       is_locked = false;
+      game_state = 0;
       back_to_landing();
     }
   }

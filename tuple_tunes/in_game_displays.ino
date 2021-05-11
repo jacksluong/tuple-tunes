@@ -5,6 +5,7 @@
 uint8_t GRAY[] = {70, 70, 70};
 
 void display_in_game() {
+  Serial.printf("Current measure: %d , Selected measure: %d\n", current_measure, selected_measure);
   tft.fillScreen(TFT_BLACK);
   
   // Dividing line between left and right
@@ -56,12 +57,16 @@ void display_in_game() {
 //    tft.setCursor(8 + 26.5 * (i % 4), 28 + 25*(int(i/4)), 1);
 //    tft.printf(measures[current_measure][i]);
 //  }
-  for (int i = 0; i < note_state; i++) {
+  if (selected_measure != current_measure) { // if you're looking at different measure
+    for (int i = 0; i < 16; i++) {
       tft.setCursor(8 + 26.5 * (i % 4), 28 + 25*(int(i/4)), 1);
-      int note_i = curr_notes_array[i] % 12;
-      if (curr_notes_array[i] == 36) {
+//      int note_i = curr_notes_array[i] % 12;
+      int note_i = measures[selected_measure][i] % 12;
+//      if (curr_notes_array[i] == 36) {
+      if (measures[selected_measure][i] == 36) {
         tft.println("R");
-      } else if (curr_notes_array[i] == 37) {                
+//      } else if (selected_measure[i] == 37) {  
+      } else if (measures[selected_measure][i] == 37) {              
         tft.println("~");
       } else {
         if (is_flat_key) {
@@ -70,10 +75,32 @@ void display_in_game() {
           tft.println(NOTES_SHARP[note_i]);
         }
       }
+    }
+  } else {
+    for (int i = 0; i < note_state; i++) {
+        tft.setCursor(8 + 26.5 * (i % 4), 28 + 25*(int(i/4)), 1);
+  //      int note_i = curr_notes_array[i] % 12;
+        int note_i = measures[current_measure][i] % 12;
+  //      if (curr_notes_array[i] == 36) {
+        if (measures[current_measure][i] == 36) {
+          tft.println("R");
+  //      } else if (curr_notes_array[i] == 37) {  
+        } else if (measures[current_measure][i] == 37) {              
+          tft.println("~");
+        } else {
+          if (is_flat_key) {
+            tft.println(NOTES_FLAT[note_i]);
+          } else {
+            tft.println(NOTES_SHARP[note_i]);
+          }
+        }
+    }
+    if (note_state < 16) {
+      is_locked = true;
+    }
   }
-  if (note_state < 16) {
-    is_locked = true;
-  }
+//  if (in_turn) set_led_color(255, 0, 0);
+//  else set_led_color(0, 255, 0);
   update_in_game();
 }
 
@@ -93,7 +120,7 @@ void update_in_game() {
   } else {
     tft.setCursor(119, 100, 1); 
   }
-  tft.printf("m. %d", current_measure);
+  tft.printf("m. %d", selected_measure);
   
   // grid cursor
   if (note_state < 16) {
@@ -109,6 +136,11 @@ void update_in_game() {
     tft.setCursor(8 + 26.5 * (note_state % 4), 28 + 25*(int(note_state/4)), 1);
     tft.printf(current_note);
   }
+
+  // LED light
+  // TODO: put it somewhere better so it's only called when in turn changes
+  if (in_turn) set_led_color(255, 0, 0);
+  else set_led_color(0, 255, 0);
 }
 
 ///////////////
@@ -158,7 +190,7 @@ void display_game_menu() {
   tft.setCursor(88, 60, 1);
   tft.printf(" Tempo:%s\r\n", TEMPO_LABELS[selected_tempo]);
   tft.setCursor(88, 80, 1);
-  tft.printf(" #Players:%d\r\n", player_count);
+  tft.printf(" #Players:%d\r\n", num_players);
   tft.setCursor(88, 100, 1);
   if (sound_on) {
     tft.println(" Sound On");
@@ -166,6 +198,8 @@ void display_game_menu() {
     tft.println(" Sound off");
   }
 
+  if (in_turn) set_led_color(255, 0, 0);
+  else set_led_color(0, 255, 0);
   update_game_menu();
 }
 

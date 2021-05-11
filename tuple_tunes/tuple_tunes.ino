@@ -47,9 +47,10 @@ const uint16_t WAIT_ROOM_UPDATE = 7000; //waiting room updates every 2 seconds
 char player_list[200];
 bool is_host = false; //determining if you are the host / made the create_game request
 int num_players = 0;
+int game_state = 0; // consistent with return numbers of get game status
 
 // LED
-const uint8_t red = 0;
+const uint8_t red = 14;
 const uint8_t green = 13;
 const uint8_t blue = 15;
 
@@ -81,7 +82,7 @@ const char* TEMPO_LABELS[] = {"Slow", "Mid", "Fast"};
 const uint8_t TEMPO_SPEEDS[] = {60, 96, 144};
 const char* NOTE_DURATIONS[] = {"1/16", "1/8", "1/4", "1/2", "1"};
 const char SYMBOLS[] = {'b', ' ', '#'};
-const int MEASURE_COUNT = 16;
+const int MEASURE_COUNT = 1;
 const uint8_t SCALE_STEPS[] = {0, 2, 2, 1, 2, 2, 2, 1}; // half steps that we need per scale
 const char* NOTES_FLAT[] = {"C ", "Db", "D ", "Eb", "E ", "F ", "Gb", "G ", "Ab", "A ", "Bb", "B "}; // Db, Eb, F, Gb, Ab, Bb
 const char* NOTES_SHARP[] = {"C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "}; // C, D, E, G, A, B
@@ -104,6 +105,7 @@ int player_count = 0;
 bool in_turn = false;
 uint8_t measures[MEASURE_COUNT][16];
 int current_measure = 0;
+int selected_measure = 0; // the measure the player is viewing
 int selected_note = 0;
 int curr_note_index = 0;
 int adjustment = 0;
@@ -116,9 +118,9 @@ int note_state = 0;
 
 
 // Tests
-int test1[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
-int test2[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37};
-int test_song[2][16] = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37}};
+uint8_t test1[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
+uint8_t test2[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37};
+uint8_t test_song[2][16] = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37}};
 
 /////////////////////////////////
 // Convenient helper functions //
@@ -144,11 +146,7 @@ void setup() {
   // Set up screen
   tft.init();
   tft.setRotation(1); // set display in landscape
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_RED);
-  tft.setTextSize(2);
-  tft.setCursor(15, 50);
-  tft.println("Loading...");
+  loading_page();
 
   // Set up button(s)
   delay(100);
@@ -160,7 +158,7 @@ void setup() {
   analogReadResolution(10);
 
   // Set up LED
-  ledcSetup(red, 50, 8);
+  ledcSetup(red, 80, 8);
   ledcSetup(green, 80, 8);
   ledcSetup(blue, 80, 8);
   
@@ -214,8 +212,11 @@ void setup() {
 }
 
 void loop() {
-  if (playing_measure && sound_on)  play_measure(curr_notes_array, note_state);
-  if (playing_song && sound_on) play_song(test_song);
+  if (playing_measure && sound_on)  {
+    //Serial.printf("Play measure - num notes: %d\n", note_state); // debugging
+    play_measure(measures[selected_measure], note_state);
+  }
+  if (playing_song && sound_on) play_song(measures, current_measure, note_state);
   int bv = button.read();
   int js = joystick.read();
     

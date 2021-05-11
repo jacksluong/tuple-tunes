@@ -56,12 +56,13 @@ def request_handler(request):
         
         #END GAME FUNCTIONALITY: if max_measures have been reached, the game automatically ends
 
-        # elif type_ == "end":
-        #     try:
-        #         game_id = int(request['form']['game_id'])
-        #     except:
-        #         return "Please post valid username and game id"
-        #     return end_game(game_id)
+        elif type_ == "leave":
+            try:
+                username = request['form']['username']
+                game_id = int(request['form']['game_id'])
+            except:
+                return "-1"
+            return leave_game(game_id, username)
 
         else:
             return "-1"

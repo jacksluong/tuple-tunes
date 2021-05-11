@@ -12,10 +12,12 @@ void create_game_http() {
   make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);  
 
   strcpy(game_code, strtok(response, "&"));
+  room_num[0] = '\0';
+  strcat(room_num, game_code);
 
   if (game_code == "-1"){
     Serial.printf("invalid post, please post username, selected key, and tempo");
-  } else{
+  } else {
     game_id = atoi(strtok(NULL, "&"));
     Serial.printf("created game with game_id %d, game_code %s\n", game_id, game_code);
     is_host = true;
@@ -83,6 +85,22 @@ void start_game_http() {
   int offset = 0;
   char query[50];
   sprintf(query, "game_id=%d", game_id);
+  make_get_request(SERVER, START_GAME_ADDRESS, query, response, false);
+
+  char code = strtok(response, "&")[0];
+  if (code == '1'){ //game in waiting room, response ”1&{num_players}&{player_names}”
+    num_players = atoi(strtok(NULL, "&"));
+    strcpy(player_list, strtok(NULL, "&"));
+    game_state = 1;
+  } else if (code == '2') {
+    Serial.printf("Game id %d, game code %c is in progress", game_id, code);
+    game_state = 2;
+  } else if (code == '3') {
+    Serial.printf("Game id %d, game code %c has ended", game_id, code);
+    game_state = 3;
+  } else { //TODO: process how to parse other types of statements 
+    Serial.printf("Something went wrong; game_id: %d, response code: %c \n", game_id, code);
+  }
  }
 
 //////////////////////
@@ -107,6 +125,10 @@ void fetch_game_state(int game_id) {
 
   Serial.print("in_turn: ");
   Serial.println(in_turn);
+
+  // Turns on LED based on in turn: red for in turn, green for off turn.
+  if (in_turn) set_led_color(255, 0, 0);
+  else set_led_color(0, 255, 0);
   
   p = strtok(NULL, "&"); // index of next measure to be submitted
   Serial.printf("current measure: {%s}\n", p);
@@ -132,7 +154,6 @@ void fetch_game_state(int game_id) {
       if (note_state == 16) current_measure++;
     }
 
-    
     Serial.println("finished parsing fetched data, measures is now:");
     for (int i = 0; i <= current_measure; i++) {
       for (int j = 0; j < 16; j++)
@@ -154,7 +175,8 @@ void submit_measure() {
   uint8_t notes_offset = 0;
   
   for (int i = 0; i < note_state; i++) {
-    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
+//    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
+    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", measures[current_measure][i]);
   }
   for (int i = note_state; i < 16; i++) {
     notes_offset += sprintf(string_of_notes + notes_offset, "36 ");
@@ -170,7 +192,8 @@ void submit_measure() {
  */
 void ping() {
   char query[100]; //for body
-  sprintf(query, "username=%s&game_id=%d", USERNAME, game_id);
+  sprintf(query, "type=ping&username=%s&game_id=%d", USERNAME, game_id);
+  Serial.println("Ping:");
   make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
 
   time_since_last_ping = millis();

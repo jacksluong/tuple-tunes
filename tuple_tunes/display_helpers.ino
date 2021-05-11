@@ -7,6 +7,14 @@ uint16_t rgb_to_565(uint8_t* rgb) {
   return tft.color565(rgb[0], rgb[1], rgb[2]);
 }
 
+void loading_page() {
+  tft.fillScreen(TFT_BLACK);
+  tft.setTextColor(TFT_RED);
+  tft.setTextSize(2);
+  tft.setCursor(15, 50);
+  tft.println("Loading...");
+}
+
 /*
  * Convenience function to set the cursor pos.
  */

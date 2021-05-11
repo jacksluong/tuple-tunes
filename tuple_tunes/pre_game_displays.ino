@@ -11,6 +11,7 @@ uint8_t DARK_CYAN[] = {50, 162, 168};
 /////////////
 
 void display_landing() {
+  set_led_color(0, 0, 255);
   tft.fillScreen(TFT_BLACK);
   fade_in_text(" Tuple\n Tunes", 0, 13, CYAN, 1000, 3);
   
@@ -20,7 +21,7 @@ void display_landing() {
   fade_in_text("   Gallery", 90, 109, DARK_CYAN, 500, 1);
 
   sound_on = true;
-  fade_in_text("Hold to mute", 5, 109, DARK_CYAN, 200, 1);
+  fade_in_text("Hold to mute", 3, 109, DARK_CYAN, 200, 1);
 
   update_landing();
 }
@@ -29,8 +30,8 @@ void update_landing() {
   tft.fillRect(78, 75, 11, 45, TFT_BLACK);
   set_cursor_pos(80, 76 + 17 * menu_state);
   draw_cursor();
-  tft.fillRect(0, 100, 100, 20, TFT_BLACK);
-  tft.setCursor(5, 109, 1);
+  tft.fillRect(0, 100, 80, 20, TFT_BLACK);
+  tft.setCursor(3, 109, 1);
   if (sound_on) {
     tft.println("Hold to mute");
   } else {
@@ -61,9 +62,9 @@ void display_start_game() {
   fade_in_text("      Back", 86, 109, DARK_CYAN, 200, 1);
 
   if (sound_on) {
-    fade_in_text("Hold to mute", 5, 109, DARK_CYAN, 200, 1);
+    fade_in_text("Hold to mute", 3, 109, DARK_CYAN, 200, 1);
   } else {
-    fade_in_text("Hold to unmute", 5, 109, DARK_CYAN, 200, 1);
+    fade_in_text("Hold to unmute", 3, 109, DARK_CYAN, 200, 1);
   }
   
   update_start_game(1);
@@ -75,8 +76,8 @@ void update_start_game(int js) {
   else if (is_locked && (js == 2 || js == 4)) tft.fillRect(80, 45, 80, 30, TFT_BLACK); // clear inputs
   else if (js > 4) {
     // Mute
-    tft.fillRect(0, 100, 100, 20, TFT_BLACK);
-    tft.setCursor(5, 109, 1);
+    tft.fillRect(0, 100, 80, 20, TFT_BLACK);
+    tft.setCursor(3, 109, 1);
     if (sound_on) {
       tft.println("Hold to mute");
     } else {
@@ -123,9 +124,9 @@ void display_join_game() {
   fade_in_text("      Back", 86, 109, DARK_CYAN, 200, 1);
 
   if (sound_on) {
-    fade_in_text("Hold to mute", 5, 109, DARK_CYAN, 200, 1);
+    fade_in_text("Hold to mute", 3, 109, DARK_CYAN, 200, 1);
   } else {
-    fade_in_text("Hold to unmute", 5, 109, DARK_CYAN, 200, 1);
+    fade_in_text("Hold to unmute", 3, 109, DARK_CYAN, 200, 1);
   }
 
   update_join_game(1);
@@ -137,8 +138,8 @@ void update_join_game(int js) {
   else if (is_locked && (js == 1 || js == 3)) tft.fillRect(118, 64, 40, 17, TFT_BLACK); // clear inputs
   else if (js > 4) { 
     // Mute
-    tft.fillRect(0, 100, 100, 20, TFT_BLACK);
-    tft.setCursor(5, 109, 1);
+    tft.fillRect(0, 100, 80, 20, TFT_BLACK);
+    tft.setCursor(3, 109, 1);
     if (sound_on) {
       tft.println("Hold to mute");
     } else {

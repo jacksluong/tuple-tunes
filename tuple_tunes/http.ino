@@ -87,10 +87,9 @@ bool start_game_http() {
 }
 
 /*
-   Makes a GET request to get current game status.
-   Used to show all players in waiting room
-*/
-
+ * Makes a GET request to get current game status.
+ * Used to show all players in waiting room
+ */
 void get_game_status() {
   int offset = 0;
   char query[50];

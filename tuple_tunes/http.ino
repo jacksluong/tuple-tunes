@@ -164,7 +164,6 @@ void fetch_game_state(int game_id) {
         current_measure++;
         note_state = 0;
       }
-      
     }
 
     Serial.println("finished parsing fetched data, measures is now:");

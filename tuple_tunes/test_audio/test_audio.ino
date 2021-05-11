@@ -45,15 +45,15 @@ void loop()
 {
   while (millis() - last_played < 2000)
     for(int i=0;i<256;i++)
-      dacWrite(25,SineValues[i]/2);
+      dacWrite(25,SineValues[i]/3+SineValues[(2*i)%256]/4+SineValues[(3*i)%256]/4);
 
   while (millis() - last_played > 2000 && millis() - last_played < 3000)
     for(int i=0;i<200;i++)
-      dacWrite(25,SineValues[i]/2);
+      dacWrite(25,SineValues[i]/3+SineValues[(2*i)%256]/4+SineValues[(3*i)%256]/4);
   
   while (millis() - last_played > 3000)
     for(int i=0;i<160;i++)
-      dacWrite(25,SineValues[i]/2);
+      dacWrite(25,SineValues[i]/3+SineValues[(2*i)%256]/4+SineValues[(3*i)%256]/4);
 }
 //void loop() {
 //  for(int i=0;i<256;i++)

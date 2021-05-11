@@ -3,19 +3,20 @@
 ///////////////////////
 
 /*
- * Makes a POST request to ask the server for the code and ID of a new game.
- */
+   Makes a POST request to ask the server for the code and ID of a new game.
+*/
 void create_game_http() {
+  reset_game();
   char body[100];
   sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, TEMPO_SPEEDS[selected_tempo]);
   Serial.println(body);
-  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);  
+  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
 
   strcpy(game_code, strtok(response, "&"));
   room_num[0] = '\0';
   strcat(room_num, game_code);
 
-  if (game_code == "-1"){
+  if (game_code == "-1") {
     Serial.printf("invalid post, please post username, selected key, and tempo");
   } else {
     game_id = atoi(strtok(NULL, "&"));
@@ -26,11 +27,12 @@ void create_game_http() {
 }
 
 /*
- * Makes a POST request to join a game with the specified game code
- * (from join-game page) and returns whether or not it was successful.
- * Saves appropriate data (game_id, room_num) if successful.
- */
+   Makes a POST request to join a game with the specified game code
+   (from join-game page) and returns whether or not it was successful.
+   Saves appropriate data (game_id, room_num) if successful.
+*/
 bool join_game_http() {
+  reset_game();
   int offset = 0;
   char body[100];
   sprintf(body, "type=join&username=%s&game_code=%d%d%d", USERNAME, game_code_input[0], game_code_input[1], game_code_input[2]);
@@ -41,6 +43,13 @@ bool join_game_http() {
     game_id = atoi(strtok(NULL, "&"));
     selected_key = atoi(strtok(NULL, "&"));
     selected_tempo = atoi(strtok(NULL, "&"));
+
+    if ((selected_key <= 5 && selected_key % 2 != 0) || (selected_key > 5 && selected_key % 2 == 0)) {
+      is_flat_key = true;
+    } else {
+      is_flat_key = false;
+    }
+    
     room_num[0] = '\0';
     sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
     Serial.printf("joined game %s\n", room_num);
@@ -53,9 +62,9 @@ bool join_game_http() {
 }
 
 /*
- * Makes a POST request to start the current game. Only accessible 
- * by the host who created the game.
- */
+   Makes a POST request to start the current game. Only accessible
+   by the host who created the game.
+*/
 void start_game_http() {
   int offset = 0;
   char body[50];
@@ -64,34 +73,34 @@ void start_game_http() {
 
   char code = strtok(response, "&")[0];
 
-  if (code == '1'){
+  if (code == '1') {
     Serial.printf("Starting game id %d \n", game_id);
     //num_players = atoi(strtok(NULL, "&"));
   }
-  else if (code =='0' || code == '-'){
+  else if (code == '0' || code == '-') {
     Serial.printf("Game not found, invalid game_id: %d \n", game_id);
-  } else if (code == '2'){
+  } else if (code == '2') {
     Serial.println("Game has already started");
-  } else if (code == '3'){
+  } else if (code == '3') {
     Serial.println("Game has already ended");
-  } else{
+  } else {
     Serial.println("something went wrong");
   }
 }
 
 /*
- * Makes a GET request to get current game status. 
- * Used to show all players in waiting room
- */
+   Makes a GET request to get current game status.
+   Used to show all players in waiting room
+*/
 
- void get_game_status(){
+void get_game_status() {
   int offset = 0;
   char query[50];
   sprintf(query, "game_id=%d", game_id);
   make_get_request(SERVER, START_GAME_ADDRESS, query, response, false);
 
   char code = strtok(response, "&")[0];
-  if (code == '1'){ //game in waiting room, response ”1&{num_players}&{player_names}”
+  if (code == '1') { //game in waiting room, response ”1&{num_players}&{player_names}”
     num_players = atoi(strtok(NULL, "&"));
     strcpy(player_list, strtok(NULL, "&"));
     game_state = 1;
@@ -101,10 +110,10 @@ void start_game_http() {
   } else if (code == '3') {
     Serial.printf("Game id %d, game code %c has ended", game_id, code);
     game_state = 3;
-  } else { //TODO: process how to parse other types of statements 
+  } else { //TODO: process how to parse other types of statements
     Serial.printf("Something went wrong; game_id: %d, response code: %c \n", game_id, code);
   }
- }
+}
 
 //////////////////////
 // In-game requests //
@@ -131,12 +140,12 @@ void fetch_game_state(int game_id) {
 
   // Turns on LED based on in turn: red for in turn, green for off turn.
   if (in_turn) set_led_color(0, 255, 0);
-  
+
   p = strtok(NULL, "&"); // index of next measure to be submitted
   Serial.printf("current measure: {%s}\n", p);
   if (atoi(p) > current_measure) { // we are now a measure behind
     p = strtok(NULL, "&"); // all measures string
-    
+
     char* separator;
     char* measure;
     while ((separator = strchr(p, ' '))) {
@@ -169,15 +178,15 @@ void fetch_game_state(int game_id) {
 }
 
 /*
- * Submits the current measure to the current game on the server via a
- * POST request and fills any empty inputs with rests.
- */
+   Submits the current measure to the current game on the server via a
+   POST request and fills any empty inputs with rests.
+*/
 void submit_measure() {
   char string_of_notes[50];
   uint8_t notes_offset = 0;
-  
+
   for (int i = 0; i < note_state; i++) {
-//    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
+    //    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
     notes_offset += sprintf(string_of_notes + notes_offset, "%d ", measures[current_measure][i]);
   }
   for (int i = note_state; i < 16; i++) {
@@ -190,8 +199,8 @@ void submit_measure() {
 }
 
 /*
- * Tells the server we're still connected via a POST request.
- */
+   Tells the server we're still connected via a POST request.
+*/
 void ping() {
   char query[100]; //for body
   sprintf(query, "type=ping&username=%s&game_id=%d", USERNAME, game_id);

@@ -24,7 +24,11 @@ uint8_t AUDIO_PWM = 1;
 // HTTP
 char NETWORK[] = "MIT";
 char PASSWORD[] = "";
+<<<<<<< HEAD
 char USERNAME[] = "Joyce";
+=======
+char USERNAME[] = "Jan";
+>>>>>>> da13572a43f7d4b8e1d49fcdf2aee0c72d885650
 
 uint16_t game_id;
 char game_code[5];

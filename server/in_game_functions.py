@@ -14,12 +14,12 @@ def fetch(game_id, username, last_updated_measure):
         #update the player last ping for timeout purposes
         ping_status = update_last_ping(game_id, username)
         if ping_status == "0":
+            #invalid game ID!
             return ping_status
 
         #check for status of the game
         # game_code int, host text, key text, tempo text, game_status text, time timestamp, turn int, measure int
-        game_status, current_measure, turn = c.execute('''SELECT game_status, measure, turn FROM games WHERE rowid = 
-                                                          ?;''', (game_id,)).fetchone()
+        game_status, current_measure, turn = c.execute('''SELECT game_status, measure, turn FROM games WHERE rowid = ?;''', (game_id,)).fetchone()
 
         if game_status == "ended":
             return 'game ended'
@@ -66,6 +66,21 @@ def play_turn(game_id, username, measure):
 
         #SUCCESSFUL!
         return "1"
+
+def leave_game(game_id, username):
+    """
+    Allow a user to leave a game, update game state accordinally
+    """
+    with sqlite3.connect(moosic_db) as c:
+        c.execute('''DELETE FROM players WHERE username = ? ''', (username, ))
+
+        #TODO: make sure doing so, won't affect current turn
+
+def monitor_disconnect(game_id, username):
+    """
+    makes sure no players are disconnected/idle, update game state 
+    """
+    raise NotImplementedError
 
 
 def update_last_ping(game_id, username):

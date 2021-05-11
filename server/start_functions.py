@@ -148,8 +148,6 @@ def fetch_game_status(game_id):
             num_players = len(players)
             player_names = [val[0] for val in players]
 
-            # return f"GAME w/ id {game_id} \n STATE: START (WAITING FOR HOST TO START) \n NUM PLAYERS: {num_players} \n CURRENT PLAYERS IN WAITING ROOM: {', '.join(player_names)}"
-
             return f"1&{num_players}&{','.join(player_names)}"
 
         elif status == "in_game":

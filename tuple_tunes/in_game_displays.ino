@@ -64,21 +64,23 @@ void update_in_game(int js, bool note_added) {
     int current_y = 29 + 25 * (int(note_state / 4));
     tft.drawTriangle(current_x, current_y, current_x, current_y + 4, current_x + 3, current_y + 2, TFT_BLACK); 
   }
-  
-  tft.setCursor(132, 20, 1); 
-  tft.println(current_note); // print current selected note
-  if (selected_duration == 0) { // 1/16
-    tft.setCursor(122, 40, 1); 
-  } else if (selected_duration == 4) { // 1
-    tft.setCursor(131, 40, 1); 
-  } else {
-    tft.setCursor(125, 40, 1);
-  }
-  tft.println(NOTE_DURATIONS[selected_duration]); // print current selected note duration
-  if (current_measure < 10) { // scroll through measures
-    tft.setCursor(122, 100, 1);
-  } else {
-    tft.setCursor(117, 100, 1); 
+
+  if (in_turn) {
+    tft.setCursor(132, 20, 1); 
+    tft.println(current_note); // print current selected note
+    if (selected_duration == 0) { // 1/16
+      tft.setCursor(122, 40, 1); 
+    } else if (selected_duration == 4) { // 1
+      tft.setCursor(131, 40, 1); 
+    } else {
+      tft.setCursor(125, 40, 1);
+    }
+    tft.println(NOTE_DURATIONS[selected_duration]); // print current selected note duration
+    if (current_measure < 10) { // scroll through measures
+      tft.setCursor(122, 100, 1);
+    } else {
+      tft.setCursor(117, 100, 1); 
+    }
   }
   tft.printf("m. %d", selected_measure + 1);
   

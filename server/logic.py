@@ -2,8 +2,6 @@ import sys
 sys.path.append('__HOME__/server')
 from in_game_functions import *
 
-moosic_db = '/var/jail/home/team59/moosic6.db'
-
 
 def request_handler(request):
     if request["method"] == "GET":

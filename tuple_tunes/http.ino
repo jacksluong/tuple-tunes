@@ -8,7 +8,7 @@
 void create_game_http() {
 
   char body[100];
-  sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, TEMPO_SPEEDS[selected_tempo]);
+  sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, selected_tempo); //instead of TEMPO_SPEEDS[selected_tempo]
   Serial.println(body);
   make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
 
@@ -50,6 +50,7 @@ bool join_game_http() {
     room_num[0] = '\0';
     sprintf(room_num, "%d%d%d", game_code_input[0], game_code_input[1], game_code_input[2]);
     Serial.printf("joined game %s\n", room_num);
+    Serial.printf("selected_key: %d, selected_tempo: %d, is_flat_key: %d \n", selected_key, selected_tempo, is_flat_key);
     
     return true;
   } else {

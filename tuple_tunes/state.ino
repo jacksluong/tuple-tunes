@@ -394,7 +394,7 @@ void process_in_game(int bv, int js) {
     if (bv == 1) {
       for (int i = 0; i < 5; i++) tft.fillCircle(135, 30 + 20 * i, 1, rgb_to_565(DARK_GRAY)); // clear indicator
       
-      if (!in_turn && menu_state < 4) return;
+      if (!in_turn && (menu_state == 2 || menu_state == 3)) return; //cannot access submit note or add note
       
       if (!is_locked && menu_state != 2) {
         is_locked = true;
@@ -477,6 +477,8 @@ void process_in_game(int bv, int js) {
       menu_state = 0;
       is_locked = false;
       display_game_menu();
+      //Joyce beleives there should be a return here
+      return;
     }
     
     if (millis() - time_since_last_ping > PING_INTERVAL) {

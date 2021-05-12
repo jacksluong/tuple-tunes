@@ -28,7 +28,7 @@ void reset_game() {
   menu_state = 0;
   input_cursor = 0;
   state = 4;
-  is_locked = true;
+  is_locked = false;
   tft.setTextSize(1);
 
   if (is_host) {
@@ -392,6 +392,8 @@ void process_in_game(int bv, int js) {
     }
 
     if (bv == 1) {
+      for (int i = 0; i < 5; i++) tft.fillCircle(135, 30 + 20 * i, 1, rgb_to_565(DARK_GRAY)); // clear indicator
+      
       if (!in_turn && menu_state < 4) return;
       
       if (!is_locked && menu_state != 2) {
@@ -404,7 +406,7 @@ void process_in_game(int bv, int js) {
         play_note(curr_note_index);
       }
       if (menu_state == 2) { // add a note
-        int curr_x = 2 + 26.5 * (note_state % 4);
+        int curr_x = 2 + 25 * (note_state % 4);
         int curr_y = 29 + 25 * (int(note_state / 4));
         tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
 
@@ -413,6 +415,7 @@ void process_in_game(int bv, int js) {
         if ((note_state >= 16)) {
           note_state = 16;  // to update grid cursor position for next note
           menu_state = 3;
+//          tft.fillCircle(135, 30 + 20 * 2, 1, rgb_to_565(DARK_GRAY));
         } else {
           note_state += pow(2, selected_duration);
           menu_state = 0;
@@ -443,10 +446,13 @@ void process_in_game(int bv, int js) {
           if ((note_state >= 16)) {
             note_state = 16;  // to update grid cursor position for next note
             menu_state = 3;
-            is_locked = false;
+//            tft.fillCircle(135, 30 + 20 * 2, 1, rgb_to_565(DARK_GRAY));
+//            is_locked = false;
           } else {
-            is_locked = true;
+//            is_locked = true;
           }
+
+          is_locked = false;
         }
       } else if (menu_state == 3) {
         if (note_state < 16) {

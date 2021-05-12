@@ -13,6 +13,7 @@ uint8_t DARK_GRAY[] = {30, 30, 30};
 void display_in_game() {
   tft.fillRect(0, 0, 106, 128, TFT_BLACK);
   tft.fillRect(106, 0, 80, 128, rgb_to_565(DARK_GRAY));
+  tft.fillRect(119, 100, 30, 15, rgb_to_565(DARK_GRAY)); // clear measure
   
   // Left side grid
   tft.setCursor(5, 6, 1);
@@ -31,9 +32,9 @@ void display_in_game() {
   else if (current_note[1] == 'b') selected_symbol = 1;
   else if (current_note[1] == ' ') selected_symbol = 2;
 
-  tft.setCursor(112, 60, 1); // add a note
+  tft.setCursor(110, 60, 1); // add a note
   tft.println("Add Note");
-  tft.setCursor(118, 80, 1); // submit measure
+  tft.setCursor(115, 80, 1); // submit measure
   tft.println("Submit");
 
   /* vertical lines in the grid
@@ -105,11 +106,11 @@ void display_in_game() {
 void update_in_game(int js) {
   if (is_locked) {
     if (menu_state == 0) tft.fillRect(125, 15, 25, 15, rgb_to_565(DARK_GRAY)); // clear selected note
-    else if (menu_state == 1) tft.fillRect(122, 40, 25, 15, TFT_BLACK); // clear duration
-    else if (menu_state == 4) tft.fillRect(119, 100, 30, 15, TFT_BLACK); // clear measure
+    else if (menu_state == 1) tft.fillRect(122, 40, 25, 15, rgb_to_565(DARK_GRAY)); // clear duration
+    else if (menu_state == 4) tft.fillRect(119, 100, 30, 15, rgb_to_565(DARK_GRAY)); // clear measure
   }
   if (js == 1 || js == 3) 
-    for (int i = 0; i < 4; i++) tft.fillCircle(135, 30 + 20 * i, 1, rgb_to_565(DARK_GRAY)); // clear indicator
+    for (int i = 0; i < 5; i++) tft.fillCircle(135, 30 + 20 * i, 1, rgb_to_565(DARK_GRAY)); // clear indicator
   
   tft.setCursor(132, 20, 1); 
   tft.println(current_note); // print current selected note
@@ -130,7 +131,7 @@ void update_in_game(int js) {
   
   // grid cursor
   if (note_state < 16) {
-    set_cursor_pos(2 + 26.5 * (note_state % 4), 29 + 25*(int(note_state/4)));
+    set_cursor_pos(2 + 25 * (note_state % 4), 29 + 25*(int(note_state/4)));
     draw_cursor();
   }
   

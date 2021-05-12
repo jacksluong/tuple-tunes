@@ -25,12 +25,6 @@ void reset_game() {
   note_state = 0;
 
   // Other variables
-  menu_state = in_turn ? 0 : 4;
-  input_cursor = 0;
-  state = 4;
-  is_locked = !in_turn;
-  tft.setTextSize(1);
-
   if (is_host) {
     in_turn = true;
     set_led_color(0, 255, 0);
@@ -38,6 +32,11 @@ void reset_game() {
     in_turn = false;
     set_led_color(255, 0, 0);
   }
+  menu_state = in_turn ? 0 : 4;
+  input_cursor = 0;
+  state = 4;
+  is_locked = !in_turn;
+  tft.setTextSize(1);
 }
 
 void update_state(int bv, int js) {

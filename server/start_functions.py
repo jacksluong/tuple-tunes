@@ -1,28 +1,9 @@
 import sqlite3
 import datetime
 
-moosic_db = '/var/jail/home/team59/moosic1.db'
+moosic_db = '/var/jail/home/team59/moosic3.db'
 
 ROOM_CAPACITY = 10
-
-
-def initiate_tables():
-    """
-    Tables to be created in database
-    """
-    with sqlite3.connect(moosic_db) as c:
-        c.execute(
-            '''CREATE TABLE IF NOT EXISTS games(game_code int, host text, key text, tempo text, game_status text, time timestamp, turn int, measure int);''')
-        # game code - a number btwn 1 - 99 that increments
-        # game status - 'start', 'in-game', 'ended'
-        # key - one of the 12 major scales
-        # tempo -
-
-        c.execute(
-            '''CREATE TABLE IF NOT EXISTS players(game_id real, username text, last_ping timestamp, entry_time timestamp);''')
-
-        c.execute(
-            '''CREATE TABLE IF NOT EXISTS measures(game_id real, username text, measure_number int, n1 text, n2 text, n3 text, n4 text, n5 text, n6 text, n7 text, n8 text, n9 text, n10 text, n11 text, n12 text, n13 text, n14 text, n15 text, n16 text,);''')
 
 
 def create_game(host, key, tempo):
@@ -33,7 +14,7 @@ def create_game(host, key, tempo):
     with sqlite3.connect(moosic_db) as c:
         # create GAMES TABLE
         c.execute(
-            '''CREATE TABLE IF NOT EXISTS games(game_code int, host text, key int, tempo int, game_status text, turn int, measure int, time timestamp);''')
+            '''CREATE TABLE IF NOT EXISTS games(game_code int, host text, key int, tempo int, game_status text, turn int, measure int, disconnect_check timestamp, time timestamp);''')
 
         # CREATE PLAYERS TABLE
         c.execute(
@@ -45,8 +26,8 @@ def create_game(host, key, tempo):
         if most_recent:
             game_code = (most_recent[0] + 1) % 1000
 
-        c.execute('''INSERT INTO games VALUES (?,?,?,?,?,?,?,?);''',
-                  (game_code, host, key, tempo, 'start', 0, 0, datetime.datetime.now()))
+        c.execute('''INSERT INTO games VALUES (?,?,?,?,?,?,?,?,?);''',
+                  (game_code, host, key, tempo, 'start', 0, 0, datetime.datetime.now(), datetime.datetime.now()))
 
         # get game_id of last inserted game
         game_id = c.execute('''SELECT rowid FROM games ORDER BY time DESC;''').fetchone()

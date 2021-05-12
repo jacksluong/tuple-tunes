@@ -1,8 +1,8 @@
 import numpy
 import sqlite3
-import datetime
+import datetime 
 
-moosic_db = '/var/jail/home/team59/moosic1.db'
+moosic_db = '/var/jail/home/team59/moosic3.db'
 MAX_MEASURES = 5
 
 def fetch(game_id, username, last_updated_measure):
@@ -93,13 +93,43 @@ def leave_game(game_id, username):
         #delete player from players database
         c.execute('''DELETE FROM players WHERE username = ? ''', (username, ))
 
+        #print for debuggin
+        players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
 
-def monitor_disconnect(game_id, username):
+        player_names = [player[0] for player in players]
+
+        return f'players remaining'
+
+
+def monitor_disconnect(game_id, time):
     """
     makes sure no players are disconnected/idle, update game state 
     """
-    raise NotImplementedError
+    
+    #create time delta variables
+    delta_time_20 = datetime.timedelta(seconds=20)
+    delta_time_30 = datetime.timedelta(seconds=30)
 
+
+    with sqlite3.connect(moosic_db) as c:
+        
+        #check last time we checked for disconnect
+        last_disconnect_check = c.execute('''SELECT disconnect_check FROM games WHERE rowid = ?;''' (game_id, ))
+
+        #only check if we haven't checked for 39 seconds
+        if time - last_disconnect_check > delta_time_30:
+            
+            #get all the players who haven't pinged/fetched for the last 20 seconds
+            players_disconnect = c.execute('''SELECT username FROM players WHERE game_id = ? AND last_ping < ?''',(game_id, time - delta_time_20)).fetchall()
+
+            #for each player that disconnect, remove them from the game
+            for entry in players_disconnect:
+                username = entry[0]
+                leave_game(game_id, username)
+            
+            #update last disconnect check time to be current time
+            c.execute('''UPDATE games SET disconnect_check = ? WHERE rowid = ?;''' (datetime.datetime.now(), game_id))
+        
 
 def update_last_ping(game_id, username):
     '''given game id and username,
@@ -108,6 +138,9 @@ def update_last_ping(game_id, username):
         #first, update ping
         try:
             c.execute('''UPDATE players SET last_ping = ? WHERE game_id = ? AND username = ?;''', (datetime.datetime.now(), game_id, username))
+            
+            monitor_disconnect(game_id, datetime.datetime.now())
+
         except Exception as e:
             # return "INVALID GAME ID OR USERNAME"
             return "0"

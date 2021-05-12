@@ -162,7 +162,7 @@ void display_waiting_room() {
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(rgb_to_565(CYAN));
 
-  fade_in_text("Waiting Room", 11, 13, CYAN, 600, 2);
+  fade_in_text("Waiting Room", 10, 13, CYAN, 600, 2);
 
   char temp[50];
   sprintf(temp, "Username: %s", USERNAME);

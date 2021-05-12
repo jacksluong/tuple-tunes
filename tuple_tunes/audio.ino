@@ -50,7 +50,7 @@ void play_measure(uint8_t* measure_input) {
   }
 }
 
-void play_song(int curr_num_measures){
+void play_song() {
   if (measure_index < current_measure + 1) {
     play_measure(measures[measure_index]);
   } else {
@@ -59,7 +59,3 @@ void play_song(int curr_num_measures){
     playing_song = false;
   }
 }
-
-//void sine_wave(double freq) {
-//  dacWrite(AUDIO_TRANSDUCER, 3.3);
-//}

@@ -74,6 +74,7 @@ bool start_game_http() {
 
   if (code == '1') {
     Serial.printf("Starting game id %d \n", game_id);
+    game_state = 2;
     return true;
   } else if (code == '0' || code == '-') {
     Serial.printf("Game not found, invalid game_id: %d \n", game_id);

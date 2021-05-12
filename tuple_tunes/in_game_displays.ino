@@ -36,13 +36,6 @@ void display_in_game() {
   */
 
   // TODO: below
-  
-  tft.drawTriangle(115,21,110,23,115,25, TFT_WHITE); // arrows for note selection
-  tft.drawTriangle(151,21,156,23,151,25, TFT_WHITE);
-  tft.drawTriangle(115,41,110,43,115,45, TFT_WHITE); // arrows for duration selection
-  tft.drawTriangle(151,41,156,43,151,45, TFT_WHITE);
-  tft.drawTriangle(115,101,110,103,115,105, TFT_WHITE); // arrows for measure selection
-  tft.drawTriangle(151,101,156,103,151,105, TFT_WHITE);
 
   for (int i = 0; i < 3; i++) { // ellipses
     tft.fillCircle(4 * i + 146, 119, 1, TFT_WHITE);
@@ -54,9 +47,23 @@ void display_in_game() {
 void update_in_game(int js, bool note_added) {
   // Clearing
   if (is_locked) {
+    
     if (menu_state == 0) tft.fillRect(125, 15, 25, 15, rgb_to_565(DARK_GRAY)); // selected note
     else if (menu_state == 1) tft.fillRect(122, 40, 25, 15, rgb_to_565(DARK_GRAY)); // duration
     else if (menu_state == 4) tft.fillRect(119, 100, 30, 15, rgb_to_565(DARK_GRAY)); // measure
+    tft.drawTriangle(115, 21 + 20 * menu_state, 
+                     110, 23 + 20 * menu_state,
+                     115, 25 + 20 * menu_state, rgb_to_565(GRAY));
+    tft.drawTriangle(151, 21 + 20 * menu_state, 
+                     156, 23 + 20 * menu_state,
+                     151, 25 + 20 * menu_state, rgb_to_565(GRAY)); // arrows for note selection
+  } else {
+    tft.drawTriangle(115,21,110,23,115,25, rgb_to_565(DARK_GRAY)); // arrows for note selection
+    tft.drawTriangle(151,21,156,23,151,25, rgb_to_565(DARK_GRAY));
+    tft.drawTriangle(115,41,110,43,115,45, rgb_to_565(DARK_GRAY)); // arrows for duration selection
+    tft.drawTriangle(151,41,156,43,151,45, rgb_to_565(DARK_GRAY));
+    tft.drawTriangle(115,101,110,103,115,105, rgb_to_565(DARK_GRAY)); // arrows for measure selection
+    tft.drawTriangle(151,101,156,103,151,105, rgb_to_565(DARK_GRAY));
   }
   if (js == 1 || js == 3 || note_added) // menu cursor
     for (int i = 0; i < 5; i++) tft.fillCircle(134, 30 + 20 * i, 1, rgb_to_565(DARK_GRAY)); 
@@ -96,7 +103,7 @@ void update_in_game(int js, bool note_added) {
   if (is_locked && menu_state == 0) draw_note(note_state, curr_note_index + adjustment);
   if (note_added) display_measure(current_measure);
 
-  Serial.printf("Current measure: %d, Selected measure: %d, note_state : %d\n", current_measure, selected_measure, note_state);
+  Serial.printf("Current/selected measure: %d/%d, note_state (c_n_i): %d (%d)\n", current_measure, selected_measure, note_state, curr_note_index);
 }
 
 void display_measure(int measure_i) {

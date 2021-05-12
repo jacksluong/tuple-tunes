@@ -323,14 +323,15 @@ void process_in_game(int bv, int js) {
     }
     if (menu_state == 2) { // add a note
       // Jacky's
-      if (current_note[0] == 'R') curr_note_index = 36;
       int num_notes_added = min(16 - note_state, pow(2, selected_duration));
 
       if (num_notes_added) { // if nonzero
+        measures[current_measure][note_state] = current_note[0] == 'R' ? 36 : (curr_note_index + adjustment);
         for (int i = 1; i < num_notes_added; i++) measures[current_measure][note_state + i] = 37;
         note_state += num_notes_added;
       }
       note_added = true;
+      menu_state = 0;
 
       Serial.printf("Added %d notes, note_state now %d\n", num_notes_added, note_state);
       ///////// Original is everything below

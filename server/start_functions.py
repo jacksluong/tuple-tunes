@@ -1,7 +1,7 @@
 import sqlite3
 import datetime
 
-moosic_db = '/var/jail/home/team59/moosic3.db'
+moosic_db = '/var/jail/home/team59/moosic6.db'
 
 ROOM_CAPACITY = 10
 
@@ -66,9 +66,6 @@ def join_game(username, game_code):
             players = c.execute('''SELECT username FROM players WHERE game_id = ?;''', (game_id,)).fetchall()
             num_players = len(players)
 
-            # get player names
-            # player_names = [val[0] for val in players]
-
             # check if room is still open to players
             if num_players < ROOM_CAPACITY:
 
@@ -88,26 +85,6 @@ def join_game(username, game_code):
         else:
             # game is in progress or ended
             return "2"
-
-
-def start_game(game_id):
-    """
-    Start the game with the give game id
-    """
-    with sqlite3.connect(moosic_db) as c:
-
-        # get status of game
-        try:
-            game_status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
-        except Exception:  # invalid game id
-            return "0"
-
-        # if game hasn't started yet
-        if game_status == "start":
-            c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ('in_game', game_id))
-
-            # Successful!
-            return "1"
 
 
 def fetch_game_status(game_id):
@@ -134,7 +111,33 @@ def fetch_game_status(game_id):
             return f"1&{num_players}&{','.join(player_names)}"
 
         elif status == "in_game":
+            players = c.execute('''SELECT username FROM players WHERE game_id = ?;''', (game_id,)).fetchall()
+            num_players = len(players)
+            player_names = [val[0] for val in players]
+
+            for player_name in player_names:
+                c.execute('''UPDATE players SET last_ping = ? WHERE username = ?;'''(datetime.datetime.now(), player_name))
+                
             return "2"
 
         elif status == "ended":
             return "3"
+
+def start_game(game_id):
+    """
+    Start the game with the give game id
+    """  
+    with sqlite3.connect(moosic_db) as c:
+
+        # get status of game
+        try:
+            game_status = c.execute('''SELECT game_status FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
+        except Exception:  # invalid game id
+            return "0"
+
+        # if game hasn't started yet
+        if game_status == "start":
+            c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ('in_game', game_id))
+
+            # Successful!
+            return "1"

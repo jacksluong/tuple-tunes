@@ -2,6 +2,8 @@ import sys
 sys.path.append('__HOME__/server')
 from in_game_functions import *
 
+moosic_db = '/var/jail/home/team59/moosic6.db'
+
 
 def request_handler(request):
     if request["method"] == "GET":
@@ -60,9 +62,12 @@ def request_handler(request):
             try:
                 username = request['form']['username']
                 game_id = int(request['form']['game_id'])
-            except:
-                return "-1"
-            return leave_game(game_id, username)
+
+            except Exception as e:
+                return f"-1&{e.message}"
+
+            with sqlite3.connect(moosic_db) as c:
+                return leave_game(c, game_id, username)
 
         else:
             return "-1"

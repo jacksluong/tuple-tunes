@@ -1,9 +1,9 @@
 import numpy
 import sqlite3
-import datetime
+import datetime 
 
-moosic_db = '/var/jail/home/team59/moosic1.db'
-MAX_MEASURES = 5
+moosic_db = '/var/jail/home/team59/moosic6.db'
+MAX_MEASURES = 4
 
 def fetch(game_id, username, last_updated_measure):
     '''given the game id, username, and last updated measure of fetching player,
@@ -12,28 +12,24 @@ def fetch(game_id, username, last_updated_measure):
 
     with sqlite3.connect(moosic_db) as c:
         #update the player last ping for timeout purposes
-        ping_status = update_last_ping(game_id, username)
-        if ping_status == "0":
-            #invalid game ID!
-            return ping_status
+        update_last_ping(game_id, username)
 
-        #check for status of the game
-        # game_code int, host text, key text, tempo text, game_status text, time timestamp, turn int, measure int
+        #get current game information
         game_status, current_measure, turn = c.execute('''SELECT game_status, measure, turn FROM games WHERE rowid = ?;''', (game_id,)).fetchone()
 
-        if game_status == "ended":
-            return 'game ended'
+        players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
+
+        ##game ended
+        if (game_status == "ended") or (len(players) == 0):
+            c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ('ended',game_id,))
+            return '-1'
 
         # get song from player's last measure and onwards
         song = get_song(game_id, last_updated_measure)
 
-        # figure out who's turn it should be
-        players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
-
         # username of player in turn
         in_turn = players[turn % len(players)][0]
-
-        # return f"Player in turn: {in_turn} \n Current Song: \n {song}"
+        
         return f"{in_turn}&{current_measure}&{song} "
 
 
@@ -44,15 +40,10 @@ def play_turn(game_id, username, measure):
 
     with sqlite3.connect(moosic_db) as c:
         #first, update ping
-        ping_status = update_last_ping(game_id, username)
-        if ping_status == "0":
-            return ping_status
+        update_last_ping(game_id, username)
 
-        measure_num, turn = c.execute('''SELECT measure, turn FROM games WHERE rowid = ?;''',(game_id,)).fetchone()
         # measure is the (0-indexed) index of the measure that we are submitting rn)
-
-        if measure_num >= MAX_MEASURES:
-            return '0'
+        measure_num, turn = c.execute('''SELECT measure, turn FROM games WHERE rowid = ?;''',(game_id,)).fetchone()
         
         c.execute('''CREATE TABLE IF NOT EXISTS measures(game_id int, username text, measure_number int, n1 int, n2 int, n3 int, n4 int, n5 int, n6 int, n7 int, n8 int, n9 int, n10 int, n11 int, n12 int, n13 int, n14 int, n15 int, n16 int);''')
 
@@ -67,53 +58,76 @@ def play_turn(game_id, username, measure):
         #SUCCESSFUL!
         return "1"
 
-def leave_game(game_id, username):
+def leave_game(c, game_id, username):
     """
     Allow a user to leave a game, update game state accordinally
     """
-    with sqlite3.connect(moosic_db) as c:
 
-        #get the current turn in the game (not modded yet)
-        turn = c.execute('''SELECT turn FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
+    #get the current turn in the game (not modded yet)
+    turn = c.execute('''SELECT turn FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
 
-        #get player_names
-        players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
-        player_names = [player[0] for player in players]
+    #get player_names
+    players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
+    player_names = [player[0] for player in players]
 
-        #find the index of the player to be popped
-        pop_index = player_names.index(username)
+    #find the index of the player to be popped
+    pop_index = player_names.index(username)
 
-        #index of current turn
-        turn_index = turn % len(players)
+    #index of current turn
+    turn_index = turn % len(players)
 
-        #only update turn if pop_index is less than turn_index
-        if pop_index < turn_index:
-            c.execute('''UPDATE games SET turn = ? WHERE rowid = ?''', (turn_index - 1, game_id))
+    #only update turn if pop_index is less than turn_index
+    if (pop_index < turn_index) or (pop_index == turn_index and pop_index == (len(players) - 1)):
+        c.execute('''UPDATE games SET turn = ? WHERE rowid = ?;''', (turn_index - 1, game_id))
 
-        #delete player from players database
-        c.execute('''DELETE FROM players WHERE username = ? ''', (username, ))
+    #delete player from players database
+    c.execute('''DELETE FROM players WHERE username = ?;''', (username, ))
 
 
-def monitor_disconnect(game_id, username):
+def monitor_disconnect(c, game_id, time_now):
     """
     makes sure no players are disconnected/idle, update game state 
     """
-    raise NotImplementedError
+    
+    #create time delta variables
+    delta_time_20 = datetime.timedelta(seconds=20)
+    delta_time_30 = datetime.timedelta(seconds=30)
 
+    #check last time we checked for disconnect
+    last_disconnect_check = c.execute('''SELECT disconnect_check FROM games WHERE rowid = ?;''',(game_id,)).fetchone()[0]
+
+    dto = datetime.datetime.strptime(last_disconnect_check,'%Y-%m-%d %H:%M:%S.%f')
+
+    #only check if we haven't checked for 30 seconds
+    if time_now - dto > delta_time_30:
+
+        #get all the players who haven't pinged/fetched for the last 20 seconds
+        players_disconnect = c.execute('''SELECT username FROM players WHERE game_id = ? AND last_ping < ?;''',(game_id, time_now - delta_time_20)).fetchall()
+
+        disconnected_names = [player[0] for player in players_disconnect]
+            
+        #for each player that disconnect, remove them from the game
+        for username in disconnected_names:
+            leave_game(c, game_id, username) 
+
+        #update last disconnect check time to be current time
+        c.execute('''UPDATE games SET disconnect_check = ? WHERE rowid = ?;''',(datetime.datetime.now(), game_id))
+
+        
 
 def update_last_ping(game_id, username):
     '''given game id and username,
     updates the last ping of the player'''
-    with sqlite3.connect(moosic_db) as c:
-        #first, update ping
-        try:
-            c.execute('''UPDATE players SET last_ping = ? WHERE game_id = ? AND username = ?;''', (datetime.datetime.now(), game_id, username))
-        except Exception as e:
-            # return "INVALID GAME ID OR USERNAME"
-            return "0"
 
-        #Successful!
-        return "1"
+    with sqlite3.connect(moosic_db) as c:
+
+        #first, update ping
+        c.execute('''UPDATE players SET last_ping = ? WHERE game_id = ? AND username = ?;''', (datetime.datetime.now(), game_id, username))
+
+        #check for disconnects
+        monitor_disconnect(c, game_id, datetime.datetime.now())
+
+
 
 
 def get_song(game_id, start_measure=0):

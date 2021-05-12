@@ -10,7 +10,7 @@ void create_game_http() {
   char body[100];
   sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, selected_tempo); //instead of TEMPO_SPEEDS[selected_tempo]
   Serial.println(body);
-  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+  make_post_request(SERVER, PRE_GAME_ADDRESS, body, response, false);
 
   strcpy(game_code, strtok(response, "&"));
   room_num[0] = '\0';
@@ -33,7 +33,7 @@ bool join_game_http() {
   int offset = 0;
   char body[100];
   sprintf(body, "type=join&username=%s&game_code=%d%d%d", USERNAME, game_code_input[0], game_code_input[1], game_code_input[2]);
-  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+  make_post_request(SERVER, PRE_GAME_ADDRESS, body, response, false);
 
   char code = strtok(response, "&")[0];
   if (code == '3') {
@@ -68,12 +68,13 @@ bool start_game_http() {
   int offset = 0;
   char body[50];
   sprintf(body, "type=start&game_id=%d", game_id);
-  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+  make_post_request(SERVER, PRE_GAME_ADDRESS, body, response, false);
 
   char code = strtok(response, "&")[0];
 
   if (code == '1') {
     Serial.printf("Starting game id %d \n", game_id);
+    game_state = 2;
     return true;
   } else if (code == '0' || code == '-') {
     Serial.printf("Game not found, invalid game_id: %d \n", game_id);
@@ -95,7 +96,7 @@ void get_game_status() {
   int offset = 0;
   char query[50];
   sprintf(query, "game_id=%d", game_id);
-  make_get_request(SERVER, START_GAME_ADDRESS, query, response, false);
+  make_get_request(SERVER, PRE_GAME_ADDRESS, query, response, false);
 
   char code = strtok(response, "&")[0];
   if (code == '1') { //game in waiting room, response ”1&{num_players}&{player_names}”
@@ -117,7 +118,7 @@ void get_game_status() {
 // In-game requests //
 //////////////////////
 
-void fetch_game_state(int game_id) {
+bool fetch_game_state(int game_id) {
   char query[100]; //for body
   sprintf(query, "username=%s&game_id=%d&measure=%d", USERNAME, game_id, current_measure);
   Serial.println("making fetch");
@@ -129,6 +130,8 @@ void fetch_game_state(int game_id) {
   // format of response: "{in_turn}&{current_measure}&{song}"
   char* p = strtok(response, "&"); // name of current user's turn
 
+  if (p[0] == '-') return false; // game ended
+  
   Serial.printf("p is %s\n", p);
   Serial.printf("comparison: %d\n", strcmp(p, USERNAME));
   in_turn = !strcmp(p, USERNAME); // if matched, strcmp returns 0, which is equivalent to false
@@ -137,7 +140,13 @@ void fetch_game_state(int game_id) {
   Serial.println(in_turn);
 
   // Turns on LED based on in turn: red for in turn, green for off turn.
-  if (in_turn) set_led_color(0, 255, 0);
+  if (in_turn) {
+    if (state == 4) {
+      menu_state = 0;
+      is_locked = false;
+    }
+    set_led_color(0, 255, 0);
+  }
 
   p = strtok(NULL, "&"); // index of next measure to be submitted
   Serial.printf("current measure: {%s}\n", p);
@@ -174,11 +183,13 @@ void fetch_game_state(int game_id) {
       Serial.println();
     }
 
-    update_in_game(0);
+    display_in_game();
   } else {
     Serial.println("no updates needed");
   }
   time_since_last_ping = millis();
+
+  return true;
 }
 
 /*
@@ -187,14 +198,13 @@ void fetch_game_state(int game_id) {
 */
 void submit_measure() {
   char string_of_notes[50];
-  uint8_t notes_offset = 0;
+  uint8_t offset = 0;
 
   for (int i = 0; i < note_state; i++) {
-    //    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
-    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", measures[current_measure][i]);
+    offset += sprintf(string_of_notes + offset, "%d ", measures[current_measure][i]);
   }
   for (int i = note_state; i < 16; i++) {
-    notes_offset += sprintf(string_of_notes + notes_offset, "36 ");
+    offset += sprintf(string_of_notes + offset, "36 ");
   }
 
   char query[100]; //for body

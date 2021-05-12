@@ -24,30 +24,30 @@ uint8_t AUDIO_PWM = 1;
 // HTTP
 char NETWORK[] = "MIT";
 char PASSWORD[] = "";
-char USERNAME[] = "Joyce";
 
 uint16_t game_id;
 char game_code[5];
 char measure_response[200];
 char player_in_turn[50];
+char USERNAME[] = "jkluong";
 
 char SERVER[] = "608dev-2.net";
 char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py";
-char START_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py";
+char PRE_GAME_ADDRESS[] = "/sandbox/sc/team59/server/init.py";
 
 const uint16_t OUT_BUFFER_SIZE = 2000;
 char response[OUT_BUFFER_SIZE];
 const uint16_t IN_BUFFER_SIZE = 2000;
 char request[IN_BUFFER_SIZE];
 uint32_t time_since_last_ping = millis();
+const int PING_INTERVAL = 6000;
 
-//waiting room stuffz
+// Waiting room
 uint32_t wait_room_timer = millis();
-const uint16_t WAIT_ROOM_UPDATE = 7000; //waiting room updates every 2 seconds
 char player_list[200];
 bool is_host = false; //determining if you are the host / made the create_game request
-int num_players = 1;
-int game_state = 0; // consistent with return numbers of get game status
+uint8_t num_players = 1;
+uint8_t game_state = 0; // consistent with return numbers of get game status
 
 // LED
 const uint8_t red = 14;
@@ -56,26 +56,33 @@ const uint8_t blue = 15;
 
 // Display
 TFT_eSPI tft = TFT_eSPI();
-const int SCREEN_WIDTH = 160;
-const int SCREEN_HEIGHT = 128;
+const uint8_t SCREEN_WIDTH = 160;
+const uint8_t SCREEN_HEIGHT = 128;
+
+// Colors
+uint8_t CYAN[] = {18, 243, 255};
+uint8_t DARK_CYAN[] = {50, 162, 168};
+uint8_t GRAY[] = {100, 100, 100};
+uint8_t DARK_GRAY[] = {50, 50, 50};
 
 // Input
 Button button(BUTTON_PINS[0]);
 Joystick joystick(JOYSTICK_LR, JOYSTICK_UD);
+
+// State / Control
+uint8_t state = 0;
+uint8_t menu_state = 0;
+int8_t game_code_input[] = {-10, -10, -10};
+char input_cursor = 0;
+bool is_locked = false;
+uint32_t last_button_click = millis();
 
 // Audio output (see lab05b)
 const int NOTE_COUNT = 36;
 double note_freqs[NOTE_COUNT];
 double MULT = 1.059463094359; //12th root of 2 (precalculated) for note generation
 double C3 = 130.81; //C3 130.81 Hz  for note generation
-
-// State / Control
-int state = 0;
-int menu_state = 0;
-int8_t game_code_input[] = {-10, -10, -10};
-char input_cursor = 0;
-bool is_locked = false;
-uint16_t last_button_click = millis();
+uint32_t last_played = 0;
 
 // Game constants
 const char* TEMPO_LABELS[] = {"Slow", "Mid", "Fast"};
@@ -101,7 +108,10 @@ int selected_tempo = 0;
 char room_num[4];
 
 // Game state variables
-int player_count = 0;
+uint16_t game_id;
+char game_code[5];
+uint8_t player_count = 0;
+
 bool in_turn = false;
 uint8_t measures[MEASURE_COUNT][16];
 int current_measure = 0;
@@ -110,21 +120,14 @@ int selected_note = 0;
 int curr_note_index = 0;
 int adjustment = 0;
 char current_note[5] = "\0";
-int curr_notes_array[16]; //use note state to get index, temporary until we implement measures
 int selected_duration = 0; // selected duration index for current note
 int selected_symbol = 0; // selected symbol index for current note
 int step_index = 0; // selected jump index for determining next note in key
 int note_state = 0;
 
-
-// Tests
-uint8_t test1[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37};
-uint8_t test2[16] = {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37};
-uint8_t test_song[2][16] = {{7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 12, 9, 9, 7, 7, 37}, {7, 4, 4, 2, 4, 7, 7, 37, 9, 9, 7, 0, 4, 2, 0, 37}};
-
-/////////////////////////////////
-// Convenient helper functions //
-/////////////////////////////////
+/////////////////
+// Convenience //
+/////////////////
 
 /*
  * Sets the color of the LED given RGB input values.
@@ -201,7 +204,7 @@ void setup() {
   // Compute note frequencies
   note_freqs[0] = C3;
   for (int i = 1; i < NOTE_COUNT; i++) {
-    note_freqs[i] = MULT*note_freqs[i-1];
+    note_freqs[i] = MULT*note_freqs[i - 1];
   }
   
   // Draw first screen
@@ -209,13 +212,6 @@ void setup() {
 }
 
 void loop() {
-  int num_notes_in_selected = 16;
-  if (playing_measure && sound_on)  {
-    //Serial.printf("Play measure - num notes: %d\n", note_state); // debugging
-    if (selected_measure == current_measure) num_notes_in_selected = note_state;
-    play_measure(measures[selected_measure], num_notes_in_selected);
-  }
-  if (playing_song && sound_on) play_song(measures, current_measure, note_state);
   int bv = button.read();
   int js = joystick.read();
     
@@ -223,7 +219,22 @@ void loop() {
   if (is_locked && note_state < 16) draw_cursor();
   
   update_state(bv, js);
-  //stop_sound();
-  // separating that huge chunk of nested ifs to a separate file so
-  // when we handle continuous fetching, it doesn't get mixed in with it all here
+
+  processes();
+}
+
+void processes() {
+  // Fetch/ping
+  if ((state == 4 || state == 5) && millis() - time_since_last_ping > PING_INTERVAL) {
+    if (in_turn) ping();
+    else if (!fetch_game_state(game_id)) { // condition true only when game ended (prematurely)
+      display_end_game();
+      state = 6;
+    }
+  }
+
+  // Sounds
+  if (playing_measure && sound_on) play_measure(measures[selected_measure]);
+  if (playing_song && sound_on) play_song();
+  if ((state == 1 || state == 4) && millis() - last_played > 300) stop_sound();
 }

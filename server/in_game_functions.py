@@ -40,10 +40,10 @@ def fetch(game_id, username, last_updated_measure):
 
         in_turn = c.execute('''SELECT turn FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0] % len(player_names)
 
-        return f'players remaining: {player_names}, in turn index: {in_turn}'
+        # return f'players remaining: {player_names}, in turn index: {in_turn}'
 
 
-        # return f"{in_turn}&{current_measure}&{song} "
+        return f"{in_turn}&{current_measure}&{song} "
 
 
 
@@ -116,7 +116,10 @@ def leave_game(c, game_id, username):
 
     in_turn = c.execute('''SELECT turn FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0] % len(player_names)
 
-    return f'YEETED away {username} \n players remaining: {player_names}, in turn index: {in_turn}'
+    # return f'YEETED away {username} \n players remaining: {player_names}, in turn index: {in_turn}'
+
+    #SUCCESSFUL!
+    return "1"
 
 
 def monitor_disconnect(c, game_id, time_now):
@@ -169,7 +172,7 @@ def update_last_ping(game_id, username):
         try:
             c.execute('''UPDATE players SET last_ping = ? WHERE game_id = ? AND username = ?;''', (datetime.datetime.now(), game_id, username))
             
-            return monitor_disconnect(c, game_id, datetime.datetime.now())
+            monitor_disconnect(c, game_id, datetime.datetime.now())
 
         except Exception as e:
             # return "INVALID GAME ID OR USERNAME"

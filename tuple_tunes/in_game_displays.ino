@@ -101,6 +101,7 @@ void update_in_game(int js, bool note_added) {
 
 void display_measure(int measure_i) {
   tft.fillRect(4, 5, 75, 13, TFT_BLACK);
+  tft.setTextColor(rgb_to_565(GRAY));
   tft.setCursor(5, 6, 1);
   tft.printf("<measure %d/%d>", selected_measure + 1, MEASURE_COUNT);
   for (int i = 0; i < (measure_i == current_measure ? min(note_state + 1, 16) : 16); i++)
@@ -111,7 +112,7 @@ void display_measure(int measure_i) {
 void draw_note(int note_i, int note_num) {
   tft.fillRect(3 + 25 * (note_i % 4), 22 + 25 * (note_i / 4), 19, 19, TFT_BLACK);
   tft.setCursor(10 + 25 * (note_i % 4), 28 + 25 * (note_i / 4), 1);
-  tft.setTextColor((measure_i == current_measure && note_i == note_state) ? rgb_to_565(CYAN) : rgb_to_565(DARK_CYAN));
+  tft.setTextColor((selected_measure == current_measure && note_i == note_state) ? rgb_to_565(CYAN) : rgb_to_565(DARK_CYAN));
   if (note_num == 37) tft.println("~");
   else if (note_num == 36) tft.println("R");
   else tft.println((is_flat_key ? NOTES_FLAT : NOTES_SHARP)[note_num % 12]);

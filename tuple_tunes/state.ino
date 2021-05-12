@@ -25,10 +25,10 @@ void reset_game() {
   note_state = 0;
 
   // Other variables
-  menu_state = 0;
+  menu_state = in_turn ? 0 : 4;
   input_cursor = 0;
   state = 4;
-  is_locked = false;
+  is_locked = !in_turn;
   tft.setTextSize(1);
 
   if (is_host) {
@@ -298,79 +298,37 @@ void process_in_game(int bv, int js) {
         selected_duration = (selected_duration + 4) % 5;
       }
     } else if (menu_state == 4) {
+      uint8_t old_selected_measure = selected_measure;
       if (js == 2) { // right
         selected_measure = (selected_measure + 1) % (current_measure + 1);
       } else if (js == 4) { // left
         selected_measure = (selected_measure + current_measure) % (current_measure + 1);
       }
-      display_in_game();
+      if (old_selected_measure != selected_measure) display_in_game();
       Serial.printf("Selected measure: %d", selected_measure);
     }
   }
 
   bool note_added = false;
   if (bv == 1) {
-    if (!in_turn && (menu_state == 2 || menu_state == 3)) return; //cannot access submit note or add note
-    
-    if (!is_locked && menu_state != 2) {
-      is_locked = true;
-    } else {
-      is_locked = false;
+    if (in_turn) {
+      if (!is_locked && (menu_state < 2 || menu_state == 4)) is_locked = true;
+      else is_locked = false;
     }
     // state changes
     if (menu_state == 0) {
       play_note(curr_note_index);
     }
     if (menu_state == 2) { // add a note
-      // Jacky's
       int num_notes_added = min(16 - note_state, pow(2, selected_duration));
 
       if (num_notes_added) { // if nonzero
         measures[current_measure][note_state] = current_note[0] == 'R' ? 36 : (curr_note_index + adjustment);
         for (int i = 1; i < num_notes_added; i++) measures[current_measure][note_state + i] = 37;
         note_state += num_notes_added;
+        menu_state = 0;
       }
       note_added = true;
-      menu_state = 0;
-
-      Serial.printf("Added %d notes, note_state now %d\n", num_notes_added, note_state);
-      ///////// Original is everything below
-
-      /*
-      int temp_note_state = note_state;
-      Serial.printf("Added is %d", note_state + pow(2, selected_duration));
-      if ((note_state >= 16)) {
-        note_state = 16;  // no more notes allowed
-        menu_state = 3;
-      } else {
-        note_added = true;
-        
-        note_state += pow(2, selected_duration);
-        menu_state = 0;
-
-        //adding the note to the notes array
-
-        measures[current_measure][temp_note_state] = curr_note_index + adjustment; 
-        temp_note_state = temp_note_state + 1;
-
-        int i;
-        for (i = 0; i < pow(2, selected_duration); i = i + 1) {
-          if (i != pow(2, selected_duration) - 1) {
-            tft.setCursor(10 + 26.5 * (temp_note_state % 4), 28 + 25 * (int(temp_note_state / 4)), 1);
-            tft.println("~");
-          }
-          measures[current_measure][temp_note_state] = 37;
-          temp_note_state = temp_note_state + 1;
-        }
-
-        if (note_state >= 16) {
-          note_state = 16;  // to update grid cursor position for next note
-          menu_state = 3;
-        }
-
-//        is_locked = false; // think we don't this
-      }
-      //*/
     } else if (menu_state == 3) {
       if (note_state < 16) {
         while (note_state < 16) {
@@ -379,12 +337,19 @@ void process_in_game(int bv, int js) {
         }
       }
       submit_measure();
+
+      // Update internal
       note_state = 0;
       current_measure += 1;
       selected_measure = current_measure;
-      menu_state = 0;
-      display_in_game();
+
+      // Update controls
+      menu_state = 4;
       in_turn = false;
+      is_locked = true;
+
+      // Update visuals
+      display_in_game();
       set_led_color(255, 0, 0);
     }
   } else if (bv == 2) { // go to game menu screen
@@ -421,6 +386,7 @@ void process_game_menu(int bv, int js) {
     update_game_menu();
     if (menu_state == 0) { // resume game
       state = 4;
+      is_locked = true;
       display_in_game();
     } else if (menu_state == 1) {
       if (playing_song) stop_sound();

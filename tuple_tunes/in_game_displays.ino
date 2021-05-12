@@ -18,24 +18,16 @@ void display_in_game() {
   display_measure(selected_measure);
 
   // Right side
-  strcpy(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[curr_note_index % 12]);
-  // update starting index for selected symbol based on the note from this key
-  if (current_note[1] == '#') selected_symbol = 0;
-  else if (current_note[1] == 'b') selected_symbol = 1;
-  else if (current_note[1] == ' ') selected_symbol = 2;
+  if (in_turn) {
+    strcpy(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[curr_note_index % 12]);
+    // update starting index for selected symbol based on the note from this key
+    if (current_note[1] == '#') selected_symbol = 0;
+    else if (current_note[1] == 'b') selected_symbol = 1;
+    else if (current_note[1] == ' ') selected_symbol = 2;
 
-  tft.setCursor(110, 60, 1); // add a note
-  tft.println("Add Note");
-  tft.setCursor(115, 80, 1); // submit measure
-  tft.println("Submit");
-
-  /* vertical lines in the grid
-  tft.drawLine(26.5, 19, 26.5, 118, rgb_to_565(GRAY));
-  tft.drawLine(53, 19, 53, 118, rgb_to_565(GRAY));
-  tft.drawLine(79.5, 19, 79.5, 118, rgb_to_565(GRAY));
-  */
-
-  // TODO: below
+    draw_text("Add Note", 110, 60, CYAN, 1);
+    draw_text("Submit", 115, 80, CYAN, 1);
+  }
 
   for (int i = 0; i < 3; i++) { // ellipses
     tft.fillCircle(4 * i + 146, 119, 1, TFT_WHITE);
@@ -78,9 +70,9 @@ void update_in_game(int js, bool note_added) {
   if (selected_duration == 0) { // 1/16
     tft.setCursor(122, 40, 1); 
   } else if (selected_duration == 4) { // 1
-    tft.setCursor(133, 40, 1); 
+    tft.setCursor(131, 40, 1); 
   } else {
-    tft.setCursor(127, 40, 1);
+    tft.setCursor(125, 40, 1);
   }
   tft.println(NOTE_DURATIONS[selected_duration]); // print current selected note duration
   if (current_measure < 10) { // scroll through measures
@@ -113,7 +105,6 @@ void display_measure(int measure_i) {
   tft.printf("<measure %d/%d>", selected_measure + 1, MEASURE_COUNT);
   for (int i = 0; i < (measure_i == current_measure ? min(note_state + 1, 16) : 16); i++)
     draw_note(i, measures[measure_i][i]);
-  if (measure_i == current_measure) draw_note(note_state, curr_note_index + adjustment);
 }
 
 void draw_note(int note_i, int note_num) {

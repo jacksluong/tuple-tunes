@@ -162,19 +162,19 @@ void display_waiting_room() {
   tft.fillScreen(TFT_BLACK);
   tft.setTextColor(rgb_to_565(CYAN));
 
-  fade_in_text("Waiting Room", 10, 13, CYAN, 600, 2);
+  fade_in_text("Waiting Room", 9, 13, CYAN, 600, 2);
 
   char temp[50];
   sprintf(temp, "Username: %s", USERNAME);
-  fade_in_text(temp, 10, 39, DARK_CYAN, 200, 1);
+  fade_in_text(temp, 9, 39, DARK_CYAN, 200, 1);
   temp[0] = '\0';
   sprintf(temp, "Room #:   %s", room_num);
-  fade_in_text(temp, 10, 51, DARK_CYAN, 200, 1);
+  fade_in_text(temp, 9, 51, DARK_CYAN, 200, 1);
   temp[0] = '\0';
   sprintf(temp, "Players:  %d", num_players);
-  fade_in_text(temp, 10, 63, DARK_CYAN, 200, 1);
+  fade_in_text(temp, 9, 63, DARK_CYAN, 200, 1);
   strcpy(temp, is_host ? "You are the host!" : "Waiting for host to start");
-  fade_in_text(temp, 10, 75, DARK_CYAN, 200, 1);
+  fade_in_text(temp, 9, 75, DARK_CYAN, 200, 1);
   
   if (is_host) {
     fade_in_text("Start", 15, 100, DARK_CYAN, 100, 1);

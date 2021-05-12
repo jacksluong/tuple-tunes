@@ -24,7 +24,7 @@ uint8_t AUDIO_PWM = 1;
 // HTTP
 char NETWORK[] = "MIT";
 char PASSWORD[] = "";
-char USERNAME[] = "Boba";
+char USERNAME[] = "jkluong";
 
 char SERVER[] = "608dev-2.net";
 char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py";
@@ -57,8 +57,8 @@ const uint8_t SCREEN_HEIGHT = 128;
 // Colors
 uint8_t CYAN[] = {18, 243, 255};
 uint8_t DARK_CYAN[] = {50, 162, 168};
-uint8_t GRAY[] = {70, 70, 70};
-uint8_t DARK_GRAY[] = {30, 30, 30};
+uint8_t GRAY[] = {100, 100, 100};
+uint8_t DARK_GRAY[] = {50, 50, 50};
 
 // Input
 Button button(BUTTON_PINS[0]);
@@ -222,7 +222,10 @@ void processes() {
   // Fetch/ping
   if ((state == 4 || state == 5) && millis() - time_since_last_ping > PING_INTERVAL) {
     if (in_turn) ping();
-    else fetch_game_state(game_id);
+    else if (!fetch_game_state(game_id)) { // condition true only when game ended (prematurely)
+      display_end_game();
+      state = 6;
+    }
   }
 
   // Sounds

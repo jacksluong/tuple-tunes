@@ -118,7 +118,7 @@ void get_game_status() {
 // In-game requests //
 //////////////////////
 
-void fetch_game_state(int game_id) {
+bool fetch_game_state(int game_id) {
   char query[100]; //for body
   sprintf(query, "username=%s&game_id=%d&measure=%d", USERNAME, game_id, current_measure);
   Serial.println("making fetch");
@@ -130,6 +130,8 @@ void fetch_game_state(int game_id) {
   // format of response: "{in_turn}&{current_measure}&{song}"
   char* p = strtok(response, "&"); // name of current user's turn
 
+  if (p[0] == '-') return false; // game ended
+  
   Serial.printf("p is %s\n", p);
   Serial.printf("comparison: %d\n", strcmp(p, USERNAME));
   in_turn = !strcmp(p, USERNAME); // if matched, strcmp returns 0, which is equivalent to false
@@ -138,7 +140,13 @@ void fetch_game_state(int game_id) {
   Serial.println(in_turn);
 
   // Turns on LED based on in turn: red for in turn, green for off turn.
-  if (in_turn) set_led_color(0, 255, 0);
+  if (in_turn) {
+    if (state == 4) {
+      menu_state = 0;
+      is_locked = false;
+    }
+    set_led_color(0, 255, 0);
+  }
 
   p = strtok(NULL, "&"); // index of next measure to be submitted
   Serial.printf("current measure: {%s}\n", p);
@@ -175,11 +183,13 @@ void fetch_game_state(int game_id) {
       Serial.println();
     }
 
-    update_in_game(0, true);
+    display_in_game();
   } else {
     Serial.println("no updates needed");
   }
   time_since_last_ping = millis();
+
+  return true;
 }
 
 /*

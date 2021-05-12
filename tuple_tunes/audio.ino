@@ -26,7 +26,7 @@ void play_measure(uint8_t* measure_input) {
   if (note_index < num_notes) {
     selected_note = measure_input[note_index];
     if (millis() - last_played > note_period) {
-      Serial.printf("Note %d is %d\n", note_index, measure_input[note_index]);
+      Serial.printf("Playing note index %d (%d) in measure\n", note_index, measure_input[note_index]);
       if (selected_note == NOTE_COUNT) {
         stop_sound();
       } else if (selected_note < NOTE_COUNT) {

@@ -1,11 +1,3 @@
-/////////////////
-// Convenience //
-/////////////////
-
-// Colors
-uint8_t CYAN[] = {18, 243, 255};
-uint8_t DARK_CYAN[] = {50, 162, 168};
-
 /////////////
 // Landing //
 /////////////
@@ -109,7 +101,7 @@ void update_start_game(int js) {
 
 void display_join_game() {
   tft.fillScreen(TFT_BLACK);
-  fade_in_text(" Join\n Game", 0, 13, CYAN, 1200, 2);
+  fade_in_text(" Join\n Game", 0, 13, CYAN, 1000, 2);
 
   fade_in_text("Room:", 120, 47, DARK_CYAN, 200, 1);
   fade_in_text("___", 127, 64, DARK_CYAN, 200, 1);
@@ -168,30 +160,35 @@ void update_join_game(int js) {
 
 void display_waiting_room() {
   tft.fillScreen(TFT_BLACK);
+  tft.setTextColor(rgb_to_565(CYAN));
+
+  fade_in_text("Waiting Room", 11, 13, CYAN, 600, 2);
+
+  char temp[50];
+  sprintf(temp, "Username: %s", USERNAME);
+  fade_in_text(temp, 10, 39, DARK_CYAN, 200, 1);
+  temp[0] = '\0';
+  sprintf(temp, "Room #:   %s", room_num);
+  fade_in_text(temp, 10, 51, DARK_CYAN, 200, 1);
+  temp[0] = '\0';
+  sprintf(temp, "Players:  %d", num_players);
+  fade_in_text(temp, 10, 63, DARK_CYAN, 200, 1);
+  strcpy(temp, is_host ? "You are the host!" : "Waiting for host to start");
+  fade_in_text(temp, 10, 75, DARK_CYAN, 200, 1);
   
-  tft.setCursor(0, 13, 2);
-  tft.println("Waiting Room");
-  tft.setCursor(8, 40, 1);
-  tft.printf("Username: %s", USERNAME);
-  tft.setCursor(8, 53, 1);
-  tft.printf("Room #: %s", room_num);
   if (is_host) {
-    tft.setCursor(8, 66, 1);
-    tft.println("You are the host!");
-    //    tft.setCursor(8, 79, 1);
-    //    tft.printf("Click to start game.");
-    tft.setCursor(8, 100, 1);
-    tft.printf("Number of Players: %d", num_players);
-    tft.setCursor(8, 115, 1);
-    tft.println("Start");
-    set_cursor_pos(0, 116);
+    fade_in_text("Start", 15, 100, DARK_CYAN, 100, 1);
+    set_cursor_pos(6, 101);
     draw_cursor();
-  } else {
-    tft.setCursor(8, 66, 1);
-    tft.println("Waiting for host to start");
-    tft.setCursor(8, 100, 1);
-    tft.printf("Number of Players: %d", num_players);
   }
+}
+
+void update_waiting_room() {
+  char temp[20];
+  tft.fillRect(66, 62, 30, 12, TFT_BLACK);
+  temp[0] = '\0';
+  sprintf(temp, "          %d", num_players);
+  draw_text(temp, 10, 63, DARK_CYAN, 1);
 }
 
 /////////////

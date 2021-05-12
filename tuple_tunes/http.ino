@@ -10,7 +10,7 @@ void create_game_http() {
   char body[100];
   sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, selected_tempo); //instead of TEMPO_SPEEDS[selected_tempo]
   Serial.println(body);
-  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+  make_post_request(SERVER, PRE_GAME_ADDRESS, body, response, false);
 
   strcpy(game_code, strtok(response, "&"));
   room_num[0] = '\0';
@@ -33,7 +33,7 @@ bool join_game_http() {
   int offset = 0;
   char body[100];
   sprintf(body, "type=join&username=%s&game_code=%d%d%d", USERNAME, game_code_input[0], game_code_input[1], game_code_input[2]);
-  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+  make_post_request(SERVER, PRE_GAME_ADDRESS, body, response, false);
 
   char code = strtok(response, "&")[0];
   if (code == '3') {
@@ -68,7 +68,7 @@ bool start_game_http() {
   int offset = 0;
   char body[50];
   sprintf(body, "type=start&game_id=%d", game_id);
-  make_post_request(SERVER, START_GAME_ADDRESS, body, response, false);
+  make_post_request(SERVER, PRE_GAME_ADDRESS, body, response, false);
 
   char code = strtok(response, "&")[0];
 
@@ -95,7 +95,7 @@ void get_game_status() {
   int offset = 0;
   char query[50];
   sprintf(query, "game_id=%d", game_id);
-  make_get_request(SERVER, START_GAME_ADDRESS, query, response, false);
+  make_get_request(SERVER, PRE_GAME_ADDRESS, query, response, false);
 
   char code = strtok(response, "&")[0];
   if (code == '1') { //game in waiting room, response ”1&{num_players}&{player_names}”
@@ -174,7 +174,7 @@ void fetch_game_state(int game_id) {
       Serial.println();
     }
 
-    update_in_game(0);
+    update_in_game(0, true);
   } else {
     Serial.println("no updates needed");
   }
@@ -187,14 +187,13 @@ void fetch_game_state(int game_id) {
 */
 void submit_measure() {
   char string_of_notes[50];
-  uint8_t notes_offset = 0;
+  uint8_t offset = 0;
 
   for (int i = 0; i < note_state; i++) {
-    //    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", curr_notes_array[i]);
-    notes_offset += sprintf(string_of_notes + notes_offset, "%d ", measures[current_measure][i]);
+    offset += sprintf(string_of_notes + offset, "%d ", measures[current_measure][i]);
   }
   for (int i = note_state; i < 16; i++) {
-    notes_offset += sprintf(string_of_notes + notes_offset, "36 ");
+    offset += sprintf(string_of_notes + offset, "36 ");
   }
 
   char query[100]; //for body

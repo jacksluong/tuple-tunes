@@ -2,8 +2,6 @@
 //  Audio  //
 /////////////
 
-uint32_t last_played = 0;
-
 void play_note(int index) {
   if (sound_on) {
     ledcWriteTone(AUDIO_PWM, note_freqs[index]);
@@ -21,47 +19,41 @@ void stop_sound() {
   ledcWriteTone(AUDIO_PWM, 0);
 }
 
-void play_measure(uint8_t measure_input[16], int num_notes) {
-  double note_period = 15000.0/(TEMPO_SPEEDS[selected_tempo]); // change ig?
+void play_measure(uint8_t* measure_input) {
+  // Play note
+  double note_period = 15000.0/TEMPO_SPEEDS[selected_tempo]; // change ig?
+  int num_notes = selected_measure == current_measure ? note_state : 16;
   if (note_index < num_notes) {
     selected_note = measure_input[note_index];
-    if (millis() - last_played > note_period){
+    if (millis() - last_played > note_period) {
       Serial.printf("Note %d is %d\n", note_index, measure_input[note_index]);
       if (selected_note == NOTE_COUNT) {
         stop_sound();
-      }
-      else if (selected_note < NOTE_COUNT) {
+      } else if (selected_note < NOTE_COUNT) {
         play_note(selected_note);
       }
       last_played = millis();
-      note_index = note_index + 1;
+      note_index++;
     }
   }
-  if (note_index == num_notes){
+  
+  // Stop playing this measure after last note
+  if (note_index == num_notes) {
     if (millis() - last_played > note_period) {
       stop_sound();
       playing_measure = false;
       note_index = 0;
       if (playing_song) {
-        measure_index = measure_index + 1;
+        measure_index++;
       }
     }
   }
-  
 }
 
-void play_song(uint8_t song_input[MEASURE_COUNT][16], int curr_num_measures, int num_notes_last_measure){
-  if (measure_index < curr_num_measures+1) {
-    if (song_input[measure_index][0] > -1) {
-      if (measure_index == curr_num_measures) play_measure(song_input[measure_index], num_notes_last_measure);
-      else play_measure(song_input[measure_index], 16);
-    }
-    else {
-      playing_song = false;
-      measure_index = 0;
-    }
-  }
-  if (measure_index == curr_num_measures+1) {
+void play_song(int curr_num_measures){
+  if (measure_index < current_measure + 1) {
+    play_measure(measures[measure_index]);
+  } else {
     measure_index = 0;
     stop_sound();
     playing_song = false;

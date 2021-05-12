@@ -116,7 +116,7 @@ def fetch_game_status(game_id):
             player_names = [val[0] for val in players]
 
             for player_name in player_names:
-                c.execute('''UPDATE players SET last_ping = ? WHERE username = ?;'''(datetime.datetime.now(), player_name))
+                c.execute('''UPDATE players SET last_ping = ? WHERE username = ?;''',(datetime.datetime.now(), player_name))
                 
             return "2"
 

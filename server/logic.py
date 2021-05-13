@@ -65,7 +65,7 @@ def request_handler(request):
                 return f"-1&{e.message}"
 
             with sqlite3.connect(moosic_db) as c:
-                return leave_game(c, game_id, username)
+                leave_game(c, game_id, username)
 
         else:
             return "-1"

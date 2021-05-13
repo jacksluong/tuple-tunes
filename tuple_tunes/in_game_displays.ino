@@ -5,7 +5,6 @@
 void display_in_game() {
   tft.fillRect(0, 0, 106, 128, TFT_BLACK);
   tft.fillRect(106, 0, 80, 128, rgb_to_565(DARK_GRAY));
-//  tft.fillRect(119, 100, 30, 15, rgb_to_565(DARK_GRAY)); // clear measure
   
   // Grid
   tft.setCursor(5, 6, 1);
@@ -45,10 +44,10 @@ void update_in_game(int js, bool note_added) {
     else if (menu_state == 4) tft.fillRect(119, 100, 30, 15, rgb_to_565(DARK_GRAY)); // measure
     tft.drawTriangle(115, 21 + 20 * menu_state, 
                      110, 23 + 20 * menu_state,
-                     115, 25 + 20 * menu_state, rgb_to_565(GRAY));
+                     115, 25 + 20 * menu_state, TFT_WHITE);
     tft.drawTriangle(151, 21 + 20 * menu_state, 
                      156, 23 + 20 * menu_state,
-                     151, 25 + 20 * menu_state, rgb_to_565(GRAY)); // arrows for note selection
+                     151, 25 + 20 * menu_state, TFT_WHITE); // arrows for note selection
   } else {
     tft.drawTriangle(115,21,110,23,115,25, rgb_to_565(DARK_GRAY)); // arrows for note selection
     tft.drawTriangle(151,21,156,23,151,25, rgb_to_565(DARK_GRAY));
@@ -56,13 +55,21 @@ void update_in_game(int js, bool note_added) {
     tft.drawTriangle(151,41,156,43,151,45, rgb_to_565(DARK_GRAY));
     tft.drawTriangle(115,101,110,103,115,105, rgb_to_565(DARK_GRAY)); // arrows for measure selection
     tft.drawTriangle(151,101,156,103,151,105, rgb_to_565(DARK_GRAY));
+    if (menu_state == 0 || menu_state == 1 || menu_state == 4) {
+      tft.drawTriangle(115, 21 + 20 * menu_state, 
+                       110, 23 + 20 * menu_state,
+                       115, 25 + 20 * menu_state, rgb_to_565(GRAY));
+      tft.drawTriangle(151, 21 + 20 * menu_state, 
+                       156, 23 + 20 * menu_state,
+                       151, 25 + 20 * menu_state, rgb_to_565(GRAY)); // arrows for current menu state
+    }
   }
   if (js == 1 || js == 3 || note_added) // menu cursor
     for (int i = 0; i < 5; i++) tft.fillCircle(134, 30 + 20 * i, 1, rgb_to_565(DARK_GRAY)); 
   if (note_added) { // grid cursor
-    int current_x = 2 + 25 * (note_state % 4);
-    int current_y = 29 + 25 * (int(note_state / 4));
-    tft.drawTriangle(current_x, current_y, current_x, current_y + 4, current_x + 3, current_y + 2, TFT_BLACK); 
+    int current_x = 8 + 25 * (note_state % 4);
+    int current_y = 38 + 25 * (int(note_state / 4));
+    tft.drawLine(current_x, current_y, current_x + 10, current_y, TFT_BLACK);
   }
 
   if (in_turn) {
@@ -94,7 +101,7 @@ void update_in_game(int js, bool note_added) {
   tft.fillCircle(134, 30 + 20 * menu_state, 1, TFT_WHITE);
 
   // Update selected note
-  if (is_locked && menu_state == 0) draw_note(note_state, curr_note_index + adjustment);
+  if (is_locked && menu_state == 0) draw_note(note_state, measures[current_measure][note_state]);
   if (note_added) display_measure(current_measure);
 
   Serial.printf("Current/selected measure: %d/%d, note_state (c_n_i): %d (%d)\n", current_measure, selected_measure, note_state, curr_note_index);
@@ -110,7 +117,7 @@ void display_measure(int measure_i) {
 }
 
 void draw_note(int note_i, int note_num) {
-  tft.fillRect(3 + 25 * (note_i % 4), 22 + 25 * (note_i / 4), 19, 19, TFT_BLACK);
+  tft.fillRect(3 + 25 * (note_i % 4), 22 + 25 * (note_i / 4), 19, 21, TFT_BLACK);
   tft.setCursor(10 + 25 * (note_i % 4), 28 + 25 * (note_i / 4), 1);
   tft.setTextColor((selected_measure == current_measure && note_i == note_state) ? rgb_to_565(CYAN) : rgb_to_565(DARK_CYAN));
   if (note_num == 37) tft.println("~");

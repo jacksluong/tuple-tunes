@@ -59,7 +59,7 @@ const uint8_t SCREEN_HEIGHT = 128;
 
 // Colors
 uint8_t CYAN[] = {18, 243, 255};
-uint8_t DARK_CYAN[] = {50, 162, 168};
+uint8_t DARK_CYAN[] = {54, 131, 135};
 uint8_t GRAY[] = {100, 100, 100};
 uint8_t DARK_GRAY[] = {50, 50, 50};
 

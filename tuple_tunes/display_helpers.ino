@@ -27,6 +27,7 @@ void set_cursor_pos(uint8_t x, uint8_t y) {
  * A non-blocking function that draws a static or flashing cursor.
  */
 void draw_cursor() {
+  // Choose color
   uint16_t color; 
   if (is_locked) {
     uint8_t val = (int) (255 * abs(cos((millis() - last_button_click) * PI / 600.0)));
@@ -34,7 +35,12 @@ void draw_cursor() {
   }
   else color = TFT_WHITE;
   uint8_t x = cursor_pos[0], y = cursor_pos[1];
-  tft.drawTriangle(x, y, x, y + 4, x + 3, y + 2, color);
+
+  // Draw cursor/underline
+  if (state == 4 && selected_measure == current_measure && note_state < 16) 
+    tft.drawLine(8 + 25 * (note_state % 4), 38 + 25 * (note_state / 4),
+                 17 + 25 * (note_state % 4), 38 + 25 * (note_state / 4), color);
+  else tft.drawTriangle(x, y, x, y + 4, x + 3, y + 2, color);
 }
 
 /*

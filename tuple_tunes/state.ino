@@ -128,6 +128,7 @@ void process_start_game(int bv, int js) {
     } else if (menu_state == 2) { // start
       create_game_http();
       is_host = true;
+      is_locked = true;
 
       state = 3;
       num_players = 1;
@@ -170,6 +171,7 @@ void process_join_game(int bv, int js) {
     } else if (menu_state == 1) { // join
       if (join_game_http()) {
         is_host = false;
+        is_locked = true;
         get_game_status();
         
         state = 3;
@@ -258,38 +260,30 @@ void process_in_game(int bv, int js) {
         }
         adjustment = 0;
       } else { // Changing symbol
+        if (current_note[0] == 'R') return;
         if (js == 1) { // up
           if (selected_symbol == 2) {
-            if (curr_note_index + adjustment - 2 >= 0) {
-              adjustment = adjustment - 2;
-              selected_symbol = (selected_symbol + 1) % 3;
-            }
+            if (curr_note_index + adjustment - 2 >= 0) adjustment -= 2;
           } else {
-            if (curr_note_index + adjustment + 1 <= 35) {
-              adjustment = adjustment + 1;
-              selected_symbol = (selected_symbol + 1) % 3;
-            }
+            if (curr_note_index + adjustment + 1 <= 35) adjustment += 1;
           }
+          selected_symbol = (selected_symbol + 1) % 3;
           current_note[1] = SYMBOLS[selected_symbol];
         } else if (js == 3) { // down
           if (selected_symbol == 0) {
-            if (curr_note_index + adjustment + 2 <= 35) {
-              adjustment = adjustment + 2;
-              selected_symbol = (selected_symbol + 2) % 3;
-            }
+            if (curr_note_index + adjustment + 2 <= 35) adjustment += 2;
           } else {
-            if (curr_note_index + adjustment - 1 >= 0) {
-              adjustment = adjustment - 1;
-              selected_symbol = (selected_symbol + 2) % 3;
-            }
+            if (curr_note_index + adjustment - 1 >= 0) adjustment -= 1;
           }
+          selected_symbol = (selected_symbol + 2) % 3;
           current_note[1] = SYMBOLS[selected_symbol];
         }
       }
       
       Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
-      if (note_state < 16) measures[current_measure][note_state] = curr_note_index + adjustment;
-      if (curr_note_index != 36) play_note(curr_note_index + adjustment);
+      int temp_note_num = current_note[0] == 'R' ? 36 : curr_note_index + adjustment;
+      if (note_state < 16) measures[current_measure][note_state] = temp_note_num;
+      if (temp_note_num != 36) play_note(temp_note_num);
     } else if (menu_state == 1) { // duration selection
       if (js == 2) { // right
         selected_duration = (selected_duration + 1) % 5;
@@ -326,14 +320,14 @@ void process_in_game(int bv, int js) {
         for (int i = 1; i < num_notes_added; i++) measures[current_measure][note_state + i] = 37;
         note_state += num_notes_added;
         menu_state = 0;
+        if (note_state < 16) // display currently selected note in next note index, not C
+          measures[current_measure][note_state] = current_note[0] == 'R' ? 36 : (curr_note_index + adjustment);
       }
       note_added = true;
     } else if (menu_state == 3) {
-      if (note_state < 16) {
-        while (note_state < 16) {
-          measures[current_measure][note_state] = 36;
-          note_state += 1;
-        }
+      while (note_state < 16) {
+        measures[current_measure][note_state] = 36;
+        note_state += 1;
       }
       submit_measure();
 

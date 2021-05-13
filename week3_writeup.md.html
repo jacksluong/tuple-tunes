@@ -6,17 +6,19 @@
 
 Meeting time: 4:30 - 5:00 PM Thursday
 
-# Goal 1: Multiplayer interactions - setting up and joining a game with a game code - Display in database and serial monitor the created game and game code, and show a user able to join that game using that game code
+# Goal 1: Multiplayer interactions - setting up and joining a game with a game code 
+Display in database and serial monitor the created game and game code, and show a user able to join that game using that game code
 ![Demo - Starting Game](https://youtu.be/ja4s54sznyc)
 
-* On the start game page, the host can select a key and tempo before clicking start, to which the screen takes to the waiting room, and the Serial Monitor shows that a game is created, printing the game id, game code, and username. This aligns with the display on the host’s esp display, which prints the same username and game room code. 
+* On the start game page, the host can select a key and tempo before clicking start, to which the screen takes to the waiting room, and the Serial Monitor shows that a game is created, printing the game id, game code, and username. This aligns with the display on the host’s ESP display, which prints the same username and game room code. 
 
-* Then, another player on their esp board can join the same game using this game code. On the join game screen, after inputting the corresponding game code number, they can click join, to which they arrive at the waiting room and the Serial Monitor displays the response from the post request, printing the correct game room code joined, the corresponding game’s song key, song tempo, and whether it is a flat key (this is used for logic on determining musically accurate notes which the player adds to measures). The second player’s waiting room display also displays the correct game room code joined. 
+* Then, another player on their ESP board can join the same game using this game code. On the join game screen, after inputting the corresponding game code number, they can click join, to which they arrive at the waiting room and the Serial Monitor displays the response from the post request, printing the correct game room code joined, the corresponding game’s song key, song tempo, and whether it is a flat key (this is used for logic on determining musically accurate notes which the player adds to measures). The second player’s waiting room display also displays the correct game room code joined. 
 
 * On the Serial Monitor, we see that there is a timed constant response retrieved from the database which is updated with the correct current number of players and their usernames.
 
 
-# Goal 2: Implement a waiting room for pre-game - Display a screen after starting/joining game; if host, option to start game; if player, says waiting for host to start (update state machine)
+# Goal 2: Implement a waiting room for pre-game
+Display a screen after starting/joining game; if host, option to start game; if player, says waiting for host to start (update state machine)
 ![Demo - first part of full game video](https://youtu.be/8_oeJFojwiw) 
 
 We were able to implement a waiting room feature for everyone joining the game as well as the host creating the game. Currently, the waiting room feature works such that: 
@@ -25,44 +27,49 @@ We were able to implement a waiting room feature for everyone joining the game a
 * The number of players is being updated every few seconds by a get game status; if a game is ever started, players exit the waiting room and arrive in game.
 * Only the host player (the player who created the game) has power to start the game with a short button push, which makes a post to update the game status. The game status, as mentioned above, is then fetched by all players to update their displays to take to the in game screen.
 
-# Goal 3 : Multiplayer interactions - functioning in-game, both for player in turn and out of turn - Display multiple players able to add notes to current measure, with measures and song updating accordingly
+# Goal 3 : Multiplayer interactions - functioning in-game, both for player in turn and out of turn 
+Display multiple players able to add notes to current measure, with measures and song updating accordingly
 ![Demo - full game video](https://youtu.be/8_oeJFojwiw) 
 
 ![Demo - specifically for out of turn](https://youtu.be/o1f93Uktq_8) 
 
 * Multiplayer functionality works as follows:
 * Player in turn:
-** A player in turn can choose between the notes in the major scale (ordered in the key they selected when creating the game), the duration, add note, submit note, and scrolling through previous measures.
-** To change a selection, the player can short press once to lock into the selection mode, in which the grid cursor flashes in indication of selection permission, then use the joystick to scroll through options, and then short press the button again to select the option they are on in this field.
-** The player can submit unfinished measures, which are filled in by rests.
+    * A player in turn can choose between the notes in the major scale (ordered in the key they selected when creating the game), the duration, add note, submit note, and scrolling through previous measures.
+    * To change a selection, the player can short press once to lock into the selection mode, in which the grid cursor flashes in indication of selection permission, then use the joystick to scroll through options, and then short press the button again to select the option they are on in this field.
+    * The player can submit unfinished measures, which are filled in by rests.
 * Both player in turn and players out of turn can:
-** Look at previous measures
-** Access the in game menu and see the game code, key, tempo, and number of players
-** Play the current measure they are looking at
-** Play the entirety of the song at any point
-** Mute their sound
-** Leave the game
+    * Look at previous measures
+    * Access the in game menu and see the game code, key, tempo, and number of players
+    * Play the current measure they are looking at
+    * Play the entirety of the song at any point
+    * Mute their sound
+    * Leave the game
 * Players out of turn cannot add or submit notes.
 
 Players take turns submitting measures in the order they joined, and they alternate in and out of turn as they submit measures. This change in player game state is implemented through consistent fetch requests in the background every few seconds. The LED light also displays the color corresponding to players who are in and out of turn.
 
 
-# Goal 4: Display LED and LCD properly based on whose turn it is - Show the correct displays (light color) based on the game state (whose turn it is)
+# Goal 4: Display LED and LCD properly based on whose turn it is 
+Show the correct displays (light color) based on the game state (whose turn it is)
 ![Demo: full game play video](https://youtu.be/8_oeJFojwiw) 
 
 When a player is in turn, the color of the light is a consistent bright green. Once a player submits a measure on their turn, their LCD display updates so that the measure is submitted and incremented, and the grid of notes is cleared. The LED light turns a consistent bright red to indicate this player is not out of turn. In general, if any player is in turn, their light color is green, and all players out of turn have a light color of red.
 
-# Goal 5: Complete feature to audio play previous measure or the entire song at any point during the game (both during your turn and not during your turn) - Show the selected measure or entire song being played by the buzzer at any point in the game.
+# Goal 5: Complete feature to audio play previous measure or the entire song at any point during the game (both during your turn and not during your turn) 
+Show the selected measure or entire song being played by the buzzer at any point in the game.
 ![Demo: full game play video](https://youtu.be/8_oeJFojwiw) 
 
 Whether they are in turn or out of turn, all players can play a previous measure and song by accessing the game menu. At any point in the game, a player can scroll through previous measures on the right side menu on the in game display, and doing a long press will take them to the game menu screen. The left side of this menu has all actionable selections, and if the player selects “Play Measure” the audio plays the measure which the player had selected on the previous in game display page. The player can also select “Play Song” on this menu page at any point during the game to play the entire song composed so far. When out of turn, however, a player is unable to actually add notes nor submit measures since it is not their turn. 
 
-# Goal 6: Show previous measures while the user scrolls through the measures on the ESP - Show a previous measure (display in-game) or the entire song being played (on the game menu) at any point during the game
+# Goal 6: Show previous measures while the user scrolls through the measures on the ESP 
+Show a previous measure (display in-game) or the entire song being played (on the game menu) at any point during the game
 ![Demo: full game play video](https://youtu.be/8_oeJFojwiw) 
 
 On the right side menu on the in game display with the grid of notes, a player at any point can scroll through the measures which have been composed so far in the song. Clicking the button once locks into the measure selection field in the right side menu, and the cursor blinks in the grid, indicating that the player can scroll through these options. Scrolling left and right allows the player to select which measure to see and hear, and the ESP display updates accordingly with the notes which were added for previous measures. (If any measure is submitted without being fully completed, the remaining notes are displayed as R for rests, for unfilled notes.) When the player has selected (with another short click) a measure, they can do a long press on the button to take to the game menu page, where they can “Play Measure” and “Play Song.” The “Play Measure” option plays the current measure which the player has selected.
 
-# Goal 7: Monitor disconnects / player leaving - Show on Postman working API endpoint for leaving game, show updated fetch game for players leaving or disconnecting/idle
+# Goal 7: Monitor disconnects / player leaving 
+Show on Postman working API endpoint for leaving game, show updated fetch game for players leaving or disconnecting/idle
 ![Demo: ESP side disconnect working](https://youtu.be/a_sds9-tweY) 
 
 ![Demo: Postman working for Disconnect](https://youtu.be/N8phczjkAQQ) 
@@ -84,7 +91,7 @@ It was much harder than we thought to construct different logical statements for
 We are rescoping our goal for next week a little, and we will likely focus on fixing the bugs in our system to make a more robust game, to make sure that all parts of the game can flexibly fit together.
 
 In particular, we have created and been continuously updating a bug log of backend and frontend changes which we would like to fix for a more improved version of our game. 
-![Bug log found here](https://docs.google.com/spreadsheets/d/1Pkt5tuLlZQ7YCKsR67mw-R_IlKexvAEQ1bpVTXt2xR0/edit?usp=sharing):  
+[Bug log found here](https://docs.google.com/spreadsheets/d/1Pkt5tuLlZQ7YCKsR67mw-R_IlKexvAEQ1bpVTXt2xR0/edit?usp=sharing):  
 
 Additionally, on the hardware side, we would like to investigate into using a speaker, amplifier, and potentiometer for better control of sound capabilities.
 

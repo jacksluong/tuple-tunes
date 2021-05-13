@@ -27,7 +27,9 @@ We were able to implement a waiting room feature for everyone joining the game a
 
 # Goal 3 : Multiplayer interactions - functioning in-game, both for player in turn and out of turn - Display multiple players able to add notes to current measure, with measures and song updating accordingly
 ![Demo - full game video](https://youtu.be/8_oeJFojwiw) 
+
 ![Demo - specifically for out of turn](https://youtu.be/o1f93Uktq_8) 
+
 * Multiplayer functionality works as follows:
 * Player in turn:
 ** A player in turn can choose between the notes in the major scale (ordered in the key they selected when creating the game), the duration, add note, submit note, and scrolling through previous measures.
@@ -47,10 +49,12 @@ Players take turns submitting measures in the order they joined, and they altern
 
 # Goal 4: Display LED and LCD properly based on whose turn it is - Show the correct displays (light color) based on the game state (whose turn it is)
 ![Demo: full game play video](https://youtu.be/8_oeJFojwiw) 
+
 When a player is in turn, the color of the light is a consistent bright green. Once a player submits a measure on their turn, their LCD display updates so that the measure is submitted and incremented, and the grid of notes is cleared. The LED light turns a consistent bright red to indicate this player is not out of turn. In general, if any player is in turn, their light color is green, and all players out of turn have a light color of red.
 
 # Goal 5: Complete feature to audio play previous measure or the entire song at any point during the game (both during your turn and not during your turn) - Show the selected measure or entire song being played by the buzzer at any point in the game.
 ![Demo: full game play video](https://youtu.be/8_oeJFojwiw) 
+
 Whether they are in turn or out of turn, all players can play a previous measure and song by accessing the game menu. At any point in the game, a player can scroll through previous measures on the right side menu on the in game display, and doing a long press will take them to the game menu screen. The left side of this menu has all actionable selections, and if the player selects “Play Measure” the audio plays the measure which the player had selected on the previous in game display page. The player can also select “Play Song” on this menu page at any point during the game to play the entire song composed so far. When out of turn, however, a player is unable to actually add notes nor submit measures since it is not their turn. 
 
 # Goal 6: Show previous measures while the user scrolls through the measures on the ESP - Show a previous measure (display in-game) or the entire song being played (on the game menu) at any point during the game
@@ -60,7 +64,9 @@ On the right side menu on the in game display with the grid of notes, a player a
 
 # Goal 7: Monitor disconnects / player leaving - Show on Postman working API endpoint for leaving game, show updated fetch game for players leaving or disconnecting/idle
 ![Demo: ESP side disconnect working](https://youtu.be/a_sds9-tweY) 
+
 ![Demo: Postman working for Disconnect] (https://youtu.be/N8phczjkAQQ) 
+
 ![Demo: Postman working for leave game](https://youtu.be/nOQnSt2v1QA) 
 
 There is an entry within every game entry in the games table called disconnect_check that holds the timestamp of the most recent check for disconnect. A disconnect check happens whenever it has been at least 30 seconds since the last check for a disconnect. During a disconnect check, we check for all players who haven't made a fetch or ping request to the server for 20 seconds (the difference between their last ping and the current time exceeds 20 seconds). The players that fit that condition are the ones that have disconnected (wire broken, lost wifi etc.), and they will be removed from the game. The internal game state on the server including the player in turn and the number of players will update accordingly. 
@@ -95,7 +101,6 @@ state.ino - has the waiting room, new state machine, in turn out of turn functio
 
 in_game_functions.py - disconnect and leave game code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 def leave_game(c, game_id, username):
     """
     Allow a user to leave a game, update game state accordinally

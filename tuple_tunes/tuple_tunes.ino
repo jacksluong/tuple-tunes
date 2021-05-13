@@ -214,7 +214,6 @@ void loop() {
   int js = joystick.read();
     
   if (bv) last_button_click = millis();
-  if (is_locked && note_state < 16) draw_cursor();
   
   update_state(bv, js);
 
@@ -222,6 +221,8 @@ void loop() {
 }
 
 void processes() {
+  if (is_locked && note_state < 16 && !(state == 3 && !is_host)) draw_cursor();
+  
   // Fetch/ping
   if ((state == 4 || state == 5) && millis() - time_since_last_ping > PING_INTERVAL) {
     if (in_turn) ping();

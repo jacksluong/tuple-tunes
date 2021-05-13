@@ -183,7 +183,7 @@ bool fetch_game_state(int game_id) {
       Serial.println();
     }
 
-    display_in_game();
+    if (state == 4) display_in_game();
   } else {
     Serial.println("no updates needed");
   }

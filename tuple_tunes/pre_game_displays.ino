@@ -173,7 +173,7 @@ void display_waiting_room() {
   temp[0] = '\0';
   sprintf(temp, "Players:  %d", num_players);
   fade_in_text(temp, 9, 63, DARK_CYAN, 200, 1);
-  strcpy(temp, is_host ? "You are the host!" : "Waiting for host to\nstart");
+  strcpy(temp, is_host ? "You are the host!" : "Waiting for host");
   fade_in_text(temp, 9, 75, DARK_CYAN, 200, 1);
   
   if (is_host) {

@@ -17,6 +17,12 @@ void reset_game() {
   current_measure = 0;
   curr_note_index = selected_key;
   current_note[0] = '\0';
+  strcpy(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[curr_note_index % 12]);
+  // update starting index for selected symbol based on the note from this key
+  if (current_note[1] == '#') selected_symbol = 0;
+  else if (current_note[1] == 'b') selected_symbol = 1;
+  else if (current_note[1] == ' ') selected_symbol = 2;
+  
   selected_note = curr_note_index % 12;
   selected_duration = 0;
   selected_symbol = 0;
@@ -404,6 +410,7 @@ void process_game_menu(int bv, int js) {
       stop_sound();
       update_game_menu();
     } else if (menu_state == 4) { // leave game
+      leave_game();
       is_locked = false;
       game_state = 0;
       back_to_landing();

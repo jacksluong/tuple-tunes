@@ -18,12 +18,6 @@ void display_in_game() {
 
   // Right side
   if (in_turn) {
-    strcpy(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[curr_note_index % 12]);
-    // update starting index for selected symbol based on the note from this key
-    if (current_note[1] == '#') selected_symbol = 0;
-    else if (current_note[1] == 'b') selected_symbol = 1;
-    else if (current_note[1] == ' ') selected_symbol = 2;
-
     draw_text("Add Note", 110, 60, CYAN, 1);
     draw_text("Submit", 115, 80, CYAN, 1);
   }

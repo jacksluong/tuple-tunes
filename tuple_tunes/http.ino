@@ -223,3 +223,7 @@ void ping() {
 
   time_since_last_ping = millis();
 }
+
+void leave_game() {
+  
+}

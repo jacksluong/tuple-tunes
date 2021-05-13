@@ -221,7 +221,7 @@ void loop() {
 }
 
 void processes() {
-  if (is_locked && note_state < 16 && !(state == 3 && !is_host)) draw_cursor();
+  if (is_locked && note_state < 16 && !(state == 3 && !is_host) && !(state == 4 && !in_turn)) draw_cursor();
   
   // Fetch/ping
   if ((state == 4 || state == 5) && millis() - time_since_last_ping > PING_INTERVAL) {

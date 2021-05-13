@@ -178,8 +178,8 @@ void display_waiting_room() {
   
   if (is_host) {
     fade_in_text("Start", 15, 100, DARK_CYAN, 100, 1);
-    set_cursor_pos(6, 101);
   }
+  set_cursor_pos(6, 101);
 }
 
 void update_waiting_room() {

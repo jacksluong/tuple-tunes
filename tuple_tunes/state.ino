@@ -395,6 +395,7 @@ void process_game_menu(int bv, int js) {
     update_game_menu();
     if (menu_state == 0) { // resume game
       state = 4;
+      menu_state = in_turn ? 0 : 4;
       is_locked = true;
       display_in_game();
     } else if (menu_state == 1) {

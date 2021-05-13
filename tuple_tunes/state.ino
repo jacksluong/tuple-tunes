@@ -263,19 +263,29 @@ void process_in_game(int bv, int js) {
         if (current_note[0] == 'R') return;
         if (js == 1) { // up
           if (selected_symbol == 2) {
-            if (curr_note_index + adjustment - 2 >= 0) adjustment -= 2;
+            if (curr_note_index + adjustment - 2 >= 0) {
+              adjustment -= 2;
+              selected_symbol = (selected_symbol + 1) % 3;
+            }
           } else {
-            if (curr_note_index + adjustment + 1 <= 35) adjustment += 1;
+            if (curr_note_index + adjustment + 1 <= 35) {
+              adjustment += 1;
+              selected_symbol = (selected_symbol + 1) % 3;
+            }
           }
-          selected_symbol = (selected_symbol + 1) % 3;
           current_note[1] = SYMBOLS[selected_symbol];
         } else if (js == 3) { // down
           if (selected_symbol == 0) {
-            if (curr_note_index + adjustment + 2 <= 35) adjustment += 2;
+            if (curr_note_index + adjustment + 2 <= 35) {
+              adjustment += 2;
+              selected_symbol = (selected_symbol + 2) % 3;
+            }
           } else {
-            if (curr_note_index + adjustment - 1 >= 0) adjustment -= 1;
+            if (curr_note_index + adjustment - 1 >= 0) {
+              adjustment -= 1;
+              selected_symbol = (selected_symbol + 2) % 3;
+            }
           }
-          selected_symbol = (selected_symbol + 2) % 3;
           current_note[1] = SYMBOLS[selected_symbol];
         }
       }

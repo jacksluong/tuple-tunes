@@ -233,7 +233,7 @@ void processes() {
   }
 
   // Sounds
-  if (playing_measure && sound_on) play_measure(measures[selected_measure]);
+  if (playing_measure && sound_on) play_measure(selected_measure);
   if (playing_song && sound_on) play_song();
   if ((state == 1 || state == 4) && millis() - last_played > 300) stop_sound();
 }

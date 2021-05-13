@@ -19,14 +19,15 @@ void stop_sound() {
   ledcWriteTone(AUDIO_PWM, 0);
 }
 
-void play_measure(uint8_t* measure_input) {
+void play_measure(uint8_t measure_i) {
   // Play note
+  uint8_t* this_measure = measures[measure_i];
   double note_period = 15000.0/TEMPO_SPEEDS[selected_tempo]; // change ig?
-  int num_notes = selected_measure == current_measure ? note_state : 16;
+  int num_notes = measure_i == current_measure ? note_state : 16;
   if (note_index < num_notes) {
-    selected_note = measure_input[note_index];
+    selected_note = this_measure[note_index];
     if (millis() - last_played > note_period) {
-      Serial.printf("Playing note index %d (%d) in measure\n", note_index, measure_input[note_index]);
+      Serial.printf("Playing note index %d (%d) in measure\n", note_index, this_measure[note_index]);
       if (selected_note == NOTE_COUNT) {
         stop_sound();
       } else if (selected_note < NOTE_COUNT) {
@@ -52,7 +53,7 @@ void play_measure(uint8_t* measure_input) {
 
 void play_song() {
   if (measure_index < current_measure + 1) {
-    play_measure(measures[measure_index]);
+    play_measure(measure_index);
   } else {
     measure_index = 0;
     stop_sound();

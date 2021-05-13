@@ -76,11 +76,11 @@ void update_in_game(int js, bool note_added) {
       tft.setCursor(125, 40, 1);
     }
     tft.println(NOTE_DURATIONS[selected_duration]); // print current selected note duration
-    if (current_measure < 10) { // scroll through measures
-      tft.setCursor(122, 100, 1);
-    } else {
-      tft.setCursor(117, 100, 1); 
-    }
+  }
+  if (current_measure < 10) { // scroll through measures
+    tft.setCursor(122, 100, 1);
+  } else {
+    tft.setCursor(117, 100, 1); 
   }
   tft.printf("m. %d", selected_measure + 1);
   

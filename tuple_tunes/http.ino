@@ -150,7 +150,7 @@ bool fetch_game_state(int game_id) {
 
   p = strtok(NULL, "&"); // index of next measure to be submitted
   Serial.printf("current measure: {%s}\n", p);
-  if (atoi(p) > current_measure) { // we are now a measure behind
+  if (/*atoi(p) > current_measure*/true) { // we are now a measure behind
     p = strtok(NULL, "&"); // all measures string
 
     char* separator;

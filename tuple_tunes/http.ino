@@ -225,5 +225,8 @@ void ping() {
 }
 
 void leave_game() {
-  
+  char query[100]; //for body
+  sprintf(query, "type=leave&username=%s&game_id=%d", USERNAME, game_id);
+  Serial.println("Leaving game");
+  make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
 }

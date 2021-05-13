@@ -17,6 +17,7 @@ void display_in_game() {
   display_measure(selected_measure);
 
   // Right side
+  menu_state = in_turn ? 0 : 4;
   if (in_turn) {
     draw_text("Add Note", 110, 60, CYAN, 1);
     draw_text("Submit", 115, 80, CYAN, 1);

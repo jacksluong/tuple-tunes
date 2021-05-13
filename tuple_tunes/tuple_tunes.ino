@@ -27,7 +27,7 @@ char PASSWORD[] = "";
 
 char measure_response[200];
 char player_in_turn[50];
-char USERNAME[] = "jkluong";
+char USERNAME[] = "siliangl";
 
 char SERVER[] = "608dev-2.net";
 char IN_GAME_ADDRESS[] = "/sandbox/sc/team59/server/logic.py";

@@ -202,7 +202,7 @@ void process_waiting_room(int bv, int js) {
     reset_game();
     display_in_game();
   } else {
-    if (bv == 1) start_game_http();
+    if (bv == 1 && is_host) start_game_http();
     else if (millis() - wait_room_timer > PING_INTERVAL) {
       get_game_status();
       update_waiting_room();

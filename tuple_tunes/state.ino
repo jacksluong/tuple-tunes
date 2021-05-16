@@ -22,7 +22,7 @@ void reset_game() {
   if (current_note[1] == '#') selected_symbol = 0;
   else if (current_note[1] == 'b') selected_symbol = 1;
   else if (current_note[1] == ' ') selected_symbol = 2;
-  
+
   selected_note = curr_note_index % 12;
   selected_duration = 0;
   selected_symbol = 0;
@@ -59,6 +59,8 @@ void update_state(int bv, int js) {
     process_game_menu(bv, js);
   } else if (state == 6) {
     process_end_game(bv, js);
+  } else if (state == 7) {
+    process_gallery(bv, js);
   }
 }
 
@@ -178,7 +180,7 @@ void process_join_game(int bv, int js) {
         is_host = false;
         is_locked = true;
         get_game_status();
-        
+
         state = 3;
         Serial.println("Player joining waiting room");
         Serial.println(player_list);
@@ -244,7 +246,7 @@ void process_in_game(int bv, int js) {
           }
         }
         Serial.printf("Current note index updated %d \n", curr_note_index);
-  
+
         // Display selected note
         current_note[0] = '\0';
         if (step_index == 7) {
@@ -255,7 +257,7 @@ void process_in_game(int bv, int js) {
           sprintf(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[selected_note]);
           Serial.printf("Current note is %s \n", current_note);
         }
-        
+
         if (current_note[1] == '#') {
           selected_symbol = 2;
         } else if (current_note[1] == 'b') {
@@ -294,7 +296,7 @@ void process_in_game(int bv, int js) {
           current_note[1] = SYMBOLS[selected_symbol];
         }
       }
-      
+
       Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
       int temp_note_num = current_note[0] == 'R' ? 36 : curr_note_index + adjustment;
       if (note_state < 16) measures[current_measure][note_state] = temp_note_num;
@@ -366,7 +368,7 @@ void process_in_game(int bv, int js) {
     is_locked = false;
     display_game_menu();
   }
-  
+
   if ((bv || js) && state == 4) update_in_game(js, note_added);
 }
 
@@ -390,7 +392,7 @@ void process_game_menu(int bv, int js) {
       playing_measure = false;
       return;
     }
-    
+
     update_game_menu();
     if (menu_state == 0) { // resume game
       state = 4;
@@ -422,6 +424,32 @@ void process_game_menu(int bv, int js) {
 void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clearing all measures
   if (bv == 1) {
     is_locked = false;
+    back_to_landing();
+  }
+
+//  uint8_t old_selected_measure = selected_measure;
+//  
+//  if (js == 2) { // right
+//    selected_measure = (selected_measure + 1) % (current_measure + 1);
+//  } else if (js == 4) { // left
+//    selected_measure = (selected_measure + current_measure) % (current_measure + 1);
+//  }
+//  
+//  if (old_selected_measure != selected_measure) display_in_game();
+//
+//  if (bv == 2) {
+//    state == 5;
+//    process_game_menu(bv, js);
+//  }
+
+}
+
+//////gallery///////
+void process_gallery(int bv, int js) {
+  if (bv == 1) {
+    play_song();
+  }
+  if (bv == 2) {
     back_to_landing();
   }
 }

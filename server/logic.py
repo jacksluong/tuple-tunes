@@ -5,6 +5,15 @@ from in_game_functions import *
 
 def request_handler(request):
     if request["method"] == "GET":
+        gallery = False
+        try:
+            gallery = bool(request['values']['view'])
+        except:
+            continue
+
+        if gallery:
+            return get_random_song()
+
         #get the game id, username, and last updated measure
         try:
             username = request['values']['username']
@@ -13,6 +22,7 @@ def request_handler(request):
         except:
             # return "Please provide username, game id, and last updated measure"
             return "-1"
+        
 
         return fetch(game_id, username, last_measure)
 

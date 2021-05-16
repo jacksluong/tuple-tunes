@@ -230,3 +230,13 @@ void leave_game() {
   Serial.println("Leaving game");
   make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
 }
+
+/*
+ * gallery request for random song
+ */
+
+void gallery_request() {
+  char query[50] = "gallery=True";
+  make_get_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+  
+}

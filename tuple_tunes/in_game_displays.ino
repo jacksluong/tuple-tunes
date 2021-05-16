@@ -208,6 +208,8 @@ void update_game_menu() {
 
 void display_end_game() {
   tft.fillScreen(TFT_BLACK);
+
+  
   draw_text("Game ended", 8, 13, GRAY, 1);
   draw_text("Return to landing page", 8, 28, GRAY, 1);
 }

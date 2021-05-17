@@ -1,5 +1,3 @@
-uint8_t BLACK[3] = {0, 0, 0};
-
 void draw_sound_toggle() {
   draw_text("Hold to", 5, 101, DARK_CYAN);
   char text[10];

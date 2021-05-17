@@ -69,7 +69,7 @@ Joystick joystick(JOYSTICK_LR, JOYSTICK_UD);
 
 // State / Control
 uint8_t state = 0;
-uint8_t menu_state = 0;
+uint8_t menu_index = 0;
 int8_t game_code_input[] = {-10, -10, -10};
 char input_cursor = 0;
 bool is_locked = false;
@@ -115,7 +115,7 @@ uint8_t measures[MEASURE_COUNT][16];
 int current_measure = 0;
 int selected_measure = 0; // the measure the player is viewing
 int selected_note = 0;
-int curr_note_index = 0;
+int note_num = 0;
 int adjustment = 0;
 char current_note[5] = "\0";
 int selected_duration = 0; // selected duration index for current note
@@ -142,7 +142,7 @@ void set_led_color(int r, int g, int b) {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("\n*********\nGreetings and salutations!\n*********\n");
+  Serial.println("\n\n\n\n\n\n*********\nGreetings and salutations!\n*********\n");
 
   // Set up screen
   tft.init();
@@ -221,7 +221,9 @@ void loop() {
 }
 
 void processes() {
-  if (is_locked && note_state < 16 && !(state == 3 && !is_host) && !(state == 4 && !in_turn)) draw_cursor();
+  if (is_locked && note_state < 16 && 
+      !(state == 3 && !is_host) && 
+      !(state == 0 && !in_turn)) draw_cursor();
   
   // Fetch/ping
   if ((state == 4 || state == 5) && millis() - time_since_last_ping > PING_INTERVAL) {

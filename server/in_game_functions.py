@@ -1,6 +1,7 @@
 import numpy
 import sqlite3
-import datetime 
+import datetime
+import random
 
 moosic_db = '/var/jail/home/team59/moosic6.db'
 MAX_MEASURES = 4
@@ -31,6 +32,8 @@ def fetch(game_id, username, last_updated_measure):
         in_turn = players[turn % len(players)][0]
         
         return f"{in_turn}&{current_measure}&{song} "
+
+
 
 
 
@@ -129,7 +132,6 @@ def update_last_ping(game_id, username):
 
 
 
-
 def get_song(game_id, start_measure=0):
     """
     Given a game id, return the song created so far
@@ -145,3 +147,14 @@ def get_song(game_id, start_measure=0):
         song = " ".join(song_list)
 
         return song
+
+def get_random_song():
+    """
+    returns a random completed song
+    """
+    with sqlite3.connect(moosic_db) as c:
+        valid_game_ids = c.execute('''SELECT rowid FROM games WHERE game_status = ended''')
+        random_id = valid_game_ids[numpy.random.randint(0, len(valid_game_ids))][0]
+        
+    return get_song(random_id)
+

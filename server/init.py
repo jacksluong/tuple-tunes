@@ -69,6 +69,7 @@ def request_handler(request):
             # return "Please provide valid game id!"
             return "-1"
 
+
         return fetch_game_status(game_id)
 
     #INVALID REQUEST

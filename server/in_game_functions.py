@@ -4,6 +4,8 @@ import datetime
 import random
 
 moosic_db = '/var/jail/home/team59/moosic6.db'
+past_games_db = '/var/jail/home/team59/archive.db'
+
 MAX_MEASURES = 4
 
 def fetch(game_id, username, last_updated_measure):
@@ -20,9 +22,10 @@ def fetch(game_id, username, last_updated_measure):
 
         players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
 
+
         ##game ended
         if (game_status == "ended") or (len(players) == 0):
-            c.execute('''UPDATE games SET game_status = ? WHERE rowid = ?;''', ('ended',game_id,))
+            garbage_collect(c, game_id)
             return '-1'
 
         # get song from player's last measure and onwards
@@ -30,7 +33,7 @@ def fetch(game_id, username, last_updated_measure):
 
         # username of player in turn
         in_turn = players[turn % len(players)][0]
-        
+
         return f"{in_turn}&{current_measure}&{song} "
 
 
@@ -83,11 +86,59 @@ def leave_game(c, game_id, username):
     if (pop_index < turn_index) or (pop_index == turn_index and pop_index == (len(players) - 1)):
         c.execute('''UPDATE games SET turn = ? WHERE rowid = ?;''', (turn_index - 1, game_id))
 
-    #delete player from players database
-    c.execute('''DELETE FROM players WHERE username = ?;''', (username, ))
+    #update databases accordinally
+    garbage_collect(c, game_id, username)
 
 
-def monitor_disconnect(c, game_id, time_now):
+def garbage_collect(c_current, game_id, username = None):
+    """
+    Garbage collect a player, delete it from current database and transfer to new database
+    """
+    
+    with sqlite3.connect(past_games_db) as c_archive:
+    #removing a player
+        if username is not None:
+
+            #create archive players databaase
+            c_archive.execute('''CREATE TABLE IF NOT EXISTS players(game_id real, username text);''')
+
+            #add player to database
+            c_archive.execute('''INSERT INTO players VALUES(?,?); ''', (game_id, username))
+
+            #remove player from current database
+            c_current.execute('''DELETE FROM players WHERE username = ?;''', (username,))
+
+        
+        #removing a game
+        else:
+
+            #get players
+            players = c_current.execute('''SELECT username FROM players WHERE game_id = ?;''',(game_id,)).fetchall()
+            player_names = [player[0] for player in players]
+
+            #garbage collect players
+            for name in player_names:
+                garbage_collect(c_current, game_id, name)
+
+            #create arhive games database
+            c_archive.execute('''CREATE TABLE IF NOT EXISTS games(game_id real, host text, key int, tempo int, song text);''')
+            
+            #get game information
+            host, key, tempo = c_current.execute('''SELECT host, key, tempo FROM games WHERE rowid = ?;''',(game_id,)).fetchone()
+            song = get_song(game_id)
+
+            #add game to archive
+            c_archive.execute('''INSERT INTO games VALUES(?,?,?,?,?);''', (game_id, host, key, tempo, song))
+
+            #delete from measures database
+            c_current.execute('''DELETE FROM measures WHERE game_id = ?;''', (game_id,))
+
+            #remove game from current database
+            c_current.execute('''DELETE FROM games WHERE rowid = ?;''', (game_id,))
+
+            
+
+def monitor_disconnect(c, game_id):
     """
     makes sure no players are disconnected/idle, update game state 
     """
@@ -95,10 +146,12 @@ def monitor_disconnect(c, game_id, time_now):
     #create time delta variables
     delta_time_20 = datetime.timedelta(seconds=20)
     delta_time_30 = datetime.timedelta(seconds=30)
+    time_now = datetime.datetime.now()
 
     #check last time we checked for disconnect
     last_disconnect_check = c.execute('''SELECT disconnect_check FROM games WHERE rowid = ?;''',(game_id,)).fetchone()[0]
 
+    #parse disconnect time
     dto = datetime.datetime.strptime(last_disconnect_check,'%Y-%m-%d %H:%M:%S.%f')
 
     #only check if we haven't checked for 30 seconds
@@ -128,7 +181,7 @@ def update_last_ping(game_id, username):
         c.execute('''UPDATE players SET last_ping = ? WHERE game_id = ? AND username = ?;''', (datetime.datetime.now(), game_id, username))
 
         #check for disconnects
-        monitor_disconnect(c, game_id, datetime.datetime.now())
+        monitor_disconnect(c, game_id)
 
 
 
@@ -152,9 +205,13 @@ def get_random_song():
     """
     returns a random completed song
     """
-    with sqlite3.connect(moosic_db) as c:
-        valid_game_ids = c.execute('''SELECT rowid FROM games WHERE game_status = ended''')
-        random_id = valid_game_ids[numpy.random.randint(0, len(valid_game_ids))][0]
-        
-    return get_song(random_id)
+    with sqlite3.connect(past_games_db) as c:
+
+        game_ids = c.execute('''SELECT rowid FROM games''').fetchall()
+
+        random_id = game_ids[numpy.random.randint(0, len(game_ids))][0]
+
+        song = c.execute('''SELECT song FROM games WHERE rowid = ?;''', (random_id,)).fetchone()[0]
+
+        return song
 

@@ -54,9 +54,9 @@ def request_handler(request):
                 game_id = int(request['form']['game_id'])
             except:
                 return "Please provide a valid game id"
-
+            
+            garbage_collect_games()
             return start_game(game_id)
-
         else:
             # return "Invalid POST request! Please specify valid type"
             return "-1"

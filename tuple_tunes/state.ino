@@ -11,6 +11,11 @@ void reset_game() {
   measure_index = 0;
   playing_measure = false;
   playing_song = false;
+  for (int m = 0; m < MEASURE_COUNT; m++) { // resetting measures to be all zeros
+    for (int i = 0; i < 16; i++) {
+      measures[m][i] = 0;
+    }
+  }
 
   // Game state variables
   player_count = 0;
@@ -221,6 +226,8 @@ void process_in_game(int bv, int js) {
   if (current_measure == MEASURE_COUNT) { // if reach measure count limit, need to end game
     display_end_game();
     state = 6;
+    menu_state = 0;
+    is_locked = false;
     return;
   }
   if (!is_locked && js) { // scrolling up and down the menu
@@ -308,6 +315,7 @@ void process_in_game(int bv, int js) {
         selected_duration = (selected_duration + 4) % 5;
       }
     } else if (menu_state == 4) {
+//      is_locked = false;
       uint8_t old_selected_measure = selected_measure;
       if (js == 2) { // right
         selected_measure = (selected_measure + 1) % (current_measure + 1);
@@ -349,8 +357,12 @@ void process_in_game(int bv, int js) {
       submit_measure();
 
       // Update internal
-      note_state = 0;
-      current_measure += 1;
+      
+      
+      if (current_measure < MEASURE_COUNT-1) {
+        note_state = 0;
+        current_measure += 1;
+      }
       selected_measure = current_measure;
 
       // Update controls
@@ -422,26 +434,48 @@ void process_game_menu(int bv, int js) {
 ////////////////////// end game //////////////////////
 
 void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clearing all measures
-  if (bv == 1) {
-    is_locked = false;
-    back_to_landing();
+  // Handle joystick input
+  if (js == 1 || js == 3) {
+    tft.fillCircle(134, 30 + 30 * menu_state, 1, rgb_to_565(DARK_GRAY));
+  }
+  if (js == 1) { // up
+    menu_state = (menu_state + 3) % 4;
+    update_end_game();
+  } else if (js == 3) { // down
+    menu_state = (menu_state + 1) % 4;
+    update_end_game();
+  }
+  
+  if (bv) {
+    if (menu_state == 0) { // play song
+      if (playing_song) stop_sound();
+      playing_song = !playing_song;
+    } else if (menu_state == 1) { // play measure
+      if (playing_measure) stop_sound();
+      playing_measure = !playing_measure;
+    } else if (menu_state == 2) { // new game
+      back_to_landing();
+    } 
   }
 
-//  uint8_t old_selected_measure = selected_measure;
-//  
-//  if (js == 2) { // right
-//    selected_measure = (selected_measure + 1) % (current_measure + 1);
-//  } else if (js == 4) { // left
-//    selected_measure = (selected_measure + current_measure) % (current_measure + 1);
-//  }
-//  
-//  if (old_selected_measure != selected_measure) display_in_game();
-//
-//  if (bv == 2) {
-//    state == 5;
-//    process_game_menu(bv, js);
-//  }
+  if (menu_state == 3) { // measure selection
+    if (!is_locked) {
+      is_locked = true;
+      uint8_t old_selected_measure = selected_measure;
+      if (js == 2) { // right
+        selected_measure = (selected_measure + 1) % (current_measure + 1);
+      } else if (js == 4) { // left
+        selected_measure = (selected_measure + current_measure) % (current_measure + 1);
+      }
+      if (old_selected_measure != selected_measure) display_end_game();
+      Serial.printf("Selected measure: %d", selected_measure);
+    } else if (is_locked) {
+      is_locked = false;
+    }
+    
+  }
 
+  if ((bv || js) && state == 3) update_end_game();
 }
 
 //////gallery///////

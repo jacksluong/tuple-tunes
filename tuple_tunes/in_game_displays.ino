@@ -208,8 +208,58 @@ void update_game_menu() {
 
 void display_end_game() {
   tft.fillScreen(TFT_BLACK);
+  display_in_game();
+  tft.fillRect(106, 0, 80, 128, rgb_to_565(DARK_GRAY));
+  draw_text("Play", 123, 10, CYAN, 1);
+  draw_text("Song", 123, 20, CYAN, 1);
+  draw_text("Play", 123, 40, CYAN, 1);
+  draw_text("Measure", 113, 50, CYAN, 1);
+  draw_text("New", 127, 70, CYAN, 1);
+  draw_text("Game", 123, 80, CYAN, 1);
 
+  if (current_measure < 10) { // scroll through measures
+    tft.setCursor(122, 100, 1);
+  } else {
+    tft.setCursor(117, 100, 1); 
+  }
+  tft.printf("m. %d", selected_measure + 1);
+
+  for (int i = 0; i < 3; i++) { // ellipses
+    tft.fillCircle(4 * i + 146, 119, 1, TFT_WHITE);
+  }
   
-  draw_text("Game ended", 8, 13, GRAY, 1);
-  draw_text("Return to landing page", 8, 28, GRAY, 1);
+  update_end_game();
+}
+
+void update_end_game() {
+  // Clearing
+  if (is_locked) {
+    if (menu_state == 3) tft.fillRect(119, 110, 20, 10, rgb_to_565(DARK_GRAY)); // measure
+    if (menu_state == 3) {
+      tft.drawTriangle(115, 11 + 30 * menu_state, 
+                       110, 13 + 30 * menu_state,
+                       115, 15 + 30 * menu_state, TFT_WHITE);
+      tft.drawTriangle(151, 11 + 30 * menu_state, 
+                       156, 13 + 30 * menu_state,
+                       151, 15 + 30 * menu_state, TFT_WHITE); // arrows for measure selection
+    }
+  } else {
+    tft.drawTriangle(115,121,110,103,115,105, rgb_to_565(DARK_GRAY)); // arrows for measure selection
+    tft.drawTriangle(151,121,156,103,151,105, rgb_to_565(DARK_GRAY));
+    if (menu_state == 3) {
+      tft.drawTriangle(115, 11 + 30 * menu_state, 
+                       110, 13 + 30 * menu_state,
+                       115, 15 + 30 * menu_state, rgb_to_565(GRAY));
+      tft.drawTriangle(151, 11 + 30 * menu_state, 
+                       156, 13 + 30 * menu_state,
+                       151, 15 + 30 * menu_state, rgb_to_565(GRAY)); // arrows for current menu state
+    }
+  }
+
+  // Menu cursor
+  if (menu_state == 3) {
+    tft.fillCircle(134, 50 + 30 * (menu_state - 1), 1, TFT_WHITE);
+  } else {
+    tft.fillCircle(134, 30 + 30 * menu_state, 1, TFT_WHITE);
+  }
 }

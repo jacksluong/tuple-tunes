@@ -386,7 +386,7 @@ void process_in_game(int bv, int js) {
     }
   }
 
-  if ((bv || js) && state == 4) update_in_game(js, note_num_changed);
+  if ((bv || js) && state == 4) update_in_game(bv, js, note_num_changed);
 }
 
 ////////////////////// game menu //////////////////////

@@ -15,10 +15,10 @@ void display_in_game() {
   menu_index = 0;
   old_menu_state = 0;
 
-  update_in_game(0, false);
+  update_in_game(1, 0, false);
 }
 
-void update_in_game(int js, bool note_num_changed) {
+void update_in_game(int bv, int js, bool note_num_changed) {
   // Clearing
   if (is_locked) {
     tft.fillRect(118, 9 + 16 * menu_index, 31, 8, rgb_to_565(DARK_GRAY));
@@ -83,7 +83,7 @@ void update_in_game(int js, bool note_num_changed) {
   if (note_num_changed) {
     draw_note(note_state, measures[current_measure][note_state]);
   }
-  else display_measure(selected_measure);
+  else if (bv) display_measure(selected_measure);
 
   Serial.println("DEBUG: (in-game received input)");
   Serial.printf("Current/selected measure: %d/%d, note_state (c_n_i): %d (%d)\n", current_measure, selected_measure, note_state, note_num);

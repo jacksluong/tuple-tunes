@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <TFT_eSPI.h>
+#include <mpu6050_esp32.h>
 #include <WiFiClientSecure.h>
 #include <WiFiClient.h>
 #include <BMP280_DEV.h>
@@ -141,7 +142,7 @@ void set_led_color(int r, int g, int b) {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("\n*********\nGreetings and salutations!\n*********\n");
+  Serial.println("\n\n\n\n\n\n*********\nGreetings and salutations!\n*********\n");
 
   // Set up screen
   tft.init();
@@ -220,7 +221,9 @@ void loop() {
 }
 
 void processes() {
-  if (is_locked && note_state < 16 && !(state == 4 && !in_turn)) draw_cursor();
+  if (is_locked && note_state < 16 && 
+      !(state == 3 && !is_host) && 
+      !(state == 0 && !in_turn)) draw_cursor();
   
   // Fetch/ping
   if ((state == 4 || state == 5) && millis() - time_since_last_ping > PING_INTERVAL) {

@@ -1,7 +1,11 @@
+uint8_t BLACK[3] = {0, 0, 0};
+
 void draw_sound_toggle() {
-  char text[20] = {0};
-  strcpy(text, sound_on ? "Hold to mute  " : "Hold to unmute");
-  draw_text(text, 3, 109, DARK_CYAN, 1);
+  draw_text("Hold to", 5, 101, DARK_CYAN);
+  char text[10];
+  strcpy(text, sound_on ? "mute  " : "unmute");
+  draw_text(text, 5, 111, DARK_CYAN);
+  tft.setCursor(3, 109, 1);
 }
 
 /////////////
@@ -17,12 +21,14 @@ void display_landing() {
   fade_in_text("Start Game", 90, 75, DARK_CYAN, 500, 1);
   fade_in_text(" Join Game", 90, 92, DARK_CYAN, 500, 1);
   fade_in_text("   Gallery", 90, 109, DARK_CYAN, 500, 1);
-  
-  clear_old_cursor();
+
+  sound_on = true;
+
   update_landing();
 }
 
 void update_landing() {
+  tft.fillRect(78, 75, 11, 45, TFT_BLACK);
   set_cursor_pos(80, 76 + 17 * menu_index);
   draw_cursor();
   draw_sound_toggle();
@@ -43,9 +49,12 @@ void display_start_game() {
   fade_in_text("     Start", 86, 81, DARK_CYAN, 200, 1);
   fade_in_text("      Back", 86, 109, DARK_CYAN, 200, 1);
 
-  draw_sound_toggle();
-
-  clear_old_cursor();
+  if (sound_on) {
+    fade_in_text("Hold to mute", 3, 109, DARK_CYAN, 200, 1);
+  } else {
+    fade_in_text("Hold to unmute", 3, 109, DARK_CYAN, 200, 1);
+  }
+  
   update_start_game(1);
 }
 
@@ -57,8 +66,11 @@ void update_start_game(int js) {
   
   char key_text[20] = "\0";
   sprintf(key_text, "  Key: %s", NOTES_FLAT[selected_key]);
-  is_flat_key = (selected_key <= 5 && selected_key % 2 != 0) || (selected_key > 5 && selected_key % 2 == 0);
-  
+  if ((selected_key <= 5 && selected_key % 2 != 0) || (selected_key > 5 && selected_key % 2 == 0)) {
+    is_flat_key = true;
+  } else {
+    is_flat_key = false;
+  }
   char tempo_text[20] = "\0";
   sprintf(tempo_text, "Tempo: %s", TEMPO_LABELS[selected_tempo]);
 
@@ -90,9 +102,12 @@ void display_join_game() {
   fade_in_text("      Join", 86, 81, DARK_CYAN, 200, 1);
   fade_in_text("      Back", 86, 109, DARK_CYAN, 200, 1);
 
-  draw_sound_toggle();
+  if (sound_on) {
+    fade_in_text("Hold to mute", 3, 109, DARK_CYAN, 200, 1);
+  } else {
+    fade_in_text("Hold to unmute", 3, 109, DARK_CYAN, 200, 1);
+  }
 
-  clear_old_cursor();
   update_join_game(1);
 }
 
@@ -143,7 +158,7 @@ void display_waiting_room() {
   temp[0] = '\0';
   sprintf(temp, "Players:  %d", num_players);
   fade_in_text(temp, 9, 63, DARK_CYAN, 200, 1);
-  strcpy(temp, is_host ? "You are the host!  " : "Waiting for host...");
+  strcpy(temp, is_host ? "You are the host!" : "Waiting for host");
   fade_in_text(temp, 9, 75, DARK_CYAN, 200, 1);
   
   if (is_host) {
@@ -153,7 +168,9 @@ void display_waiting_room() {
 }
 
 void update_waiting_room() {
-  char temp[3] = {0};
+  char temp[20];
+  tft.fillRect(66, 62, 30, 12, TFT_BLACK);
+  temp[0] = '\0';
   sprintf(temp, "%d", num_players);
   draw_text(temp, 70, 63, DARK_CYAN, 1);
 }

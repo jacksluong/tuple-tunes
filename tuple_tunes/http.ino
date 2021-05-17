@@ -8,7 +8,7 @@
 void create_game_http() {
 
   char body[100];
-  sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, selected_tempo); //instead of TEMPO_SPEEDS[selected_tempo]
+  sprintf(body, "type=create&username=%s&key=%d&tempo=%d", USERNAME, selected_key, selected_tempo);
   Serial.println(body);
   make_post_request(SERVER, PRE_GAME_ADDRESS, body, response, false);
 
@@ -119,7 +119,7 @@ void get_game_status() {
 //////////////////////
 
 bool fetch_game_state(int game_id) {
-  char query[100]; //for body
+  char query[100];
   sprintf(query, "username=%s&game_id=%d&measure=%d", USERNAME, game_id, current_measure);
   Serial.println("making fetch");
   make_get_request(SERVER, IN_GAME_ADDRESS, query, response, false);
@@ -150,7 +150,7 @@ bool fetch_game_state(int game_id) {
 
   p = strtok(NULL, "&"); // index of next measure to be submitted
   Serial.printf("current measure: {%s}\n", p);
-  if (atoi(p) > current_measure) { // we are now a measure behind // can change this to be always true to avoid display errors
+  if (atoi(p) > current_measure) { // we are now a measure behind
     p = strtok(NULL, "&"); // all measures string
 
     char* separator;
@@ -170,8 +170,14 @@ bool fetch_game_state(int game_id) {
       }
       
       if (note_state == 16) {
-        selected_measure = current_measure;
         current_measure++;
+        if (current_measure < MEASURE_COUNT) {
+          measures[current_measure][0] = current_note[0] == 'R' ? 36 : (note_num + adjustment);
+          selected_measure = in_turn ? current_measure : current_measure - 1;
+        } else {
+          selected_measure = current_measure - 1;
+        }
+        note_state = 0;
       }
     }
 
@@ -206,19 +212,19 @@ void submit_measure() {
     offset += sprintf(string_of_notes + offset, "36 ");
   }
 
-  char query[100]; //for body
-  sprintf(query, "type=new_measure&username=%s&game_id=%d&measure=%s", USERNAME, game_id, string_of_notes);
-  make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+  char body[150] = {0};
+  sprintf(body, "type=new_measure&username=%s&game_id=%d&measure=%s", USERNAME, game_id, string_of_notes);
+  make_post_request(SERVER, IN_GAME_ADDRESS, body, response, false);
 }
 
 /*
    Tells the server we're still connected via a POST request.
 */
 void ping() {
-  char query[100]; //for body
-  sprintf(query, "type=ping&username=%s&game_id=%d", USERNAME, game_id);
+  char body[100]; //for body
+  sprintf(body, "type=ping&username=%s&game_id=%d", USERNAME, game_id);
   Serial.println("Ping:");
-  make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+  make_post_request(SERVER, IN_GAME_ADDRESS, body, response, false);
 
   time_since_last_ping = millis();
 }
@@ -228,4 +234,14 @@ void leave_game() {
   sprintf(query, "type=leave&username=%s&game_id=%d", USERNAME, game_id);
   Serial.println("Leaving game");
   make_post_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+}
+
+/*
+ * gallery request for random song
+ */
+
+void gallery_request() {
+  char query[50] = "gallery=True";
+  make_get_request(SERVER, IN_GAME_ADDRESS, query, response, false);
+  
 }

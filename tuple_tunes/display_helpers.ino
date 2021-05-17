@@ -39,7 +39,7 @@ void draw_cursor() {
   // Clear old cursor if necessary
   uint8_t x = cursor_pos[0], y = cursor_pos[1], old_x = old_cursor_pos[0], old_y = old_cursor_pos[1];
   if (!(old_x == 0 && old_y == 0) && (x != old_x || y != old_y)) {
-    if (state == 4) tft.drawLine(old_x, old_y, old_x + 9, old_y, TFT_BLACK);
+    if (state == 4) tft.drawLine(old_x, old_y, old_x + 10, old_y, TFT_BLACK);
     else tft.drawTriangle(old_x, old_y, old_x, old_y + 4, old_x + 3, old_y + 2, TFT_BLACK);
   }
 
@@ -54,8 +54,8 @@ void draw_cursor() {
   else color = TFT_WHITE;
 
   // Draw new cursor/underline
-  if (state == 4 && selected_measure == current_measure && note_state < 16) tft.drawLine(x, y, x + 9, y, color);
-  else tft.drawTriangle(x, y, x, y + 4, x + 3, y + 2, color);
+  if (state == 4 && selected_measure == current_measure && note_state < 16) tft.drawLine(x, y, x + 10, y, color);
+  else if (state != 4) tft.drawTriangle(x, y, x, y + 4, x + 3, y + 2, color);
 
   // Save position of new cursor
   old_cursor_pos[0] = x;
@@ -85,23 +85,12 @@ void fade_in_text(char* text, uint8_t x, uint8_t y, uint8_t* rgb, int duration, 
 /*
  * Draws text with the given specs.
  */
-void draw_text(char* text, uint8_t x, uint8_t y, uint8_t* rgb, uint8_t font_size = 1) {
+void draw_text(char* text, uint8_t x, uint8_t y, uint8_t* rgb, uint8_t font_size = 1, uint16_t bg_color = TFT_BLACK) {
   // clear area
-  tft.fillRect(x, y, strlen(text) * 6 * font_size, 8 * font_size, tft.readPixel(x, y - 1));
+  tft.fillRect(x, y, strlen(text) * 6 * font_size, 8 * font_size, bg_color);
   
   tft.setCursor(x, y);
   tft.setTextSize(font_size);
   tft.setTextColor(tft.color565(rgb[0], rgb[1], rgb[2]));
   tft.println(text);
-}
-
-/*
- * Converts selected note (int) to its appropriate string representation in the grid.
- */
-char* note_to_grid_string(int note_n) {
-  char s[3];
-  if (note_n == 37) strcpy(s, "~");
-  else if (note_n == 36) strcpy(s, "R");
-  else strcpy(s, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[note_n % 12]);
-  return s;
 }

@@ -62,7 +62,7 @@ void update_in_game(int bv, int js, bool note_num_changed) {
     draw_text("Add Note", 110, 58, color, 1, dark_gray);
     draw_text("Del Note", 110, 74, color, 1, dark_gray);
     draw_text("Submit", 115, 90, color, 1, dark_gray);
-    draw_text("Menu", 120, 106, CYAN, 1, dark_gray);
+    draw_text("Menu", 121, 106, CYAN, 1, dark_gray);
 
     old_menu_state = menu_state;
   } else {

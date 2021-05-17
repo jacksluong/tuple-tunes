@@ -1,5 +1,5 @@
 void back_to_landing() {
-  menu_state = 0;
+  menu_index = 0;
   state = 0;
   display_landing();
   update_landing();
@@ -15,15 +15,15 @@ void reset_game() {
   // Game state variables
   player_count = 0;
   current_measure = 0;
-  curr_note_index = selected_key;
+  note_num = selected_key;
   current_note[0] = '\0';
-  strcpy(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[curr_note_index % 12]);
+  strcpy(current_note, (is_flat_key ? NOTES_FLAT : NOTES_SHARP)[note_num % 12]);
   // update starting index for selected symbol based on the note from this key
   if (current_note[1] == '#') selected_symbol = 0;
   else if (current_note[1] == 'b') selected_symbol = 1;
   else if (current_note[1] == ' ') selected_symbol = 2;
   
-  selected_note = curr_note_index % 12;
+  selected_note = note_num % 12;
   selected_duration = 0;
   selected_symbol = 0;
   selected_measure = 0;
@@ -38,10 +38,8 @@ void reset_game() {
     in_turn = false;
     set_led_color(255, 0, 0);
   }
-  input_cursor = 0;
   state = 4;
-  is_locked = !in_turn;
-  tft.setTextSize(1);
+  is_locked = false;
 }
 
 void update_state(int bv, int js) {
@@ -67,32 +65,32 @@ void update_state(int bv, int js) {
 void process_landing_state(int bv, int js) {
   // Handle joystick input
   if (js == 1) { // up
-    menu_state = (menu_state + 2) % 3;
+    menu_index = (menu_index + 2) % 3;
     update_landing();
   } else if (js == 3) { // down
-    menu_state = (menu_state + 1) % 3;
+    menu_index = (menu_index + 1) % 3;
     update_landing();
   }
 
   // Handle button input
   if (bv == 1) {
-    if (menu_state == 0) { // start
+    if (menu_index == 0) { // start
       state = 1;
       display_start_game();
-    } else if (menu_state == 1) { // join
+    } else if (menu_index == 1) { // join
       game_code_input[0] = -10; // equivalent to 0 mod 10
       game_code_input[1] = -10;
       game_code_input[2] = -10;
       input_cursor = 0;
       is_locked = true;
-      menu_state = 0;
+      menu_index = 0;
       state = 2;
       display_join_game();
     } else { // gallery
       state = 7;
       display_gallery();
     }
-    menu_state = 0;
+    menu_index = 0;
   } else if (bv == 2) {
     sound_on = !sound_on;
     update_landing();
@@ -105,17 +103,17 @@ void process_start_game(int bv, int js) {
 
   // Handle joystick input
   if (!is_locked && js == 1) { // up
-    menu_state = (menu_state + 3) % 4;
+    menu_index = (menu_index + 3) % 4;
   } else if (!is_locked && js == 3) { // down
-    menu_state = (menu_state + 1) % 4;
+    menu_index = (menu_index + 1) % 4;
   } else if (is_locked && js == 2) { // right
-    if (menu_state == 0) {
+    if (menu_index == 0) {
       selected_key = (selected_key + 1) % 12;
       play_note(selected_key);
     }
     else selected_tempo = (selected_tempo + 1) % 3;
   } else if (is_locked && js == 4) { // left
-    if (menu_state == 0) {
+    if (menu_index == 0) {
       selected_key = (selected_key + 11) % 12;
       play_note(selected_key);
     }
@@ -125,12 +123,12 @@ void process_start_game(int bv, int js) {
 
   // Handle button input
   if (bv == 1) {
-    if (menu_state == 0 || menu_state == 1) { // inputs
+    if (menu_index == 0 || menu_index == 1) { // inputs
       is_locked = !is_locked;
       if (!is_locked) stop_sound();
-      else if (menu_state == 0) play_note(selected_key);
+      else if (menu_index == 0) play_note(selected_key);
       update_start_game(1);
-    } else if (menu_state == 2) { // start
+    } else if (menu_index == 2) { // start
       create_game_http();
       is_host = true;
       is_locked = true;
@@ -146,7 +144,7 @@ void process_start_game(int bv, int js) {
     }
   } else if (bv == 2) {
     sound_on = !sound_on;
-    update_start_game(6); // TODO: toggle sound indicator
+    update_start_game(6);
   }
 }
 
@@ -158,7 +156,7 @@ void process_join_game(int bv, int js) {
     if (is_locked) {
       game_code_input[input_cursor] = (game_code_input[input_cursor] + (js == 1 ? 11 : 19)) % 10;
     } else {
-      menu_state = (menu_state + (js == 1 ? 2 : 1)) % 3;
+      menu_index = (menu_index + (js == 1 ? 2 : 1)) % 3;
     }
   } else if (is_locked && js) {
     input_cursor = (input_cursor + (js == 2 ? 1 : 2)) % 3;
@@ -167,16 +165,16 @@ void process_join_game(int bv, int js) {
 
   // Handle button input
   if (bv == 1) {
-    if (menu_state == 0) { // input
+    if (menu_index == 0) { // input
       if (!is_locked) is_locked = true;
       else if (game_code_input[0] >= 0 && // three numbers specified
                game_code_input[1] >= 0 &&
                game_code_input[2] >= 0) is_locked = false;
       update_join_game(1);
-    } else if (menu_state == 1) { // join
+    } else if (menu_index == 1) { // join
       if (join_game_http()) {
         is_host = false;
-        is_locked = true;
+        is_locked = false;
         get_game_status();
         
         state = 3;
@@ -223,27 +221,27 @@ void process_in_game(int bv, int js) {
   }
   if (!is_locked && js) { // scrolling up and down the menu
     if (js == 1) { // up
-      menu_state = (menu_state + 4) % 5;
+      menu_index = (menu_index + 4) % 5;
     } else if (js == 3) { // down
-      menu_state = (menu_state + 1) % 5;
+      menu_index = (menu_index + 1) % 5;
     }
   } else if (is_locked && js) { // scrolling through an option
-    if (menu_state == 0) { // note selection
+    if (menu_index == 0) { // note selection
       if (js == 2 || js == 4) { // left/right
         if (js == 2) { // right
-          if (curr_note_index + SCALE_STEPS[(step_index + 1) % 8] <= 35) {
+          if (note_num + SCALE_STEPS[(step_index + 1) % 8] <= 35) {
             step_index = (step_index + 1) % 8;
-            curr_note_index = curr_note_index + SCALE_STEPS[step_index];
-            selected_note = curr_note_index % 12;
+            note_num = note_num + SCALE_STEPS[step_index];
+            selected_note = note_num % 12;
           }
         } else if (js == 4) { // left
-          if (curr_note_index - SCALE_STEPS[step_index] >= 0) {
-            curr_note_index = curr_note_index - SCALE_STEPS[step_index];
+          if (note_num - SCALE_STEPS[step_index] >= 0) {
+            note_num = note_num - SCALE_STEPS[step_index];
             step_index = (step_index + 7) % 8; //same as subtracting 1
-            selected_note = curr_note_index % 12;
+            selected_note = note_num % 12;
           }
         }
-        Serial.printf("Current note index updated %d \n", curr_note_index);
+        Serial.printf("Current note index updated %d \n", note_num);
   
         // Display selected note
         current_note[0] = '\0';
@@ -268,12 +266,12 @@ void process_in_game(int bv, int js) {
         if (current_note[0] == 'R') return;
         if (js == 1) { // up
           if (selected_symbol == 2) {
-            if (curr_note_index + adjustment - 2 >= 0) {
+            if (note_num + adjustment - 2 >= 0) {
               adjustment -= 2;
               selected_symbol = (selected_symbol + 1) % 3;
             }
           } else {
-            if (curr_note_index + adjustment + 1 <= 35) {
+            if (note_num + adjustment + 1 <= 35) {
               adjustment += 1;
               selected_symbol = (selected_symbol + 1) % 3;
             }
@@ -281,12 +279,12 @@ void process_in_game(int bv, int js) {
           current_note[1] = SYMBOLS[selected_symbol];
         } else if (js == 3) { // down
           if (selected_symbol == 0) {
-            if (curr_note_index + adjustment + 2 <= 35) {
+            if (note_num + adjustment + 2 <= 35) {
               adjustment += 2;
               selected_symbol = (selected_symbol + 2) % 3;
             }
           } else {
-            if (curr_note_index + adjustment - 1 >= 0) {
+            if (note_num + adjustment - 1 >= 0) {
               adjustment -= 1;
               selected_symbol = (selected_symbol + 2) % 3;
             }
@@ -295,17 +293,17 @@ void process_in_game(int bv, int js) {
         }
       }
       
-      Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
-      int temp_note_num = current_note[0] == 'R' ? 36 : curr_note_index + adjustment;
+      Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, note_num);
+      int temp_note_num = current_note[0] == 'R' ? 36 : note_num + adjustment;
       if (note_state < 16) measures[current_measure][note_state] = temp_note_num;
       if (temp_note_num != 36) play_note(temp_note_num);
-    } else if (menu_state == 1) { // duration selection
+    } else if (menu_index == 1) { // duration selection
       if (js == 2) { // right
         selected_duration = (selected_duration + 1) % 5;
       } else if (js == 4) { // left
         selected_duration = (selected_duration + 4) % 5;
       }
-    } else if (menu_state == 4) {
+    } else if (menu_index == 4) {
       uint8_t old_selected_measure = selected_measure;
       if (js == 2) { // right
         selected_measure = (selected_measure + 1) % (current_measure + 1);
@@ -320,26 +318,26 @@ void process_in_game(int bv, int js) {
   bool note_added = false;
   if (bv == 1) {
     if (in_turn) {
-      if (!is_locked && (menu_state < 2 || menu_state == 4)) is_locked = true;
+      if (!is_locked && (menu_index < 2 || menu_index == 4)) is_locked = true;
       else is_locked = false;
     }
     // state changes
-    if (menu_state == 0) {
-      play_note(curr_note_index);
+    if (menu_index == 0) {
+      play_note(note_num);
     }
-    if (menu_state == 2) { // add a note
+    if (menu_index == 2) { // add a note
       int num_notes_added = min(16 - note_state, pow(2, selected_duration));
 
       if (num_notes_added) { // if nonzero
-        measures[current_measure][note_state] = current_note[0] == 'R' ? 36 : (curr_note_index + adjustment);
+        measures[current_measure][note_state] = current_note[0] == 'R' ? 36 : (note_num + adjustment);
         for (int i = 1; i < num_notes_added; i++) measures[current_measure][note_state + i] = 37;
         note_state += num_notes_added;
-        menu_state = 0;
+        menu_index = 0;
         if (note_state < 16) // display currently selected note in next note index, not C
-          measures[current_measure][note_state] = current_note[0] == 'R' ? 36 : (curr_note_index + adjustment);
+          measures[current_measure][note_state] = current_note[0] == 'R' ? 36 : (note_num + adjustment);
       }
       note_added = true;
-    } else if (menu_state == 3) {
+    } else if (menu_index == 3) {
       while (note_state < 16) {
         measures[current_measure][note_state] = 36;
         note_state += 1;
@@ -352,7 +350,7 @@ void process_in_game(int bv, int js) {
       selected_measure = current_measure;
 
       // Update controls
-      menu_state = 4;
+      menu_index = 4;
       in_turn = false;
       is_locked = true;
 
@@ -362,7 +360,7 @@ void process_in_game(int bv, int js) {
     }
   } else if (bv == 2) { // go to game menu screen
     state = 5;
-    menu_state = 0;
+    menu_index = 0;
     is_locked = false;
     display_game_menu();
   }
@@ -375,10 +373,10 @@ void process_in_game(int bv, int js) {
 void process_game_menu(int bv, int js) {
   // Handle joystick input
   if (js == 1) { // up
-    menu_state = (menu_state + 4) % 5;
+    menu_index = (menu_index + 4) % 5;
     update_game_menu();
   } else if (js == 3) { // down
-    menu_state = (menu_state + 1) % 5;
+    menu_index = (menu_index + 1) % 5;
     update_game_menu();
   }
 
@@ -392,23 +390,23 @@ void process_game_menu(int bv, int js) {
     }
     
     update_game_menu();
-    if (menu_state == 0) { // resume game
+    if (menu_index == 0) { // resume game
       state = 4;
       is_locked = true;
       display_in_game();
-    } else if (menu_state == 1) {
+    } else if (menu_index == 1) {
       if (playing_song) stop_sound();
       playing_song = !playing_song;
-    } else if (menu_state == 2) {
+    } else if (menu_index == 2) {
       if (playing_measure) stop_sound();
       playing_measure = !playing_measure;
-    } else if (menu_state == 3) {
+    } else if (menu_index == 3) {
       sound_on = !sound_on;
       playing_song = false;
       playing_measure = false;
       stop_sound();
       update_game_menu();
-    } else if (menu_state == 4) { // leave game
+    } else if (menu_index == 4) { // leave game
       leave_game();
       is_locked = false;
       game_state = 0;

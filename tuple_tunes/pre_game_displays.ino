@@ -1,3 +1,9 @@
+void draw_sound_toggle() {
+  char text[20] = {0};
+  strcpy(text, sound_on ? "Hold to mute  " : "Hold to unmute");
+  draw_text(text, 3, 109, DARK_CYAN, 1);
+}
+
 /////////////
 // Landing //
 /////////////
@@ -11,24 +17,15 @@ void display_landing() {
   fade_in_text("Start Game", 90, 75, DARK_CYAN, 500, 1);
   fade_in_text(" Join Game", 90, 92, DARK_CYAN, 500, 1);
   fade_in_text("   Gallery", 90, 109, DARK_CYAN, 500, 1);
-
-  sound_on = true;
-  fade_in_text("Hold to mute", 3, 109, DARK_CYAN, 200, 1);
-
+  
+  clear_old_cursor();
   update_landing();
 }
 
 void update_landing() {
-  tft.fillRect(78, 75, 11, 45, TFT_BLACK);
-  set_cursor_pos(80, 76 + 17 * menu_state);
+  set_cursor_pos(80, 76 + 17 * menu_index);
   draw_cursor();
-  tft.fillRect(0, 100, 80, 20, TFT_BLACK);
-  tft.setCursor(3, 109, 1);
-  if (sound_on) {
-    tft.println("Hold to mute");
-  } else {
-    tft.println("Hold to unmute");
-  }
+  draw_sound_toggle();
 }
 
 ////////////////
@@ -46,12 +43,9 @@ void display_start_game() {
   fade_in_text("     Start", 86, 81, DARK_CYAN, 200, 1);
   fade_in_text("      Back", 86, 109, DARK_CYAN, 200, 1);
 
-  if (sound_on) {
-    fade_in_text("Hold to mute", 3, 109, DARK_CYAN, 200, 1);
-  } else {
-    fade_in_text("Hold to unmute", 3, 109, DARK_CYAN, 200, 1);
-  }
-  
+  draw_sound_toggle();
+
+  clear_old_cursor();
   update_start_game(1);
 }
 
@@ -59,24 +53,12 @@ void update_start_game(int js) {
   if (js == 0) return;
   else if (!is_locked && (js == 1 || js == 3)) tft.fillRect(75, 45, 5, 120, TFT_BLACK); // clear cursor
   else if (is_locked && (js == 2 || js == 4)) tft.fillRect(80, 45, 80, 30, TFT_BLACK); // clear inputs
-  else if (js > 4) {
-    // Mute
-    tft.fillRect(0, 100, 80, 20, TFT_BLACK);
-    tft.setCursor(3, 109, 1);
-    if (sound_on) {
-      tft.println("Hold to mute");
-    } else {
-      tft.println("Hold to unmute");
-    }
-  }
+  else if (js > 4) draw_sound_toggle();
   
   char key_text[20] = "\0";
   sprintf(key_text, "  Key: %s", NOTES_FLAT[selected_key]);
-  if ((selected_key <= 5 && selected_key % 2 != 0) || (selected_key > 5 && selected_key % 2 == 0)) {
-    is_flat_key = true;
-  } else {
-    is_flat_key = false;
-  }
+  is_flat_key = (selected_key <= 5 && selected_key % 2 != 0) || (selected_key > 5 && selected_key % 2 == 0);
+  
   char tempo_text[20] = "\0";
   sprintf(tempo_text, "Tempo: %s", TEMPO_LABELS[selected_tempo]);
 
@@ -87,8 +69,8 @@ void update_start_game(int js) {
   draw_text("      Back", 86, 109, DARK_CYAN, 1);
 
   // Cursor
-  if (menu_state < 3) {
-    set_cursor_pos(76, 48 + 17 * menu_state);
+  if (menu_index < 3) {
+    set_cursor_pos(76, 48 + 17 * menu_index);
   } else {
     set_cursor_pos(76, 110);
   }
@@ -108,12 +90,9 @@ void display_join_game() {
   fade_in_text("      Join", 86, 81, DARK_CYAN, 200, 1);
   fade_in_text("      Back", 86, 109, DARK_CYAN, 200, 1);
 
-  if (sound_on) {
-    fade_in_text("Hold to mute", 3, 109, DARK_CYAN, 200, 1);
-  } else {
-    fade_in_text("Hold to unmute", 3, 109, DARK_CYAN, 200, 1);
-  }
+  draw_sound_toggle();
 
+  clear_old_cursor();
   update_join_game(1);
 }
 
@@ -121,16 +100,7 @@ void update_join_game(int js) {
   if (js == 0) return;
   else if (!is_locked && (js == 1 || js == 3)) tft.fillRect(99, 45, 5, 120, TFT_BLACK); // clear cursor
   else if (is_locked && (js == 1 || js == 3)) tft.fillRect(118, 64, 40, 17, TFT_BLACK); // clear inputs
-  else if (js > 4) { 
-    // Mute
-    tft.fillRect(0, 100, 80, 20, TFT_BLACK);
-    tft.setCursor(3, 109, 1);
-    if (sound_on) {
-      tft.println("Hold to mute");
-    } else {
-      tft.println("Hold to unmute");
-    }
-  }
+  else if (js > 4) draw_sound_toggle();
   tft.fillRect(127, 73, 18, 4, TFT_BLACK); // clear dot
   
   char input[4] = "\0";
@@ -146,8 +116,8 @@ void update_join_game(int js) {
   if (is_locked) tft.fillCircle(130 + 6 * input_cursor, 75, 1, TFT_WHITE);
 
   // Cursor
-  if (menu_state < 2) {
-    set_cursor_pos(100, 48 + 34 * menu_state);
+  if (menu_index < 2) {
+    set_cursor_pos(100, 48 + 34 * menu_index);
   } else {
     set_cursor_pos(100, 110);
   }
@@ -173,7 +143,7 @@ void display_waiting_room() {
   temp[0] = '\0';
   sprintf(temp, "Players:  %d", num_players);
   fade_in_text(temp, 9, 63, DARK_CYAN, 200, 1);
-  strcpy(temp, is_host ? "You are the host!" : "Waiting for host");
+  strcpy(temp, is_host ? "You are the host!  " : "Waiting for host...");
   fade_in_text(temp, 9, 75, DARK_CYAN, 200, 1);
   
   if (is_host) {
@@ -183,11 +153,9 @@ void display_waiting_room() {
 }
 
 void update_waiting_room() {
-  char temp[20];
-  tft.fillRect(66, 62, 30, 12, TFT_BLACK);
-  temp[0] = '\0';
-  sprintf(temp, "          %d", num_players);
-  draw_text(temp, 10, 63, DARK_CYAN, 1);
+  char temp[3] = {0};
+  sprintf(temp, "%d", num_players);
+  draw_text(temp, 70, 63, DARK_CYAN, 1);
 }
 
 /////////////

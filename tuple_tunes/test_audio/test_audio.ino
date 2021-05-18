@@ -119,7 +119,7 @@ void play_sound(double local_freq_new) {
   
     //val = 2*PI*local_freq*micros()/1000000;
     //dacWrite(25, 128+67*sin(val)+30*sin(2*val)+21*sin(3*val));
-  dacWrite(25, 128+60*sin(local_freq_new*micros())+19*sin(2*local_freq_new*micros())+25*sin(3*local_freq_new*micros()));
+  dacWrite(25, 128+19*sin(local_freq_new*micros())+60*sin(2*local_freq_new*micros())+25*sin(3*local_freq_new*micros()));
   
 }
 
@@ -130,7 +130,7 @@ void Task1code( void * pvParameters ){
   for(;;){
     if (play_song) {
       //dacWrite(25, 128+60*sin(global_freqs_new[note_index_global]*micros())-19*sin(2*global_freqs_new[note_index_global]*micros())+25*sin(3*global_freqs_new[note_index_global]*micros()));
-      dacWrite(25, 128+60*sin(current_freq*micros())-19*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
+      dacWrite(25, 128+19*sin(current_freq*micros())-60*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
     
     } 
   } 

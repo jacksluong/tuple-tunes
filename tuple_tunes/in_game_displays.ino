@@ -165,8 +165,8 @@ void update_game_menu() {
   draw_cursor();
 
   char text[10];
-  strcpy(text, sound_on ? " Mute" : " Unmute");
-  draw_text(text, 4, 80, CYAN, 1);
+  strcpy(text, sound_on ? "Mute" : "Unmute");
+  draw_text(text, 10, 80, CYAN, 1);
   strcpy(text, sound_on ? " Sound On" : " Sound Off");
   draw_text(text, 88, 100, DARK_CYAN, 1);
 }
@@ -179,21 +179,16 @@ void display_end_game() {
   tft.fillScreen(TFT_BLACK);
 
   display_in_game();
-  tft.fillRect(106, 0, 80, 128, rgb_to_565(DARK_GRAY));
-  draw_text("Play", 123, 10, CYAN, 1);
-  draw_text("Song", 123, 20, CYAN, 1);
-  draw_text("Play", 123, 40, CYAN, 1);
-  draw_text("Measure", 113, 50, CYAN, 1);
-  draw_text("New", 127, 70, CYAN, 1);
-  draw_text("Game", 123, 80, CYAN, 1);
+  uint16_t dark_gray = rgb_to_565(DARK_GRAY);
+  tft.fillRect(106, 0, 80, 128, dark_gray);
+  draw_text("Play", 123, 10, CYAN, 1, dark_gray);
+  draw_text("Song", 123, 20, CYAN, 1, dark_gray);
+  draw_text("Play", 123, 40, CYAN, 1, dark_gray);
+  draw_text("Measure", 113, 50, CYAN, 1, dark_gray);
+  draw_text("New", 127, 70, CYAN, 1, dark_gray);
+  draw_text("Game", 123, 80, CYAN, 1, dark_gray);
 
-  if (current_measure < 10) { // scroll through measures
-    tft.setCursor(122, 100, 1);
-  } else {
-    tft.setCursor(117, 100, 1); 
-  }
-  tft.printf("m. %d", selected_measure + 1);
-
+  
   for (int i = 0; i < 3; i++) { // ellipses
     tft.fillCircle(4 * i + 146, 119, 1, TFT_WHITE);
   }
@@ -202,6 +197,7 @@ void display_end_game() {
 }
 
 void update_end_game() {
+  display_measure(selected_measure);
   // Clearing
   if (is_locked) {
     if (menu_index == 3) tft.fillRect(119, 110, 20, 10, rgb_to_565(DARK_GRAY)); // measure
@@ -214,19 +210,20 @@ void update_end_game() {
                        151, 15 + 30 * menu_index, TFT_WHITE); // arrows for measure selection
     }
   } else {
-    tft.drawTriangle(115,121,110,103,115,105, rgb_to_565(DARK_GRAY)); // arrows for measure selection
-    tft.drawTriangle(151,121,156,103,151,105, rgb_to_565(DARK_GRAY));
-//    if (menu_index == 3) {
+    tft.drawTriangle(115,101,110,103,115,105, rgb_to_565(DARK_GRAY)); // arrows for measure selection
+    tft.drawTriangle(151,101,156,103,151,105, rgb_to_565(DARK_GRAY));
     tft.drawTriangle(115, 11 + 30 * menu_index, 
                      110, 13 + 30 * menu_index,
                      115, 15 + 30 * menu_index, rgb_to_565(menu_index == 3 ? GRAY : DARK_GRAY));
     tft.drawTriangle(151, 11 + 30 * menu_index, 
                      156, 13 + 30 * menu_index,
                      151, 15 + 30 * menu_index, rgb_to_565(menu_index == 3 ? GRAY : DARK_GRAY)); // arrows for current menu state
-//    }
   }
 
-
+  char text[10];
+  sprintf(text, "m. %d", selected_measure + 1);
+  draw_text(text, current_measure < 10 ? 122 : 117, 100, CYAN, 1, rgb_to_565(DARK_GRAY));
+  
   // Menu cursor
   if (menu_index == 3) {
     tft.fillCircle(134, 50 + 30 * (menu_index - 1), 1, TFT_WHITE);

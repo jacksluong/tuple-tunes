@@ -438,21 +438,25 @@ void process_game_menu(int bv, int js) {
 
 void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clearing all measures
   // Handle joystick input
-  if (js == 1 || js == 3) {
-    if (menu_index == 3) {
-      tft.fillCircle(134, 50 + 30 * (menu_index - 1), 1, rgb_to_565(DARK_GRAY));
-    } else {
-      tft.fillCircle(134, 30 + 30 * menu_index, 1, rgb_to_565(DARK_GRAY));
+  if (!is_locked) {
+     if (js == 1 || js == 3) {
+      if (menu_index == 3) {
+        tft.fillCircle(134, 50 + 30 * (menu_index - 1), 1, rgb_to_565(DARK_GRAY));
+      } else {
+        tft.fillCircle(134, 30 + 30 * menu_index, 1, rgb_to_565(DARK_GRAY));
+      }
+      
     }
-    
+    if (js == 1) { // up
+      menu_index = (menu_index + 3) % 4;
+      update_end_game();
+    } else if (js == 3) { // down
+      menu_index = (menu_index + 1) % 4;
+      update_end_game();
+    }
   }
-  if (js == 1) { // up
-    menu_index = (menu_index + 3) % 4;
-    update_end_game();
-  } else if (js == 3) { // down
-    menu_index = (menu_index + 1) % 4;
-    update_end_game();
-  }
+  
+ 
   
   if (bv) {
     if (menu_index == 0) { // play song
@@ -462,16 +466,16 @@ void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clear
       if (playing_measure) stop_sound();
       playing_measure = !playing_measure;
     } else if (menu_index == 2) { // new game
+      game_state = 0;
       back_to_landing();
     } 
   }
 
   
   
-  if (is_locked and menu_index == 3) {
+  if (is_locked && menu_index == 3) {
     uint8_t old_selected_measure = selected_measure;
     if (js) {
-      is_locked = false;
       if (js == 2) { // right
         selected_measure = (selected_measure + 1) % (current_measure + 1);
       } else if (js == 4) { // left
@@ -479,7 +483,7 @@ void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clear
       }
     }
     
-    if (old_selected_measure != selected_measure) display_end_game();
+    if (old_selected_measure != selected_measure) update_end_game();
     Serial.printf("Selected measure: %d", selected_measure);
   }
 

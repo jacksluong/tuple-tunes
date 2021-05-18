@@ -33,6 +33,10 @@ void play_measure(uint8_t measure_i) {
         stop_sound();
       } else if (selected_note < NOTE_COUNT) {
         play_note(selected_note);
+        prev_freq = selected_note;
+      } else {
+        stop_sound();
+        play_note(prev_freq);
       }
       last_played = millis();
       note_index++;

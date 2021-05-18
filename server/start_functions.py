@@ -1,5 +1,6 @@
 import sqlite3
 import datetime
+import random
 from in_game_functions import *
 
 moosic_db = '/var/jail/home/team59/moosic6.db'
@@ -21,12 +22,13 @@ def create_game(host, key, tempo):
         c.execute(
             '''CREATE TABLE IF NOT EXISTS players(game_id real, username text, last_ping timestamp, entry_time timestamp);''')
 
-        # create a row in game table
-        # the new game code is going to be the most recent one + 1
-        most_recent = c.execute('''SELECT game_code FROM games ORDER BY time DESC;''').fetchone()
-        if most_recent:
-            game_code = (most_recent[0] + 1) % 1000
+        #get a random game code
+        codes = c.execute('''SELECT game_code FROM games;''').fetchall()
+        if len(codes) != 0:
+            code_set = {code[0] for code in codes}
+            game_code = random.choice(list(set(range(1000)) - code_set))
 
+        #create new entry in games database
         c.execute('''INSERT INTO games VALUES (?,?,?,?,?,?,?,?,?);''',
                   (game_code, host, key, tempo, 'start', 0, 0, datetime.datetime.now(), datetime.datetime.now()))
 

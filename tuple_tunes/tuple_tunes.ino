@@ -268,7 +268,7 @@ void Task1code( void * pvParameters ){
     //Serial.printf("Play sound bool: %d, Frequency: %f\n", play_sound_bool, current_freq); 
     //if (play_sound_bool){
       //Serial.println("playing");
-      dacWrite(SPEAKER_PIN, 128+60*sin(current_freq*micros())+19*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
+      dacWrite(SPEAKER_PIN, 128+19*sin(current_freq*micros())-60*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
     //}
 
   } 

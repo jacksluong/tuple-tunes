@@ -18,7 +18,6 @@ void display_landing() {
   // Menu options
   fade_in_text("Start Game", 90, 75, DARK_CYAN, 500, 1);
   fade_in_text(" Join Game", 90, 92, DARK_CYAN, 500, 1);
-  fade_in_text("   Gallery", 90, 109, DARK_CYAN, 500, 1);
 
   sound_on = true;
 

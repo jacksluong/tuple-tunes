@@ -65,8 +65,6 @@ void update_state(int bv, int js) {
     process_game_menu(bv, js);
   } else if (state == 6) {
     process_end_game(bv, js);
-  } else if (state == 7) {
-    process_gallery(bv, js);
   }
 }
 
@@ -74,11 +72,8 @@ void update_state(int bv, int js) {
 
 void process_landing_state(int bv, int js) {
   // Handle joystick input
-  if (js == 1) { // up
-    menu_index = (menu_index + 2) % 3;
-    update_landing();
-  } else if (js == 3) { // down
-    menu_index = (menu_index + 1) % 3;
+  if (js == 1 || js == 3) { // up
+    menu_index = (menu_index + 1) % 2;
     update_landing();
   }
 
@@ -96,9 +91,6 @@ void process_landing_state(int bv, int js) {
       menu_index = 0;
       state = 2;
       display_join_game();
-    } else { // gallery
-      state = 7;
-      display_gallery();
     }
     menu_index = 0;
   } else if (bv == 2) {

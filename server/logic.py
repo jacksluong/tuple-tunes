@@ -9,8 +9,8 @@ def request_handler(request):
         try:
             gallery = bool(request['values']['view'])
         except:
-            continue
-
+            pass
+        
         if gallery:
             return get_random_song()
 
@@ -23,7 +23,6 @@ def request_handler(request):
             # return "Please provide username, game id, and last updated measure"
             return "-1"
         
-
         return fetch(game_id, username, last_measure)
 
     elif request["method"] == "POST":

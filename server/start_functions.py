@@ -1,5 +1,6 @@
 import sqlite3
 import datetime
+from in_game_functions import *
 
 moosic_db = '/var/jail/home/team59/moosic6.db'
 
@@ -30,8 +31,7 @@ def create_game(host, key, tempo):
                   (game_code, host, key, tempo, 'start', 0, 0, datetime.datetime.now(), datetime.datetime.now()))
 
         # get game_id of last inserted game
-        game_id = c.execute('''SELECT rowid FROM games ORDER BY time DESC;''').fetchone()
-        game_id = game_id[0]
+        game_id = c.execute('''SELECT rowid FROM games ORDER BY time DESC;''').fetchone()[0]
 
         # create a row in players
         c.execute('''INSERT INTO players VALUES (?,?,?,?);''',
@@ -141,3 +141,23 @@ def start_game(game_id):
 
             # Successful!
             return "1"
+        else:
+            return "2"
+    
+
+def garbage_collect_games():
+    """
+    Check for games that are still in the database after 24 hours
+    """
+
+    delta_24_hours = datetime.timedelta(days=1)
+
+    with sqlite3.connect(moosic_db) as c:
+
+        #check for all games that haven't been monitored for 24 hrs
+        disconnected_games = c.execute('''SELECT rowid FROM games WHERE disconnect_check < ?;''', (datetime.datetime.now() - delta_24_hours,)).fetchall()
+
+        #garbage collect each disconnected game
+        for game in disconnected_games:
+            game_id = game[0]
+            garbage_collect(c, game_id)

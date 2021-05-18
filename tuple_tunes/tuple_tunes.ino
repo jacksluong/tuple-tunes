@@ -123,6 +123,13 @@ int selected_symbol = 0; // selected symbol index for current note
 int step_index = 0; // selected jump index for determining next note in key
 int note_state = 0;
 
+// PLEASE DON'T CHANGE ANYTHING BELOW:
+TaskHandle_t Task1;
+const int SPEAKER_PIN = 25;
+double current_freq = 0;
+bool play_sound_bool = false; 
+
+
 /////////////////
 // Convenience //
 /////////////////
@@ -177,6 +184,18 @@ void setup() {
   ledcWrite(AUDIO_PWM, 80); //0 is a 0% duty cycle for the NFET
   stop_sound();
   ledcAttachPin(AUDIO_TRANSDUCER, AUDIO_PWM);
+  pinMode(SPEAKER_PIN, OUTPUT);
+  disableCore0WDT();
+
+  xTaskCreatePinnedToCore(
+                    Task1code,   /* Task function. */
+                    "Task1",     /* name of task. */
+                    10000,       /* Stack size of task */
+                    NULL,        /* parameter of the task */
+                    1,           /* priority of the task */
+                    &Task1,      /* Task handle to keep track of created task */
+                    0);          /* pin task to core 0 */                  
+  delay(500); 
 
   // Connect to WiFi
   WiFi.begin(NETWORK, PASSWORD);
@@ -200,7 +219,7 @@ void setup() {
   delay(500);
   
   // Compute note frequencies
-  note_freqs[0] = C3;
+  note_freqs[0] = C3*2*PI/1000000;
   for (int i = 1; i < NOTE_COUNT; i++) {
     note_freqs[i] = MULT*note_freqs[i - 1];
   }
@@ -238,4 +257,19 @@ void processes() {
   if (playing_measure && sound_on) play_measure(selected_measure);
   if (playing_song && sound_on) play_song();
   if ((state == 1 || state == 4) && millis() - last_played > 300) stop_sound();
+}
+
+// WITH SPEAKER:
+void Task1code( void * pvParameters ){
+  Serial.print("Task1 running on core ");
+  Serial.println(xPortGetCoreID());
+
+  while(1){
+    //Serial.printf("Play sound bool: %d, Frequency: %f\n", play_sound_bool, current_freq); 
+    //if (play_sound_bool){
+      //Serial.println("playing");
+      dacWrite(SPEAKER_PIN, 128+60*sin(current_freq*micros())+19*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
+    //}
+
+  } 
 }

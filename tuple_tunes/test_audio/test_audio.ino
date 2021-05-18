@@ -25,7 +25,8 @@ unsigned long last_note;
 int SineValues[NUM_BITS];       // an array to store our values for sine
 uint16_t sine_index = 0;
 uint8_t note_index_global = 0;
-boolean play_song;
+bool play_song = true;
+double current_freq;
 unsigned long first_played;
 
 TaskHandle_t Task1;
@@ -99,6 +100,7 @@ void setup() {
     global_freqs_new[i] = 2*PI*music_freqs[i]/1000000;
     //loop_time[i] = time_period / NUM_BITS;
   }
+  current_freq = global_freqs_new[0];
   last_note = millis();
   first_played = millis();
 }
@@ -126,15 +128,11 @@ void Task1code( void * pvParameters ){
   Serial.println(xPortGetCoreID());
 
   for(;;){
-    dacWrite(25, 128+60*sin(global_freqs_new[note_index_global]*micros())-19*sin(2*global_freqs_new[note_index_global]*micros())+25*sin(3*global_freqs_new[note_index_global]*micros()));
-  //  } 
-    if (millis() - last_note > 250) {
-      last_note = millis();
-      //dacWrite(25, 128+60*sin(global_freqs_new[note_index_global]*micros())+19*sin(2*global_freqs_new[note_index_global]*micros())+25*sin(3*global_freqs_new[note_index_global]*micros()));
-      note_index_global = (note_index_global+1)%NUM_NOTES;
-     // dacWrite(25, 128+60*sin(global_freqs_new[note_index_global]*micros())+19*sin(2*global_freqs_new[note_index_global]*micros())+25*sin(3*global_freqs_new[note_index_global]*micros()));
-      //rtc_wdt_reset();
-    }
+    if (play_song) {
+      //dacWrite(25, 128+60*sin(global_freqs_new[note_index_global]*micros())-19*sin(2*global_freqs_new[note_index_global]*micros())+25*sin(3*global_freqs_new[note_index_global]*micros()));
+      dacWrite(25, 128+60*sin(current_freq*micros())-19*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
+    
+    } 
   } 
 }
 
@@ -159,6 +157,14 @@ void loop()
   if (millis() - first_played > 6000) {
     play_song = false;
   }
+  if (millis() - last_note > 250) {
+      last_note = millis();
+      //dacWrite(25, 128+60*sin(global_freqs_new[note_index_global]*micros())+19*sin(2*global_freqs_new[note_index_global]*micros())+25*sin(3*global_freqs_new[note_index_global]*micros()));
+      note_index_global = (note_index_global+1)%NUM_NOTES;
+      current_freq = global_freqs_new[note_index_global];
+     // dacWrite(25, 128+60*sin(global_freqs_new[note_index_global]*micros())+19*sin(2*global_freqs_new[note_index_global]*micros())+25*sin(3*global_freqs_new[note_index_global]*micros()));
+      //rtc_wdt_reset();
+    }
 //  dacWrite(25, 128+60*sin(global_freqs_new[note_index_global]*micros())+19*sin(2*global_freqs_new[note_index_global]*micros())+25*sin(3*global_freqs_new[note_index_global]*micros()));
 //  //  } 
 //    if (millis() - last_note > 250) {

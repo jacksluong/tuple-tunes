@@ -216,15 +216,16 @@ void update_end_game() {
   } else {
     tft.drawTriangle(115,121,110,103,115,105, rgb_to_565(DARK_GRAY)); // arrows for measure selection
     tft.drawTriangle(151,121,156,103,151,105, rgb_to_565(DARK_GRAY));
-    if (menu_index == 3) {
-      tft.drawTriangle(115, 11 + 30 * menu_index, 
-                       110, 13 + 30 * menu_index,
-                       115, 15 + 30 * menu_index, rgb_to_565(GRAY));
-      tft.drawTriangle(151, 11 + 30 * menu_index, 
-                       156, 13 + 30 * menu_index,
-                       151, 15 + 30 * menu_index, rgb_to_565(GRAY)); // arrows for current menu state
-    }
+//    if (menu_index == 3) {
+    tft.drawTriangle(115, 11 + 30 * menu_index, 
+                     110, 13 + 30 * menu_index,
+                     115, 15 + 30 * menu_index, rgb_to_565(menu_index == 3 ? GRAY : DARK_GRAY));
+    tft.drawTriangle(151, 11 + 30 * menu_index, 
+                     156, 13 + 30 * menu_index,
+                     151, 15 + 30 * menu_index, rgb_to_565(menu_index == 3 ? GRAY : DARK_GRAY)); // arrows for current menu state
+//    }
   }
+
 
   // Menu cursor
   if (menu_index == 3) {

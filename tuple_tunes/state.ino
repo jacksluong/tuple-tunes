@@ -439,7 +439,12 @@ void process_game_menu(int bv, int js) {
 void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clearing all measures
   // Handle joystick input
   if (js == 1 || js == 3) {
-    tft.fillCircle(134, 30 + 30 * menu_index, 1, rgb_to_565(DARK_GRAY));
+    if (menu_index == 3) {
+      tft.fillCircle(134, 50 + 30 * (menu_index - 1), 1, rgb_to_565(DARK_GRAY));
+    } else {
+      tft.fillCircle(134, 30 + 30 * menu_index, 1, rgb_to_565(DARK_GRAY));
+    }
+    
   }
   if (js == 1) { // up
     menu_index = (menu_index + 3) % 4;
@@ -461,22 +466,33 @@ void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clear
     } 
   }
 
-  if (menu_index == 3) { // measure selection
-    if (!is_locked) {
-      is_locked = true;
-      uint8_t old_selected_measure = selected_measure;
+  
+  
+  if (is_locked and menu_index == 3) {
+    uint8_t old_selected_measure = selected_measure;
+    if (js) {
+      is_locked = false;
       if (js == 2) { // right
         selected_measure = (selected_measure + 1) % (current_measure + 1);
       } else if (js == 4) { // left
         selected_measure = (selected_measure + current_measure) % (current_measure + 1);
       }
-      if (old_selected_measure != selected_measure) display_end_game();
-      Serial.printf("Selected measure: %d", selected_measure);
+    }
+    
+    if (old_selected_measure != selected_measure) display_end_game();
+    Serial.printf("Selected measure: %d", selected_measure);
+  }
+
+  if (bv && menu_index == 3) { // measure selection
+    if (!is_locked) {
+      is_locked = true;
+      
     } else if (is_locked) {
       is_locked = false;
     }
-    
+    update_end_game();
   }
+
 
   if ((bv || js) && state == 3) update_end_game();
 }

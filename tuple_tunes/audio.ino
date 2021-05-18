@@ -67,9 +67,11 @@ void play_song() {
 }
 
 void play_note(int index) {
-  play_sound_bool = true;
-  current_freq = note_freqs[index];
-  last_played = millis();
+  if (sound_on){
+    play_sound_bool = true;
+    current_freq = note_freqs[index];
+    last_played = millis();
+  }
   Serial.printf("Playing frequency %f\n", current_freq);
 }
 

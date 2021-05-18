@@ -3,7 +3,7 @@ import datetime
 import random
 from in_game_functions import *
 
-moosic_db = '/var/jail/home/team59/moosic6.db'
+moosic_db = '/var/jail/home/team59/moosic7.db'
 
 ROOM_CAPACITY = 10
 

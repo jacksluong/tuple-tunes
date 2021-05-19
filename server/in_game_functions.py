@@ -3,10 +3,10 @@ import sqlite3
 import datetime
 import random
 
-moosic_db = '/var/jail/home/team59/moosic6.db'
+moosic_db = '/var/jail/home/team59/moosic7.db'
 past_games_db = '/var/jail/home/team59/archive.db'
 
-MAX_MEASURES = 6
+MAX_MEASURES = 4
 
 def fetch(game_id, username, last_updated_measure):
     '''given the game id, username, and last updated measure of fetching player,

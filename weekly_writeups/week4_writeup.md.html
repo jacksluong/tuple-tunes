@@ -32,8 +32,8 @@ Our code for the game was mostly the same since the speaker runs on a different 
     <br>
     <div align="center">
         <figure >
-            <img src="schematic.PNG" alt="audio diagram" style="width:50%">
-            <figcaption>Diagram for Audio</figcaption>
+            <img src="schematic.PNG" alt="system schematic" style="width:60%">
+            <figcaption>System Schematic</figcaption>
         </figure>
     </div>
     <br>
@@ -48,10 +48,14 @@ We each worked on finding and implementing solutions to different bugs which we 
 # Goal 5: Robust implementation of leave game and disconnect
 ![Demo (Same Video for Goals 1-5) - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
 
-Whether they are in turn or out of turn, all players can play a previous measure and song by accessing the game menu. At any point in the game, a player can scroll through previous measures on the right side menu on the in game display, and doing a long press will take them to the game menu screen. The left side of this menu has all actionable selections, and if the player selects “Play Measure” the audio plays the measure which the player had selected on the previous in game display page. The player can also select “Play Song” on this menu page at any point during the game to play the entire song composed so far. When out of turn, however, a player is unable to actually add notes nor submit measures since it is not their turn. 
+At week 3, we were having trouble with bugs in the disconnect method; sometimes we would have multiple players in turn, sometimes we would have crashes. Currently for player disconnect, after a lot more testing, any player who doesn’t make a ping within 20 seconds will be automatically kicked from the game, and the next player will get a turn. This is done by having the server continually check for player pings when connected players make requests from the server. The server then applies logic and sends back the new player turn. For the player leave game, a similar function happens; players who want to leave from the ESP side will send a POST request to logic.py, which would then handle the logic behind leaving.
 
 # Extra: Gallery Web App that displays the finished games + Garbage Collect 
-![Demo (Same Video for Goals 1-5) - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+Garbage collection functionality has been implemented for the server side. Whenever a player leaves a game, they are removed from the in game players database and moved to the archive players database. Whenever a game ends (either the max number of measures is hit or there are no more players in the game), the game, associated measures and players are removed from the current database and moved to an archive database. 
+
+There is now a gallery web application that displays all games in the archives database organized by chronological order (from most recent to least recent). Each game entry on the web page shows the host name, key, tempo, players and measures associated with the game. 
+
+[The link the web app can be found here.](http://608dev-2.net/sandbox/sc/team59/server/main.py) 
 
 # Challenges
 
@@ -75,6 +79,7 @@ Although this is the last week of working on our project for this class, ideas f
 # Appendix Code
 
 [Link to all code](https://drive.google.com/file/d/1JQRNUMLyT0S4IWtzh36zz81IuEKBSTz7/view?usp=sharing)
+
 tuple_tunes.ino - specifically the new code that involves the speaker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 TaskHandle_t Task1;

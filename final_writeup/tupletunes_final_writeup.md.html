@@ -1,0 +1,94 @@
+<meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
+
+**6.08 Tuple Tunes Final Writeup**
+
+**Team 59:** Irene Huang, Si Liang (Brandon) Lei, Jacky Luong, Janette (Jan) Park, Joyce Yuan
+
+Meeting time: 4:30 - 5:00 PM Thursday
+
+# Overview
+
+Our goal is to create a multiplayer music making game, where a group of players can easily compose a melody together, take turns adding on to each others’ music, browse others’ compositions, and hear their own melodies played from their very own ESP32. Tuple Tunes is intended to be a lighthearted multiplayer game that can help players with any level of experience familiarize themselves with music making.
+
+# Purpose
+
+The purpose of this project is to provide an entertaining music making experience accessible to all. Oftentimes, music making platforms are difficult to access and have a steep learning curve. In our case, we are lowering this barrier by creating a game where people can experiment with creating music no matter their previous musical background, and take ownership of the music they create. We believe that music is something people can learn through experimenting, and our game serves the purpose of allowing others to experiment composing music in an intuitive way. We take care to make sure that the UI is intuitive, and the music composition follows music theory rules so that the songs that are created sound decent without much effort. In addition, players can learn from each other, share their creations with others, and bond over the music they create. We hope to be able to provide a fun game where people can learn to compose music with each other, and spread their love for music.
+
+# Game Specifics
+
+* Pre-game - Before the game starts, players have two options: either create a game room or join a game room. 
+
+* Start Game - A host can start a game from the landing page. When starting a game, the host chooses a major key and a tempo (slow, mid, fast) to set up the gameroom. After pressing start, the host enters the waiting with their room number, username, and constantly updating number of players.
+
+* Join Game - Players can join a game with a three-digit room number
+
+* Waiting Room - players arrive here from both the start and join game pages, although the waiting room display has an added start game capability for the host (the player who created the game). Once the game is started, all players will transition to the in-game display. The host will be first in turn, and the order of turns takes the order in which players joined the game. The LED display light indicates the turn of the current player (green for in turn, red for out of turn). 
+
+* In-game Gameplay (In-turn) - While in turn, players can choose query through a few options: 
+    - Measure number: the measure currently selected to display in the grid; the player can query through previous measures or add to the measure they are composing
+    - Note selection: the player can select the specific note they wish to add
+    - Duration selection: the player can specify the duration of this note among the choices of a sixteenth note, eighth note, quarter note, half note, and whole note.
+    - Add note: clicking this adds the selected note with its specified duration, updating the grid accordingly (a tilde “~” is displayed for every held note over, and an “R” is displayed for each rest)
+    - Delete note: the player has the option to delete the last most recent added note.
+    - Submit measure: the player can click this menu option to submit the measure to the server. This updates the player’s screen by incrementing the measure count and changing this player from in-turn to out-of-turn. Subsequently, the next player in order will update to be in-turn, and the LED lights indicate this.
+    - Menu info: selecting this takes to the game menu info page, which displays both static information about the game (including the song key, tempo, room code, and number of players) on the right side, as well as actionable menu items (including play song, play  measure, and leave game) on the left side.
+
+* In-game Gameplay (Out-of-turn) - players have limited options (the rest of the options are hidden)
+    - Measure number: players can query through previous measures
+    - Menu: players can access the game menu
+
+* Game Menu - at any time, the game menu provides players with basic information and options they can access at any time. This includes:
+    - Static: room number, major key, tempo, players, mute/unmute
+    - Actions items: resume, play song, play measure, mute, and leave game
+
+* End Game - players can access the song that was just created in game. After the game has ended, players may
+    - Play entire song
+    - Play the current measure
+    - Query through all measures and see the notes
+    - Start over and make a new game by returning to landing page
+
+# Parts List
+* ESP32
+* LCD
+* LED
+* Button
+* Joystick
+* Speaker
+* Linear Amplifier for Audio Amplification
+* 10k Ohm Potentiometer
+* 68k Ohm Resistor
+* Wires of varying sizes
+<br>
+  <div align="center">
+      <figure >
+          <img src="schematic.PNG" alt="audio diagram" style="width:60%">
+          <figcaption>Board Schematic</figcaption>
+      </figure>
+  </div>
+  <br>
+
+# State Machine
+<table><tr>
+  <td> 
+    <div align="center">
+      <figure >
+        <img src="state_diagram_frontend.PNG" alt="state diagram (frontend)" style="width:100%">
+        <figcaption>State Machine (Frontend Only)</figcaption>
+      </figure>
+    </div>
+  </td>
+  <td> 
+    <div align="center">
+      <figure >
+        <img src="state_diagram_http.PNG" alt="state diagram (with http requests)" style="width:100%">
+        <figcaption>State Machine (with HTTP Requests)</figcaption>
+      </figure>
+    </div>
+  </td>
+</tr></table>
+
+# Code Organization 
+
+
+<style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
+<!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>

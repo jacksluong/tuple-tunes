@@ -75,10 +75,56 @@ Although this is the last week of working on our project for this class, ideas f
 # Appendix Code
 
 [Link to all code](https://drive.google.com/file/d/1JQRNUMLyT0S4IWtzh36zz81IuEKBSTz7/view?usp=sharing)
-
-audio.ino - 
+tuple_tunes.ino - specifically the new code that involves the speaker
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// insert audio files here
+TaskHandle_t Task1;
+const int SPEAKER_PIN = 25;
+double current_freq = 0;
+double prev_freq = 0;
+
+void setup() {
+  pinMode(SPEAKER_PIN, OUTPUT);
+  disableCore0WDT();
+
+  xTaskCreatePinnedToCore(
+                    Task1code,   /* Task function. */
+                    "Task1",     /* name of task. */
+                    10000,       /* Stack size of task */
+                    NULL,        /* parameter of the task */
+                    1,           /* priority of the task */
+                    &Task1,      /* Task handle to keep track of created task */
+                    0);          /* pin task to core 0 */     
+
+  // Compute note frequencies in radians per milliseconds
+  note_freqs[0] = C3*2*PI/1000000;
+  for (int i = 1; i < NOTE_COUNT; i++) {
+    note_freqs[i] = MULT*note_freqs[i - 1];
+  }
+}
+
+// WITH SPEAKER:
+void Task1code( void * pvParameters ){
+  Serial.print("Task1 running on core ");
+  Serial.println(xPortGetCoreID());
+
+  while(1){
+    dacWrite(SPEAKER_PIN, 128+19*sin(current_freq*micros())-60*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
+  } 
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+audio.ino - specifically the new code that involves the speaker
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void play_note(int index) {
+  if (sound_on){
+    current_freq = note_freqs[index];
+    last_played = millis();
+  }
+  Serial.printf("Playing frequency %f\n", current_freq);
+}
+
+void stop_sound() {
+  current_freq = 0;
+}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 state.ino - specifically the finished end game state and updated state machine
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

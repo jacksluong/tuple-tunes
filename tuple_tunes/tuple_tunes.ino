@@ -127,7 +127,6 @@ int note_state = 0;
 TaskHandle_t Task1;
 const int SPEAKER_PIN = 25;
 double current_freq = 0;
-bool play_sound_bool = false; 
 double prev_freq = 0;
 
 
@@ -260,9 +259,6 @@ void processes() {
 
 // WITH SPEAKER:
 void Task1code( void * pvParameters ){
-  Serial.print("Task1 running on core ");
-  Serial.println(xPortGetCoreID());
-
   while(1){
     dacWrite(SPEAKER_PIN, 128+19*sin(current_freq*micros())-60*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
   } 

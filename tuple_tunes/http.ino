@@ -243,5 +243,4 @@ void leave_game() {
 void gallery_request() {
   char query[50] = "gallery=True";
   make_get_request(SERVER, IN_GAME_ADDRESS, query, response, false);
-  
 }

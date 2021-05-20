@@ -1,0 +1,707 @@
+<meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
+
+**6.08 Final Project Week 4 Writeup**
+
+**Team 59:** Irene Huang, Si Liang (Brandon) Lei, Jacky Luong, Janette (Jan) Park, Joyce Yuan
+
+Meeting time: 4:30 - 5:00 PM Thursday
+
+# Goal 1: Reestablish front end - make in turn out of turn more obvious, make things prettier 
+![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+
+We added to and improved upon much of the frontend aspects in the pre-game and in-game displays. For the waiting room, we reformatted the display to keep the same theme consistency as with other pages. For the in-game displays, we redesigned and drew the left side grid to clearly indicate the four by four structure of the measure, with a nice underline cursor instead of the awkward triangle one which we used previously. We changed the order of the menu options to have measure displayed on the top, in consistency with the measure number out of total limit as displayed on the top left, above the grid. Additionally, we updated the right side menu options to better suit the user’s options. We were able to add another feature “delete note,” which allows the user, if they are in turn, to delete the last added note in the current measure they are composing.
+
+# Goal 2: Finish end game feature
+![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+
+We updated and improved the end game display, which now allows all users to play the song they had just composed as well as scroll through all of the submitted measures. Using the state machine, once the maximum measure count limit is reached, this signifies game completion, thereafter updating all players’ displays to the end-game screen. After a game has been ended, all players are able to query through the measures of the submitted and finished song. The end-game page is very similar to the format of the in-game displays, although with different menu options. The left side displays the added notes in a grid for the currently selected measure, and the right side menu displays options for playing the whole song, playing the current measure, returning back to the landing page to start or join a new game, or scrolling through the song’s measures. For the first three menu options, the user simply can make a short button press. For the last menu option, scrolling through measures, the player can lock into and out of the selection mode, in consistency with the functionality of scrolling through measures when in-game.
+
+# Goal 3:  Either get the speaker and amplifier working or write it into challenges / future implementation
+![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+
+First, we tried to get the speaker to output sound on a separate test_audio directory. We started with a pre-declared array of sine wave values and had an array of 8 frequencies to play. Given these frequencies, a loop_timer was created in microseconds, which was how much time elapsed between each value of the sine wave being written out. Each loop_timer microseconds, the ESP wrote through dacWrite the next sine value to the speaker. This became a problem though, as some consecutive high frequencies were not large enough in difference for the clock cycle of the ESP to distinguish with the pre-declared array. With the help of Anthony, we realized that coding the sine calculation within the dacWrite directly using micros(), such as in `dacWrite(25, sin(2*PI*micros()*frequency))` would give a precise sine wave no matter what the frequency is. This also eliminated the need looping with a loop timer. We did a lot of trial and error with the usage or elimination of variables to make sure that the ESP loop runs as quickly as possible, to avoid blocking in creating this sine wave output.
+
+Once we got the speaker to output sound in this test file, we realized the outputted sound is obnoxiously loud, so we decided to lessen the voltage delivered to the audio amplifier and speaker with a potentiometer and resistor in series as a voltage divider. We used a 10k ohm potentiometer connected to ground so that the lowest output sound is with zero voltage, or no sound (another way to mute the speaker). After a lot of trial and error, we decided that the 68k ohm resistor in series with the potentiometer and connected to pin 25 (schematic is below). The maximum voltage delivered to the amplifier would be $$\frac{10}{10+68} = \frac{5}{39}$$ the signal from pin 25. This maximum was still too loud in the speaker, but the lower half of the potentiometer readings produced a nice volume and tone in the speaker.
+
+We considered the tone we wanted to produce through the speaker. Instead of driving the speaker with a plain sine wave, we wanted to output a superposition of multiple sine waves in different harmonics to produce a nicer tone. With lots of trial and error, we decided on our favorite tone (similar to a trumpet tone) using the first three harmonics in superposition with certain Fourier coefficients, and this is the value that was outputted using dacWrite.
+
+After the test code worked, we integrated the new speaker functionality into our project code. Since outputting a continuous signal would be blocking the other functionality of the code, we decided to allocate Core 0 on the ESP (the main loop is in Core 1) to just generate our signal to pin 25. We created a task to run this second loop with just the dacWrite, and it always plays the global current frequency, in radians per microsecond, stored in the ESP. The main core changes this current frequency when needed, such as when playing a measure, song, or any note. We changed our array of frequencies from Hz to radians per microsecond to lessen the calculation time per loop cycle in Core 0, since the sine value we are calculating is $$\sin{2*\pi*\text{freq}*\text{micros()}/1000000}$$ could be simplified by pre-calculating everything except the `micros()`. In order to use this second core with this functionality, however, we needed to turn off the watchdog timer for core 0 in the setup.
+
+Our code for the game was mostly the same since the speaker runs on a different core, except `play_note(index)` sets the global current frequency variable to the indicated new note, `stop_sound()` sets the global current frequency variable to 0 (so that pin 25 always outputs in DC, which has no frequency hence no sound), and the conditional for `sound_on` (internal mute functionality) needed to be moved to the function play_note.
+
+# Goal 4: Work through all the bugs on our bug log 
+![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+
+[Bug spray history](https://docs.google.com/spreadsheets/d/1Pkt5tuLlZQ7YCKsR67mw-R_IlKexvAEQ1bpVTXt2xR0/edit?usp=sharing) 
+We each worked on finding and implementing solutions to different bugs which we recorded in our bug log. Various bugs we faced were due to new frontend additions and implementations. For example, we found a bug where adding less than two notes to a measure caused the ESP to crash and reload. After a lot of time investigating this issue, we realized that the memory allocation for the involved variables was not big enough, and by updating that, we were able to successfully solve the issue and allow users to submit any amount of notes, including none, to a measure as they wish. Apart from that, many issues we resolved mainly involved visuals and accurately reflecting change of state. We tested our game by ourselves and with each other and made sure it didn’t crash unexpectedly and kept track of all variables as we intended. Overall, although the various bugs we noted as they arose gave us a lot of frustration, with a lot of patience and time, we were able to slowly work through them to try to give our game a strong and successful foundation.
+
+# Goal 5: Robust implementation of leave game and disconnect
+![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+
+Whether they are in turn or out of turn, all players can play a previous measure and song by accessing the game menu. At any point in the game, a player can scroll through previous measures on the right side menu on the in game display, and doing a long press will take them to the game menu screen. The left side of this menu has all actionable selections, and if the player selects “Play Measure” the audio plays the measure which the player had selected on the previous in game display page. The player can also select “Play Song” on this menu page at any point during the game to play the entire song composed so far. When out of turn, however, a player is unable to actually add notes nor submit measures since it is not their turn. 
+
+# Extra: Gallery Web App that displays the finished games + Garbage Collect 
+![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+
+# Challenges: 
+
+Notable challenges we faced involved finding and implementing the solutions to the various bugs we documented in our bug log, as well as trying to achieve a fully functional yet easy to navigate and user-friendly user interface on the ESP. Since our game is intended to be for multiple players, we had to perform testing either when multiple team members were available, or through using Postman, in order to visualize and test the functionalities from different pages and features.
+
+Additionally, we faced several challenges with integrating aspects of the hardware into our system. Namely, determining a reasonable resistor to create an effective volume control took a lot of trial and error, and even with the time efficient signal generating, the sound for high frequencies is louder than for low frequencies. When audio is not playing, the speaker still outputs default noise, and the noise is still heard when the audio is playing too. These could be limitations with the parts that we’re using, or it could also be that there’s too many wires and devices connected in one system that significant noise enters the speaker. 
+
+# Possible Steps for Future Expansion:
+
+Although this is the last week of working on our project for this class, ideas for possible future expansion and features include the following:
+
+* Live updating by notes: Allowing users to see the notes that the player in turn is adding to their measure would allow them to do more than wait until each measure is complete without anything new to see or do. With this feature implemented (which would require modifying both the ESP and server code), the player in turn would periodically send the state of the current measure they’re on so that other players can always fetch the latest information and keep up closer to real-time.
+
+* Gallery: This would come in the form of a separate state/page in the game on the ESP that asks the server to provide three random (anonymous) songs (the measures information for each of them) so players have the opportunity to explore what others have created with this game, beyond just playing it themselves. This would require adding an additional API endpoint to get song information and handling it on the ESP side when loading the gallery.
+
+* Lobby: We currently only offer private games; that is, the only way for anyone to join a game is to enter a valid game code for a game that is in the waiting-room stage, but that implies that some host gave the user a code. Creating a lobby that displays public games (open for anyone to join) would give players more flexibility in the ways that they want to play (particularly who they want to play with and the opportunity to explore without knowing what to expect). To implement this, we’d have to create HTTP requests for the server to respond to the ESP with a list of games yet to start and handle it accordingly in a new state/page on the ESP side.
+
+* User account system: Players can play games, submit measures, and have their songs saved in the database, but after that, we don’t have any functionality that allows them to see those songs again. With a user account system (with appropriate and secure login functionality), we would be able to save the history of songs for each user for them to look back on at any time that they want. This would require a great deal of modification of the server side (in order to handle user login and saving new information) and new states for logging in and seeing past songs on the ESP side.
+
+
+Appendix Code:
+
+[Link to all code](https://drive.google.com/file/d/1Nkluxlbb5Ri3sTcC1ExvaBsC9Ar_D2ZT/view?usp=sharing)
+
+state.ino - has the waiting room, new state machine, in turn and out of turn functionalities including change of color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void back_to_landing() {
+  menu_state = 0;
+  state = 0;
+  display_landing();
+  update_landing();
+}
+
+void reset_game() {
+  // Playback variables
+  note_index = 0;
+  measure_index = 0;
+  playing_measure = false;
+  playing_song = false;
+
+  // Game state variables
+  player_count = 0;
+  current_measure = 0;
+  curr_note_index = selected_key;
+  current_note[0] = '\0';
+  selected_note = curr_note_index % 12;
+  selected_duration = 0;
+  selected_symbol = 0;
+  selected_measure = 0;
+  step_index = 0;
+  note_state = 0;
+
+  // Other variables
+  menu_state = 0;
+  input_cursor = 0;
+  state = 4;
+  is_locked = false;
+  tft.setTextSize(1);
+
+  if (is_host) {
+    in_turn = true;
+    set_led_color(0, 255, 0);
+  } else {
+    in_turn = false;
+    set_led_color(255, 0, 0);
+  }
+}
+
+void update_state(int bv, int js) {
+  if (state == 0) {
+    process_landing_state(bv, js);
+  } else if (state == 1) {
+    process_start_game(bv, js);
+  } else if (state == 2) {
+    process_join_game(bv, js);
+  } else if (state == 3) {
+    process_waiting_room(bv, js);
+  } else if (state == 4) {
+    process_in_game(bv, js);
+  } else if (state == 5) {
+    process_game_menu(bv, js);
+  } else if (state == 6) {
+    process_end_game(bv, js);
+  }
+}
+
+////////////////////// landing //////////////////////
+
+void process_landing_state(int bv, int js) {
+  // joystick input
+  if (js == 1) { // up
+    menu_state = (menu_state + 2) % 3;
+    update_landing();
+  } else if (js == 3) { // down
+    menu_state = (menu_state + 1) % 3;
+    update_landing();
+  }
+
+  // joystick input
+  if (bv == 1) {
+    if (menu_state == 0) { // start
+      state = 1;
+      display_start_game();
+    } else if (menu_state == 1) { // join
+      game_code_input[0] = -10; // equivalent to 0 mod 10
+      game_code_input[1] = -10;
+      game_code_input[2] = -10;
+      input_cursor = 0;
+      is_locked = true;
+      menu_state = 0;
+      state = 2;
+      display_join_game();
+    } else { // gallery
+      state = 7;
+      display_gallery();
+    }
+    menu_state = 0;
+  } else if (bv == 2) {
+    sound_on = !sound_on;
+    update_landing();
+  }
+}
+
+////////////////////// start game //////////////////////
+
+void process_start_game(int bv, int js) {
+  if (millis() - last_played > 300) stop_sound();
+
+  // joystick input
+  if (!is_locked && js == 1) { // up
+    menu_state = (menu_state + 3) % 4;
+  } else if (!is_locked && js == 3) { // down
+    menu_state = (menu_state + 1) % 4;
+  } else if (is_locked && js == 2) { // right
+    if (menu_state == 0) {
+      // selected key is index of the selected key, should not changed after locked
+      selected_key = (selected_key + 1) % 12;
+      play_note(selected_key);
+    }
+    else selected_tempo = (selected_tempo + 1) % 3;
+  } else if (is_locked && js == 4) { // left
+    if (menu_state == 0) {
+      selected_key = (selected_key + 11) % 12;
+      play_note(selected_key);
+    }
+    else selected_tempo = (selected_tempo + 2) % 3;
+  }
+  update_start_game(js);
+
+  // button input
+  if (bv == 1) {
+    if (menu_state == 0 || menu_state == 1) { // inputs
+      is_locked = !is_locked;
+      if (!is_locked) stop_sound();
+      else if (menu_state == 0) play_note(selected_key);
+      update_start_game(1);
+    } else if (menu_state == 2) { // start
+      create_game_http();
+      is_host = true;
+
+      state = 3;
+      num_players = 1;
+      Serial.println("Host joining waiting room");
+      Serial.println(player_list);
+      wait_room_timer = millis();
+      display_waiting_room();
+    } else  { // back
+      back_to_landing();
+    }
+  } else if (bv == 2) {
+    sound_on = !sound_on;
+    update_start_game(6); // TODO: toggle sound indicator
+  }
+}
+
+////////////////////// join game //////////////////////
+
+void process_join_game(int bv, int js) {
+  if (js == 1 || js == 3) {
+    if (is_locked) {
+      game_code_input[input_cursor] = (game_code_input[input_cursor] + (js == 1 ? 11 : 19)) % 10;
+    } else {
+      menu_state = (menu_state + (js == 1 ? 2 : 1)) % 3;
+    }
+  } else if (is_locked && js) {
+    input_cursor = (input_cursor + (js == 2 ? 1 : 2)) % 3;
+  }
+  update_join_game(js);
+
+  if (bv == 1) {
+    if (menu_state == 0) { // input
+      if (!is_locked) is_locked = true;
+      else if (game_code_input[0] >= 0 && // three numbers specified
+               game_code_input[1] >= 0 &&
+               game_code_input[2] >= 0) is_locked = false;
+      update_join_game(1);
+    } else if (menu_state == 1) { // join
+      if (join_game_http()) {
+        is_host = false;
+        
+        state = 3;
+        num_players = 2;
+        Serial.println("Player joining waiting room");
+        Serial.println(player_list);
+        wait_room_timer = millis();
+        display_waiting_room();
+      }
+    } else { // back
+      back_to_landing();
+    }
+  } else if (bv == 2) {
+    sound_on = !sound_on;
+    update_join_game(6);
+  }
+}
+
+////////////////////// in-game //////////////////////
+
+void process_in_game(int bv, int js) {
+  if (current_measure > MEASURE_COUNT) { // if reach measure count limit, need to end game
+    tft.fillScreen(TFT_BLACK);
+    state = 6;
+  } else {
+    if (millis() - last_played > 300) stop_sound();
+    if (!is_locked && js) { // scrolling up and down the menu
+      if (js == 1) { // up
+        menu_state = (menu_state + 4) % 5;
+      } else if (js == 3) { // down
+        menu_state = (menu_state + 1) % 5;
+      }
+    } else if (is_locked && js) { // scrolling through note and duration selection
+      if (menu_state == 0) { // note and sharp/flat/neutral selection
+        if (js == 2) { // right
+          if (curr_note_index + SCALE_STEPS[(step_index + 1) % 8] <= 35) {
+            step_index = (step_index + 1) % 8;
+            curr_note_index = curr_note_index + SCALE_STEPS[step_index];
+            selected_note = curr_note_index % 12;
+          }
+
+          play_note(curr_note_index);
+          Serial.printf("Current note index updated %d \n", curr_note_index);
+
+        } else if (js == 4) { // left
+
+          if (curr_note_index - SCALE_STEPS[step_index] >= 0) { // TODO
+            curr_note_index = curr_note_index - SCALE_STEPS[step_index];
+            step_index = (step_index + 7) % 8; //same as subtracting 1
+            selected_note = curr_note_index % 12;
+          }
+
+          play_note(curr_note_index);
+          Serial.printf("Current note index updated %d \n", curr_note_index);
+        }
+
+        //current note is what we will be displaying
+        current_note[0] = '\0';
+
+        //this is our case for representing rests
+        if (step_index == 7) {
+          stop_sound();
+          strcat(current_note, "R");
+          Serial.println("Current note is rest");
+        } else if (is_flat_key) {
+          strcat(current_note, NOTES_FLAT[selected_note]);
+          Serial.printf("Current note is %s \n", current_note);
+        } else {
+          strcat(current_note, NOTES_SHARP[selected_note]);
+          Serial.printf("Current note is %s \n", current_note);
+        }
+
+        if (js == 2 || js == 4) { // update current selected symbol if note has changed
+          if (current_note[1] == '#') {
+            selected_symbol = 2;
+          } else if (current_note[1] == 'b') {
+            selected_symbol = 0;
+          } else if (current_note[1] == ' ' || current_note[1] == '\0') {
+            selected_symbol = 1;
+          }
+          adjustment = 0; //we need to reset adjustment each time
+        }
+
+        // changing sharp/flat/neutral
+        if (js == 1) { // up
+
+          /*
+            /////////////////////////////
+            // edge cases //////////////
+            ////////////////////////////
+            if (curr_note_index == 0){ //edge case for Cb
+            if (selected_symbol == 2){
+              adjustment = adjustment - 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1) {
+              adjustment = adjustment + 1;
+              selected_symbol == 2;
+            } else {
+              Serial.println("we should not be rendering Cb");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+            }
+
+            else if (curr_note_index == 35){ //B
+            if (selected_symbol == 0){
+              adjustment = adjustment + 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1){
+              adjustment = adjustment - 1;
+              selected_symbol = 0;
+            } else {
+              Serial.println("we should not be rendering B#");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+            }
+
+            ///////////////////////////////////
+          */
+
+          //this is for all other notes
+          //later on, we will add adjustment to note index
+          if (selected_symbol == 2) {
+            if (curr_note_index + adjustment - 2 < 0) {
+              //do nothing if the next change would bring us below 0
+            } else {
+              adjustment = adjustment - 2;
+              selected_symbol = (selected_symbol + 1) % 3;
+            }
+          } else {
+            if (curr_note_index + adjustment + 1 > 35) {
+              //do nothing if next change brings us above 35
+            } else {
+              adjustment = adjustment + 1;
+              selected_symbol = (selected_symbol + 1) % 3;
+            }
+          }
+          play_note(curr_note_index + adjustment);
+          current_note[1] = SYMBOLS[selected_symbol];
+
+          Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+
+        }
+
+        else if (js == 3) { // down
+
+          /*
+            /////////////////////////////
+            // edge cases //////////////
+            ////////////////////////////
+            if (curr_note_index == 0){ //edge case for Cb
+            if (selected_symbol == 2){
+              adjustment = adjustment - 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1) {
+              adjustment = adjustment + 1;
+              selected_symbol == 2;
+            } else {
+              Serial.println("we should not be rendering Cb");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+            }
+
+            else if (curr_note_index == 35){
+            if (selected_symbol == 0){
+              adjustment = adjustment + 1;
+              selected_symbol = 1;
+            } else if (selected_symbol == 1){
+              adjustment = adjustment - 1;
+              selected_symbol = 0;
+            } else {
+              Serial.println("we should not be rendering B#");
+            }
+            current_note[1] = SYMBOLS[selected_symbol];
+            }
+
+            ///////////////////////////////////
+          */
+
+          if (selected_symbol == 0) {
+            if (curr_note_index + adjustment + 2 > 35) {
+              //do nothing if the next change would bring us below 0
+            } else {
+              adjustment = adjustment + 2;
+              selected_symbol = (selected_symbol + 2) % 3;
+            }
+
+          } else {
+            if (curr_note_index + adjustment - 1 < 0) {
+              //do nothing if next change brings us above 35
+            } else {
+              adjustment = adjustment - 1;
+              selected_symbol = (selected_symbol + 2) % 3;
+            }
+          }
+          play_note(curr_note_index + adjustment);
+          current_note[1] = SYMBOLS[selected_symbol];
+          Serial.printf("Current note is %s, adjustment %d, current_note_index %d \n", current_note, adjustment, curr_note_index);
+        }
+      }
+
+      else if (menu_state == 1) { // duration selection (joystick left and right)
+        if (js == 2) { // right
+          selected_duration = (selected_duration + 1) % 5;
+        } else if (js == 4) { // left
+          selected_duration = (selected_duration + 4) % 5;
+        }
+      } else if (menu_state == 4) {
+        if (js == 2) { // right
+          Serial.printf("Selected measure: %d", selected_measure);
+          selected_measure = (selected_measure + 1) % (current_measure + 1);
+          is_locked = true;
+          display_in_game();
+        } else if (js == 4) { // left
+          Serial.printf("Selected measure: %d", selected_measure);
+          selected_measure = (selected_measure + current_measure) % (current_measure + 1);
+          is_locked = true;
+          display_in_game();
+        }
+      }
+    }
+
+    if (bv == 1) {
+      for (int i = 0; i < 5; i++) tft.fillCircle(135, 30 + 20 * i, 1, rgb_to_565(DARK_GRAY)); // clear indicator
+      
+      if (!in_turn && (menu_state == 2 || menu_state == 3)) return; //cannot access submit note or add note
+      
+      if (!is_locked && menu_state != 2) {
+        is_locked = true;
+      } else {
+        is_locked = false;
+      }
+      // state changes
+      if (menu_state == 0) {
+        play_note(curr_note_index);
+      }
+      if (menu_state == 2) { // add a note
+        int curr_x = 2 + 25 * (note_state % 4);
+        int curr_y = 29 + 25 * (int(note_state / 4));
+        tft.drawTriangle(curr_x, curr_y, curr_x, curr_y + 4, curr_x + 3, curr_y + 2, TFT_BLACK); // clear grid cursor
+
+        int temp_note_state = note_state;
+        Serial.printf("Added is %d", note_state + pow(2, selected_duration));
+        if ((note_state >= 16)) {
+          note_state = 16;  // to update grid cursor position for next note
+          menu_state = 3;
+//          tft.fillCircle(135, 30 + 20 * 2, 1, rgb_to_565(DARK_GRAY));
+        } else {
+          note_state += pow(2, selected_duration);
+          menu_state = 0;
+
+          //adding the note to the notes array
+          if (current_note[0] == 'R') {
+            curr_note_index = 36;
+          } else {
+            //curr_note_index = curr_note_index + adjustment;
+          }
+
+          //curr_notes_array[temp_note_state] = curr_note_index;
+          //          curr_notes_array[temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
+          measures[current_measure][temp_note_state] = curr_note_index + adjustment; // Needs to be like this for playback
+          temp_note_state = temp_note_state + 1;
+
+          int i;
+          for (i = 0; i < pow(2, selected_duration); i = i + 1) {
+            if (i != pow(2, selected_duration) - 1) {
+              tft.setCursor(10 + 26.5 * (temp_note_state % 4), 28 + 25 * (int(temp_note_state / 4)), 1);
+              tft.println("~");
+            }
+            //            curr_notes_array[temp_note_state] = 37;
+            measures[current_measure][temp_note_state] = 37;
+            temp_note_state = temp_note_state + 1;
+          }
+
+          if ((note_state >= 16)) {
+            note_state = 16;  // to update grid cursor position for next note
+            menu_state = 3;
+//            tft.fillCircle(135, 30 + 20 * 2, 1, rgb_to_565(DARK_GRAY));
+//            is_locked = false;
+          } else {
+//            is_locked = true;
+          }
+
+          is_locked = false;
+        }
+      } else if (menu_state == 3) {
+        if (note_state < 16) {
+          while (note_state < 16) {
+            measures[current_measure][note_state] = 36;
+            note_state += 1;
+          }
+        }
+        submit_measure();
+        tft.fillCircle(135, 30 + 20 * menu_state, 1, TFT_BLACK); // clear right side input cursor
+        note_state = 0;
+        current_measure += 1;
+        selected_measure = current_measure;
+        menu_state = 0;
+        display_in_game();
+        in_turn = false;
+        set_led_color(255, 0, 0);
+      }
+    } else if (bv == 2) { // go to game menu screen
+      tft.fillScreen(TFT_BLACK);
+      state = 5;
+      menu_state = 0;
+      is_locked = false;
+      display_game_menu();
+      //Joyce beleives there should be a return here
+      return;
+    }
+    
+    if (millis() - time_since_last_ping > PING_INTERVAL) {
+      if (in_turn) ping();
+      else fetch_game_state(game_id);
+    }
+  }
+  
+  if (bv || js) update_in_game(js);
+}
+
+////////////////////// game menu //////////////////////
+
+void process_game_menu(int bv, int js) {
+  if (js == 1) { // up
+    menu_state = (menu_state + 4) % 5;
+    update_game_menu();
+  } else if (js == 3) { // down
+    menu_state = (menu_state + 1) % 5;
+    update_game_menu();
+  }
+  if (bv) {
+    update_game_menu();
+    if (menu_state == 0) { // resume game
+      state = 4;
+      display_in_game();
+    } else if (menu_state == 1) {
+      if (playing_song) stop_sound();
+      playing_song = ! playing_song;
+    } else if (menu_state == 2) {
+      if (playing_measure) stop_sound();
+      playing_measure = ! playing_measure;
+    } else if (menu_state == 3) {
+      sound_on = !sound_on;
+      playing_song = false;
+      playing_measure = false;
+      stop_sound();
+      update_game_menu();
+    } else if (menu_state == 4) { // leave game
+      is_locked = false;
+      game_state = 0;
+      back_to_landing();
+    }
+  }
+}
+
+////////////////////// end game //////////////////////
+
+void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clearing all measures
+  tft.setCursor(8, 13, 1);
+  tft.println("Game ended");
+  tft.setCursor(8, 28, 1);
+  tft.println("Return to landing page");
+  if (bv == 1) {
+    is_locked = false;
+    back_to_landing();
+  }
+}
+
+////////////////////// waiting room //////////////////////
+
+void process_waiting_room(int bv, int js) {
+  if (game_state == 2) { // game started
+    state = 4;
+    reset_game();
+    display_in_game();
+  } else {
+    if (bv == 1) start_game_http();
+
+    if (millis() - wait_room_timer > WAIT_ROOM_UPDATE) {
+      get_game_status();
+      tft.fillRect(8, 95, 160, 20, TFT_BLACK);
+      tft.setCursor(8, 100, 1);
+      tft.printf("Number of Players: %d", num_players);
+      Serial.printf("Num players: %d \n", num_players);
+      Serial.println(player_list);
+      wait_room_timer = millis();
+    }
+  }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+in_game_functions.py - disconnect and leave game code
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+def leave_game(c, game_id, username):
+    """
+    Allow a user to leave a game, update game state accordinally
+    """
+
+    #get the current turn in the game (not modded yet)
+    turn = c.execute('''SELECT turn FROM games WHERE rowid = ?;''', (game_id,)).fetchone()[0]
+
+    #get player_names
+    players = c.execute('''SELECT username FROM players WHERE game_id = ? ORDER BY entry_time ASC;''',(game_id,)).fetchall()
+    player_names = [player[0] for player in players]
+
+    #find the index of the player to be popped
+    pop_index = player_names.index(username)
+
+    #index of current turn
+    turn_index = turn % len(players)
+
+    #only update turn if pop_index is less than turn_index
+    if (pop_index < turn_index) or (pop_index == turn_index and pop_index == (len(players) - 1)):
+        c.execute('''UPDATE games SET turn = ? WHERE rowid = ?;''', (turn_index - 1, game_id))
+
+    #delete player from players database
+    c.execute('''DELETE FROM players WHERE username = ?;''', (username, ))
+
+
+def monitor_disconnect(c, game_id, time_now):
+    """
+    makes sure no players are disconnected/idle, update game state 
+    """
+    
+    #create time delta variables
+    delta_time_20 = datetime.timedelta(seconds=20)
+    delta_time_30 = datetime.timedelta(seconds=30)
+
+    #check last time we checked for disconnect
+    last_disconnect_check = c.execute('''SELECT disconnect_check FROM games WHERE rowid = ?;''',(game_id,)).fetchone()[0]
+
+    dto = datetime.datetime.strptime(last_disconnect_check,'%Y-%m-%d %H:%M:%S.%f')
+
+    #only check if we haven't checked for 30 seconds
+    if time_now - dto > delta_time_30:
+
+        #get all the players who haven't pinged/fetched for the last 20 seconds
+        players_disconnect = c.execute('''SELECT username FROM players WHERE game_id = ? AND last_ping < ?;''',(game_id, time_now - delta_time_20)).fetchall()
+
+        disconnected_names = [player[0] for player in players_disconnect]
+            
+        #for each player that disconnect, remove them from the game
+        for username in disconnected_names:
+            leave_game(c, game_id, username) 
+
+        #update last disconnect check time to be current time
+        c.execute('''UPDATE games SET disconnect_check = ? WHERE rowid = ?;''',(datetime.datetime.now(), game_id))
+
+        
+
+def update_last_ping(game_id, username):
+    '''given game id and username,
+    updates the last ping of the player'''
+
+    with sqlite3.connect(moosic_db) as c:
+
+        #first, update ping
+        c.execute('''UPDATE players SET last_ping = ? WHERE game_id = ? AND username = ?;''', (datetime.datetime.now(), game_id, username))
+
+        #check for disconnects
+        monitor_disconnect(c, game_id, datetime.datetime.now())
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+<style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
+<!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>

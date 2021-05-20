@@ -123,7 +123,7 @@ int selected_symbol = 0; // selected symbol index for current note
 int step_index = 0; // selected jump index for determining next note in key
 int note_state = 0;
 
-// PLEASE DON'T CHANGE ANYTHING BELOW:
+// Variables for audio:
 TaskHandle_t Task1;
 const int SPEAKER_PIN = 25;
 double current_freq = 0;
@@ -179,8 +179,6 @@ void setup() {
 
   //set up AUDIO_PWM which we will control in this lab for music:
   pinMode(AUDIO_TRANSDUCER, OUTPUT);
-  //dac_output_enable(DAC_CHANNEL_2);
-  //dac_output_voltage(DAC_CHANNEL_2, 200);
   ledcSetup(AUDIO_PWM, 0, 12);//12 bits of PWM precision
   ledcWrite(AUDIO_PWM, 80); //0 is a 0% duty cycle for the NFET
   stop_sound();
@@ -266,11 +264,6 @@ void Task1code( void * pvParameters ){
   Serial.println(xPortGetCoreID());
 
   while(1){
-    //Serial.printf("Play sound bool: %d, Frequency: %f\n", play_sound_bool, current_freq); 
-    //if (play_sound_bool){
-      //Serial.println("playing");
-      dacWrite(SPEAKER_PIN, 128+19*sin(current_freq*micros())-60*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
-    //}
-
+    dacWrite(SPEAKER_PIN, 128+19*sin(current_freq*micros())-60*sin(2*current_freq*micros())+25*sin(3*current_freq*micros()));
   } 
 }

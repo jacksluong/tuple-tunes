@@ -501,20 +501,4 @@ void process_gallery(int bv, int js) {
   if (bv == 2) {
     back_to_landing();
   }
-
-//  uint8_t old_selected_measure = selected_measure;
-//  
-//  if (js == 2) { // right
-//    selected_measure = (selected_measure + 1) % (current_measure + 1);
-//  } else if (js == 4) { // left
-//    selected_measure = (selected_measure + current_measure) % (current_measure + 1);
-//  }
-//  
-//  if (old_selected_measure != selected_measure) display_in_game();
-//
-//  if (bv == 2) {
-//    state == 5;
-//    process_game_menu(bv, js);
-//  }
-
 }

@@ -34,7 +34,7 @@ const char API_KEY[] = "AIzaSyCwyynsePu7xijUYTOgR7NdVqxH2FAG9DQ"; // for googlea
 const int RESPONSE_TIMEOUT = 6000;
 
 //////////////////
-// My functions //
+// Helper Request Functions //
 //////////////////
 
 /*

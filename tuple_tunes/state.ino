@@ -407,11 +407,11 @@ void process_game_menu(int bv, int js) {
       state = 4;
       menu_index = 0;
       display_in_game();
-    } else if (menu_index == 1) {
+    } else if (menu_index == 1 && sound_on) {
       measure_index = 0;
       note_index = 0;
       playing_song = true;
-    } else if (menu_index == 2) {
+    } else if (menu_index == 2 && sound_on) {
       note_index = 0;
       playing_measure = true;
     } else if (menu_index == 3) {
@@ -491,30 +491,4 @@ void process_end_game(int bv, int js) { // TODO: END GAME SERVER LOGIC and clear
 
 
   if ((bv || js) && state == 3) update_end_game();
-}
-
-//////gallery///////
-void process_gallery(int bv, int js) {
-  if (bv == 1) {
-    play_song();
-  }
-  if (bv == 2) {
-    back_to_landing();
-  }
-
-//  uint8_t old_selected_measure = selected_measure;
-//  
-//  if (js == 2) { // right
-//    selected_measure = (selected_measure + 1) % (current_measure + 1);
-//  } else if (js == 4) { // left
-//    selected_measure = (selected_measure + current_measure) % (current_measure + 1);
-//  }
-//  
-//  if (old_selected_measure != selected_measure) display_in_game();
-//
-//  if (bv == 2) {
-//    state == 5;
-//    process_game_menu(bv, js);
-//  }
-
 }

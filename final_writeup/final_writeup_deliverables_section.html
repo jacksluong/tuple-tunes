@@ -1,0 +1,141 @@
+<meta charset="utf-8" emacsmode="-*- markdown -*-"> <link rel="stylesheet" href="https://casual-effects.com/markdeep/latest/journal.css?">
+
+# Video Demonstration
+![Demo - Full Game Demonstration with Technical Descriptions](https://youtu.be/lWnzaUi9fGc)
+
+# Milestones in Hindsight
+
+## Front end displays
+We started early brainstorming how we wanted our front end to look like. In week 1 and 2, we were able to map out and draw our basic front end on the ESP side, designing the way to render the notes and different querying options. In Week 3 and 4, we implemented a new and improved front end that was more intuitive (clickable options were highlighted and unclickable ones were hidden), and reacted robustly to player input.
+
+* Week 1 
+
+![Demo Week 1: Foundations for Frontend and Backend](https://youtu.be/r3doWQZq61k)
+
+    * Complete frontend for landing page and join/create game pages on ESP side
+    * Complete frontend for in game (player in and off turn)
+
+* Week 2 
+
+![Demo Week 2: Single Player Demo](https://youtu.be/3gj7XBkEds0)
+
+    * Complete frontend for player in turn display, ability to select note and duration on ESP
+    * Make significant progress on feature to show previous measures on frontend
+
+* Week 3 
+
+![Demo Week 3: First Part of Full Game Video](https://youtu.be/8_oeJFojwiw)
+
+    * Show previous measures while the user scrolls through the measures on the ESP
+
+* Week 4 
+
+![Demo - Week 4: Full Game](https://youtu.be/lWnzaUi9fGc) 
+
+    * Reestablish front end - make in turn out of turn more obvious, make things prettier
+
+
+## In Game ESP32 functionalities
+In approaching our ESP32 functionalities, we started with drawing out our state machines and rendering basic state machines for the different menus on the screen. Week 2 focused on getting the single player functionality to work, including how to internally represent the notes and how to connect hardware and software. On Week 3, we focused on completing the multiplayer functionality, and making sure players can create and join games that function accordingly. Week 4 focused on figuring out how to implement leave game and disconnect, and fixing the bugs on the ESP side.
+
+* Week 1 
+
+![Demo Week 1: Foundations for Frontend and Backend](https://youtu.be/r3doWQZq61k)
+
+    * Complete controls of the pre-game system (changing the state of system with hardware)
+    * Make significant progress on frontend and backend (state machine) for in-game menu
+
+* Week 2 
+
+![Demo for Single Player Demo](https://youtu.be/3gj7XBkEds0)
+
+    * Complete functionality to select a note and connect data from ESP to the server side via POST / GET requests
+
+![Demo for Note Selection](https://youtu.be/R7J59D4zMc8)
+
+    * Complete internal representation of notes (flesh out ideas and code)
+
+![Demo for Internal Representation Using Serial Monitor](https://youtu.be/adUoVIuHj0A)
+
+    * Have a sandbox version of the game working (one player is able to query through the different tunes, hear each)
+
+* Week 3 
+
+![Demo for Week 3: First Part of Full Game Video](https://youtu.be/8_oeJFojwiw)
+
+    * Multiplayer interactions - setting up and joining a game with a game code, functioning in-game, both for player in turn and out of turn
+
+    ![Demo for Goal 1: Starting Game](https://youtu.be/ja4s54sznyc)
+
+    * Implement a waiting room for pre-game
+    * Complete feature to audio play previous measure or the entire song at any point during the game (both during your turn and not during your turn)
+    * Monitor disconnects / player leaving
+
+![Demo #1 for Goal 7: ESP Side Disconnect Working](https://youtu.be/a_sds9-tweY) 
+
+* Week 4 
+
+![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+
+    * Finish end game feature
+    * Work through all the bugs on our bug log
+    * Robust implementation of leave game and disconnect
+
+## Backend servers
+
+On the backend servers, we started off taking a long time to design the different data tables we would use to keep track of our information. In week 1, we decided on three data tables: one for game info, one for player info, and one of measure info. In week 2, we connected these endpoints together with the ESP side. In weeks 3 and 4, we worked out how to utilize the timestamp and constant pings to adjust for players disconnecting and leaving the game.
+
+* Week 1 
+
+![Demo for Week 1: HTTP Requests to Databases](https://youtu.be/wSbB_uVqHuI)
+
+    * Set up database tables and server requests
+
+* Week 2
+    * Complete functionality to select a note and connect data from ESP to the server side via POST / GET requests
+
+    ![Demo for Goal 1: Note Selection](https://youtu.be/R7J59D4zMc8)
+
+    * Function for end a game on backend
+
+	![Demo for Goal 7: End Game - Backend](https://youtu.be/WEo6JjID1OE)
+
+* Week 3
+    * Monitor disconnects / player leaving
+
+![Demo #2 for Goal 7: Postman Working for Disconnect](https://youtu.be/N8phczjkAQQ) 
+
+![Demo #3 for Goal 7: Postman Working for Leave Game](https://youtu.be/nOQnSt2v1QA)
+
+* Week 4 
+
+![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+
+    * Finish end game feature
+    * Robust implementation of leave game and disconnect
+
+
+## Hardware and Audio
+
+In the beginning, we used the button and MOSFET we already had to create audio. In week 2 and 3, we connected our hardware with code by implementing functions that could play song, play measure, and mute the game. In week 4, we investigated how to use the new speaker and amplifier, along with fourier transfers, to create a nicer audio output. 
+
+* Week 2 
+
+![Demo Week 2: Single Player Demo](https://youtu.be/3gj7XBkEds0)
+
+    * Output sound on speaker
+
+* Week 3 
+
+![Demo Week 3: First Part of Full Game Video](https://youtu.be/8_oeJFojwiw)
+
+    * Display LED and LCD properly based on whose turn it is
+    * Complete feature to audio play previous measure or the entire song at any point during the game (both during your turn and not during your turn)
+* Week 4 
+
+![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
+
+    * Either get the speaker and amplifier working or write it into challenges / future implementation
+
+    <style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>
+<!-- Markdeep: --><script src="https://casual-effects.com/markdeep/latest/markdeep.min.js?" charset="utf-8"></script>

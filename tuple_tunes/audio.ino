@@ -2,24 +2,6 @@
 //  Audio  //
 /////////////
 
-
-//void play_note(int index) {
-//  if (sound_on) {
-//    ledcWriteTone(AUDIO_PWM, note_freqs[index]);
-//    last_played = millis();
-//  }
-////  dac_output_voltage(DAC_CHANNEL_2, 200);
-////  int num = 0;
-////  while (num < 500){
-////    dacWrite(AUDIO_TRANSDUCER, 3.3);
-////    num = num + 1
-////  }
-//}
-
-//void stop_sound() {
-//  ledcWriteTone(AUDIO_PWM, 0);
-//}
-
 void play_measure(uint8_t measure_i) {
   // Play note
   uint8_t* this_measure = measures[measure_i];
@@ -68,15 +50,11 @@ void play_song() {
 
 void play_note(int index) {
   if (sound_on){
-    play_sound_bool = true;
     current_freq = note_freqs[index];
     last_played = millis();
   }
-  Serial.printf("Playing frequency %f\n", current_freq);
 }
 
 void stop_sound() {
   current_freq = 0;
-  play_sound_bool = false;
-  //dacWrite(SPEAKER_PIN, 0);
 }

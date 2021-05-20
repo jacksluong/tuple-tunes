@@ -161,18 +161,3 @@ void update_waiting_room() {
   sprintf(temp, "%d", num_players);
   draw_text(temp, 70, 63, DARK_CYAN, 1);
 }
-
-/////////////
-// Gallery //
-/////////////
-
-void display_gallery() {
-  tft.fillScreen(TFT_BLACK);
-  fade_in_text(" Gallery", 0, 13, CYAN, 1000, 2);
-
-  update_gallery(0);
-}
-
-void update_gallery(int js) {
-  
-}

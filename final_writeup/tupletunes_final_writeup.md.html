@@ -2,7 +2,7 @@
 
 **Tuple Tunes**
 
-**6.08 Final Project Team 59:** Irene Huang, Si Liang (Brandon) Lei, Jacky Luong, Janette (Jan) Park, Joyce Yuan
+6.08 Final Project Team 59
 
 Meeting time: 4:30 - 5:00 PM Thursday
 
@@ -94,9 +94,7 @@ The purpose of this project is to provide an entertaining music making experienc
 
 The code is organized into two folders for the Arduino/C++ code for the ESP 32 functionalities and Python server side scripts for backend and database functionalities.
 
-<br>
-
-For the **ESP side**, we used several arduino files which are tied and used together. 
+## For the **ESP side**: 
 
 a.) **Pre-game displays:** First, the screen displays a loading page prior to a landing page, which presents options for starting a new game and joining a game. Based on their selection (using the joystick and button), the user will be taken to the appropriate next page. 
 
@@ -135,9 +133,8 @@ The 36 notes in the game are stored in an array called note_freqs as frequencies
 e.) **Hardware - LED:** The LED functions using the ESP’s hardware PWM instead of a software PWM to prevent software blocking from other functionalities. In the pregame pages, the LED is a consistent bright blue. When a player is in turn, the color of the light is a consistent bright green. Once a player submits a measure on their turn, their LCD display updates so that the measure is submitted and incremented, and the grid of notes is cleared. The LED light turns a consistent bright red to indicate this player is not out of turn. In general, if any player is not yet playing a game, their light color is blue, if any player is in turn, their light color is green, and all players out of turn have a light color of red. 
 
 <br>
-<br>
 
-For the **backend:**
+## For the **backend:**
 
 a.) **Database Tables:**
 
@@ -387,10 +384,9 @@ d.) **Garbage Collection:** Garbage collection functionality has been implemente
 
 e.) **Web Page:** There is now a gallery web application that displays all games in the archives database organized by chronological order (from most recent to least recent). Each game entry on the web page shows the host name, key, tempo, players and measures associated with the game. The link the web app can be found here: http://608dev-2.net/sandbox/sc/team59/server/main.py
 
-<br> 
 <br>
 
-For **connecting frontend and backend**:
+## For **connecting frontend and backend**:
 
 a.) **Internal Representation:** Notes are represented by integers zero through thirty-seven, representing notes C3 to B5, and thirty-six representing rest, thirty-seven representing hold. 
 
@@ -417,9 +413,9 @@ fetch_game_state() makes a GET request to logic.py and receives the name of the 
 ping() makes a POST request to logic.py with the game ID and username so the server knows to update the last time it heard from this user (information to be used later that will determine if a player has timed out/disconnected).
 
 
-# Milestones in Hindsight
+# **Milestones in Hindsight**
 
-## Front end displays
+## **Front end displays**
 We started early brainstorming how we wanted our front end to look like. In week 1 and 2, we were able to map out and draw our basic front end on the ESP side, designing the way to render the notes and different querying options. In Week 3 and 4, we implemented a new and improved front end that was more intuitive (clickable options were highlighted and unclickable ones were hidden), and reacted robustly to player input.
 
 * Week 1 
@@ -449,7 +445,7 @@ We started early brainstorming how we wanted our front end to look like. In week
     * Reestablish front end - make in turn out of turn more obvious, make things prettier
 
 
-## In Game ESP32 functionalities
+## **In Game ESP32 functionalities**
 In approaching our ESP32 functionalities, we started with drawing out our state machines and rendering basic state machines for the different menus on the screen. Week 2 focused on getting the single player functionality to work, including how to internally represent the notes and how to connect hardware and software. On Week 3, we focused on completing the multiplayer functionality, and making sure players can create and join games that function accordingly. Week 4 focused on figuring out how to implement leave game and disconnect, and fixing the bugs on the ESP side.
 
 * Week 1 
@@ -495,7 +491,7 @@ In approaching our ESP32 functionalities, we started with drawing out our state 
     * Work through all the bugs on our bug log
     * Robust implementation of leave game and disconnect
 
-## Backend servers
+## **Backend servers**
 
 On the backend servers, we started off taking a long time to design the different data tables we would use to keep track of our information. In week 1, we decided on three data tables: one for game info, one for player info, and one of measure info. In week 2, we connected these endpoints together with the ESP side. In weeks 3 and 4, we worked out how to utilize the timestamp and constant pings to adjust for players disconnecting and leaving the game.
 
@@ -529,7 +525,7 @@ On the backend servers, we started off taking a long time to design the differen
     * Robust implementation of leave game and disconnect
 
 
-## Hardware and Audio
+## **Hardware and Audio**
 
 In the beginning, we used the button and MOSFET we already had to create audio. In week 2 and 3, we connected our hardware with code by implementing functions that could play song, play measure, and mute the game. In week 4, we investigated how to use the new speaker and amplifier, along with fourier transfers, to create a nicer audio output. 
 
@@ -550,6 +546,15 @@ In the beginning, we used the button and MOSFET we already had to create audio. 
 ![Demo - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
 
     * Either get the speaker and amplifier working or write it into challenges / future implementation
+
+# Acknowledgements
+
+We would like to express our sincere gratitude to all of our final project team instructors, Anthony, Harrison, and Mussie, for their time and help. They helped answer a lot of the quesitons we had as well as provided insightful advice and help on actual implementations, specifically hardware solutions. Thank you also to all of the 6.08 Course Staff for all of their time and help throughout this semester!
+
+# Team Members
+
+
+ Irene Huang, ireneyh@mit.edu | Si Liang (Brandon) Lei, siliangl@mit.edu | Jacky Luong, jkluong@mit.edu | Janette (Jan) Park, janp@mit.edu | Joyce Yuan, jyuan24@mit.edu |
 
 
 <style class="fallback">body{visibility:hidden}</style><script>markdeepOptions={tocStyle:'medium'};</script>

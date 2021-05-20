@@ -29,14 +29,14 @@ After the test code worked, we integrated the new speaker functionality into our
 
 Our code for the game was mostly the same since the speaker runs on a different core, except `play_note(index)` sets the global current frequency variable to the indicated new note, `stop_sound()` sets the global current frequency variable to 0 (so that pin 25 always outputs in DC, which has no frequency hence no sound), and the conditional for `sound_on` (internal mute functionality) needed to be moved to the function play_note.
 
-<!-- <br>
-    <div style = "display: center">
-        <figure style = "display: center">
-            <img src="schematic.PNG" alt="audio diagram" style="width:80%">
+    <br>
+    <div align="center">
+        <figure >
+            <img src="schematic.PNG" alt="audio diagram" style="width:50%">
             <figcaption>Diagram for Audio</figcaption>
         </figure>
     </div>
-    <br> -->
+    <br>
 
 # Goal 4: Work through all the bugs on our bug log 
 ![Demo (Same Video for Goals 1-5) - Week 4 Deliverables](https://youtu.be/lWnzaUi9fGc)
